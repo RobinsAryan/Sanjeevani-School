@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="/css/popup.css">
+    <script src="https://kit.fontawesome.com/c538c9717e.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+</head>
+
+<body>
+    <input type="text" id="userId" hidden value="<%=data._id%>">
+    <%if(data.userBirthday){%>
+        <input type="text" id="userBirthday" hidden value="<%=data.userBirthday%>">
+        <%}%>
+            <canvas id="canvas"></canvas>
+            <div class="main">
+                <div class="view">
+                    <div class="header">
+                        <div class="leftHeader">
+                            <div>
+                                <%if(data.profile){%>
+                                    <img src="<%=data.profile%>" alt="">
+                                    <%}else{%>
+                                        <img src="/img/logo.png" alt="">
+                                        <%}%>
+                            </div>
+                            <p>Hi, <%=data.username%>
+                            </p>
+                        </div>
+                        <div class="rightHeader">
+                            <div id="fancyDiv" onclick="openUserProfile()">
+                                <i class="far fa-user"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="upperBody">
+                        <div class="upperRow">
+                            <div onclick="buttonLinks(1)" class="smallCard c1">
+                                <p>Attandance</p>
+                            </div>
+                            <div onclick="location.href='/student/classWork'" class="smallCard c2">
+                                <p>Class Work</p>
+                            </div>
+                        </div>
+                        <div class="upperRow">
+                            <div onclick="location.href='/student/ebooks'" class="smallCard c3">
+                                <p>Ebooks</p>
+                            </div>
+                            <div onclick="location.href='/student/classMates'" class="smallCard c4">
+                                <p>Classmates</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- <div class="messages">Kindly Change Your Password
+                        <span onclick="document.getElementsByClassName('messages')[0].remove()">X</span>
+                    </div> -->
+                    <div class="birthDays">
+                        <div class="birthDayHeading">
+                            <p>Today BirthDay</p>
+                            <span id="moreBirthday" onclick="birthdayUser.scroll(birthdayUser.scrollLeft+120,0)">more<i
+                                    class="fas fa-chevron-circle-right"></i></span>
+                        </div>
+                        <div class="mainBirthday">
+                            <div class="users" id="birthdayUser">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="birthDays mainPosts">
+                        <div class="birthDayHeading">
+                            <p>Announcements</p>
+                            <span onclick="birthdayUser.scrollIntoView()">more<i
+                                    class="fas fa-chevron-circle-right"></i></span>
+                        </div>
+                        <div class="posts">
+                            <div class="post">
+                                <div class="postWrapper">
+                                    <div class="postTop">
+                                        <div class="postTopLeft">
+                                            <img class="postProfileImg" src='/img/me.jpg' alt='user'>
+                                            <div class="div_post_left">
+                                                <span class="postUsername">Deepak Suthar</span>
+                                                <div class="time">10:20 of 25 Oct 2023</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="postCenter">
+                                        <span class="postText">THis is sample post</span>
+                                        <img class='postImg' src='/img/ebook.jpg' alt='Error While Loading...'></img>
+                                    </div>
+                                    <div class="postBottom">
+                                        <a class="normalButton" target='__blank'>Save</a>
+                                        <span class="post_size">Size: 50KB</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="post">
+                                <div class="postWrapper">
+                                    <div class="postTop">
+                                        <div class="postTopLeft">
+                                            <img class="postProfileImg" src='/img/me.jpg' alt='user'>
+                                            <div class="div_post_left">
+                                                <span class="postUsername">Deepak Suthar</span>
+                                                <div class="time">10:20 of 25 Oct 2023</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="postCenter">
+                                        <span class="postText">THis is sample post</span>
+                                        <img class='postImg' src='/img/ebook.jpg' alt='Error While Loading...'></img>
+                                    </div>
+                                    <div class="postBottom">
+                                        <a class="normalButton" target='__blank'>Download</a>
+                                        <span class="post_size">Size: 50KB</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="post">
+                                <div class="postWrapper">
+                                    <div class="postTop">
+                                        <div class="postTopLeft">
+                                            <img class="postProfileImg" src='/img/me.jpg' alt='user'>
+                                            <div class="div_post_left">
+                                                <span class="postUsername">Deepak Suthar</span>
+                                                <div class="time">10:20 of 25 Oct 2023</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="postCenter">
+                                        <span class="postText">THis is sample post</span>
+                                        <img class='postImg' src='/img/ebook.jpg' alt='Error While Loading...'></img>
+                                    </div>
+                                    <div class="postBottom">
+                                        <a class="normalButton" target='__blank'>Download</a>
+                                        <span class="post_size">Size: 50KB</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="popup" class="popup">
+
+            </div>
+            <script src="/js/celebration.js"></script>
+            <script src="/js/common.js"></script>
+            <script src="/js/home.js"></script>
+</body>
+
+</html>

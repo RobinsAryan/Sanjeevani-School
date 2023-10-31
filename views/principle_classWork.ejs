@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        Class Work | <%=className %>
+    </title>
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/principle/class.css">
+    <link rel="stylesheet" href="/css/principle/ebook.css">
+    <link rel="stylesheet" href="/css/principle/classWork.css">
+    <link rel="stylesheet" href="/css/popup.css">
+    <script src="https://kit.fontawesome.com/c538c9717e.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+</head>
+
+<body>
+    <input type="text" id="classID" hidden value="<%=classId%>">
+    <div class="header">
+        <i style="font-size: 20px; color: grey;" onclick="history.back()" class="fas fa-arrow-left"></i>
+        <p id="headerTitle">
+            <%= className %>
+                <small>Class Work</small>
+        </p>
+        <i style="font-size: 20px; color: grey;" onclick="location.href='/'" class="fa-solid fa-house"></i>
+    </div>
+    <div class="main">
+        <div class="view">
+            <div class="feed">
+                <div class="feedWrapper" id="alluserimg">
+                    <div class="share">
+                        <div class="shareWrapper">
+                            <div class="shareTop">
+                                <img class="shareProfileImg" src='/img/nouser.png' id="myimg" alt="">
+                                <div contenteditable id="text"
+                                    >Write About Work Here...</div>
+                            </div>
+                            <hr class="shareHr">
+                            <form id="shareForm" class="shareBottom">
+                                <div class="shareOptions">
+                                    <label for="file">
+                                        <small id="shareFileSmall">Select File </small><i class="fas fa-file"></i>
+                                    </label>
+                                    <input onChange='handleFile(this)' type="file" name="file" id="file">
+                                </div>
+                                <div>
+                                    <button id="sharePostBtn" class="normalButton">Post</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div id="temp">
+                            <div class="postCenter">
+                                <span onclick="cancelPreview()" class='cancel_icon'>
+                                    <i class="fa-solid fa-xmark"></i>
+                                </span>
+                                <img class="postImg" id="tempImg" src='/img/class.jpg' alt="" />
+                                <p id="tempFileName">this is the file name that extends the length of this div to overflow </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="classes">
+            </div>
+        </div>
+    </div>
+    <div id="popup" class="popup">
+
+    </div>
+    <script src="/js/common.js"></script>
+    <script src="/js/principle/classWork.js"></script>
+</body>
+
+</html>

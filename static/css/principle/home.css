@@ -1,0 +1,283 @@
+
+body {
+    background: rgb(247, 247, 247);
+}
+
+.main {
+    width: 100%;
+}
+
+.view {
+    max-width: 400px;
+    margin: auto;
+}
+
+.header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: white;
+    position: sticky;
+    top: 0;
+}
+
+.header p {
+    font-size: 25px;
+}
+
+.header button {
+    background-color: rgb(240, 121, 121);
+    color: white;
+    font-size: 15px;
+    border-radius: 5px;
+    font-weight: 400;
+    border: none;
+    outline: none;
+    padding: 10px;
+}
+
+.classes {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.class {
+    background: white;
+    width: 120px;
+    height: max-content;
+    padding: 10px 3px;
+    border-radius: 5px;
+    box-shadow: 0 0 5px 1px rgb(241, 241, 241);
+    text-align: center;
+    margin: 20px 5px;
+    cursor: pointer;
+}
+
+.teacherClass {
+    width: 90%;
+}
+
+.classImg {
+    height: 80%;
+    padding: 10px 0;
+}
+
+.classImg div {
+    width: 80px;
+    height: 80px;
+    border-radius: 5px;
+    object-fit: cover;
+    margin: auto;
+    overflow: hidden;
+}
+
+.classImg div img {
+    width: 100%;
+    height: 100%;
+}
+
+.class p {
+    font-size: 12px;
+}
+
+.addClass {
+    width: 100%;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.addClass button {
+    width: 80%;
+    height: 45px;
+    border: none;
+    outline: none;
+    color: white;
+    background: #a5a5ff;
+    font-size: 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+
+.topbar-search {
+    width: 50%;
+    height: 24px;
+    background-color: whitesmoke;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.topbar-search .search-icon {
+    margin: 0 10px;
+}
+
+.topbar-search input {
+    border: 0;
+    background-color: whitesmoke;
+    width: 70%;
+    color: black;
+}
+
+.topbar-search input:focus {
+    outline: none;
+}
+
+.topbar-right {
+    flex: 0.1;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.line-container {
+    margin-right: 20px;
+    width: 24px;
+    height: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.line {
+    width: 100%;
+    height: 2px;
+    background-color: rgb(0, 0, 0);
+    border-radius: 20px;
+    transition: transform 1s ease, opacity 0.5s ease;
+    transform-origin: left;
+}
+
+.menu {
+    width: 200px;
+    height: calc(100% - 77px);
+    background-color: rgb(255, 255, 255);
+    position: fixed;
+    top: 77px;
+    left: -250px;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    font-family: sans-serif;
+    color: rgb(0, 0, 0);
+    transition: all 1s ease;
+}
+
+.menu-top {
+    flex: 0.1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.menu-search {
+    width: 100%;
+    height: 30px;
+    background-color: #a5a5ff;
+    color: white;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.search-icon {
+    color: gray;
+}
+
+.menu-search input {
+    width: 75%;
+    border: none;
+    background-color: lightgray;
+    color: black;
+}
+
+.menu-search input:focus {
+    outline: none;
+}
+
+.menu-center {
+    font-size: 12px;
+    flex: 0.8;
+}
+
+.menu-item {
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+.menu-item span {
+    margin-left: 10px;
+}
+
+.menu-bottom {
+    flex: 0.1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.menu-bottom-user {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.menu-bottom-user span {
+    font-size: 14px;
+}
+
+.menu img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+}
+
+.menu.active {
+    transform: translateX(250px);
+}
+
+.line-container.active .line-1 {
+    transform: rotate(45deg);
+}
+
+.line-container.active .line-2 {
+    opacity: 0;
+}
+
+.line-container.active .line-3 {
+    transform: rotate(-45deg);
+}
+
+.rotateMe {
+    animation: rotate 1s linear infinite;
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.popup-form,.loading_div {
+    background: white;
+    top: 50%;
+    position: relative;
+    width: 80%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    text-align: center;
+    border-radius: 5px;
+}
+

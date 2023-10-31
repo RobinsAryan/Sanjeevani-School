@@ -1,0 +1,69 @@
+#headerTitle small {
+    display: block;
+    font-size: 10px;
+    text-align: center;
+    color: gray;
+}
+
+.ebook {
+    width: 300px;
+    display: flex;
+
+}
+
+.ebookImg {
+    flex: 4;
+}
+
+.ebookImg img {
+    max-width: 90px; 
+    height: 70px;
+    object-fit: cover;
+    padding: 5px;
+}
+
+.ebookInfo {
+    flex: 6;
+    text-align: left;
+}
+
+.ebookInfo p {
+    font-size: 15px;
+
+}
+
+.ebookInfo small {
+    display: block;
+    color: gray;
+    font-size: 10px;
+    padding: 8px 0;
+}
+
+.ebook a,
+.ebook span {
+    background-color: rgb(81, 133, 4);
+    color: white;
+    border-radius: 5px;
+    font-size: 10px;
+    padding: 5px 10px;
+    text-decoration: none;
+}
+
+.popup-form #doc {
+    width: 85%;
+    border-radius: 5px;
+    margin: 10px 0 10px 25px;
+    text-align: center;
+
+}
+
+#tempFileName {
+    font-size: 12px;
+    text-overflow: e;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    width: 75%;
+    margin: 10px auto;
+    text-align: center;
+    white-space: nowrap;
+}

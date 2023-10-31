@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/login.css">
+    <script src="https://kit.fontawesome.com/c538c9717e.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+</head>
+
+<body>
+    <div class="page_load_slider"></div>
+    <div class="error" role="alert">
+        <span id="statusMsz">This is an Error</span>
+        <button type="button" onclick="document.getElementsByClassName('error')[0].style.display = 'none'"
+            class="btn-close">x</button>
+    </div>
+    <div class="login_container">
+        <div class="login">
+            <div class="login-img">
+                <img id="loginImage" src="img/login.jpg" alt="music">
+            </div>
+            <h2>Login Now</h2>
+            <div class="show-off">Enter Details for <span class="show-off-word"
+                    style="color:#d10000; position: absolute;margin-left: 5px;">Classes</span></div>
+            <form method="post" id="form-1">
+                <input required placeholder="Enter Phone Or Reg.Id" type="text" name="email" id="email"><br>
+                <input required placeholder="Enter Password" type="password" name="password" id="password"><br>
+                <div class="forgot-password">Forgot Password?</div>
+                <div class="btn"><button id="btn1" type="submit">Login</button></div>
+            </form>
+            <div class="btn google"><button>Google</button></div>
+        </div>
+    </div>
+    <script src="js/common.js"></script>
+    <script src="js/login.js"></script>
+</body>
+
+</html>

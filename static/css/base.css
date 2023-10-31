@@ -1,0 +1,222 @@
+ 
+* {  
+    overflow-x: hidden;
+}
+
+body { 
+    overflow-x: hidden;
+}
+
+.slider {
+    position: relative;
+}
+
+.slides {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.paperPrev,
+.paperNext {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
+    transition: all 0.5s;
+}
+
+.heroImage {
+    width: 100%;
+    text-align: center;
+    min-height: 320px;
+}
+
+.heroImage img {
+    width: 80%;
+    max-width: 320px;
+}
+
+.heroContent {
+    text-align: center;
+    width: 100%;
+    margin: 40px 0;
+    font-size: 30px;
+}
+
+.heroContent .about {
+    margin: 10px 0;
+    font-size: 15px;
+    line-height: 32px;
+}
+
+.btn {
+    width: 100%;
+}
+
+.btn button {
+    display: block;
+    width: 80%;
+    max-width: 400px;
+    margin: 20px auto;
+    height: 50px;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    outline: none;
+    border-radius: 5px;
+    background: transparent;
+}
+
+.btn .NextBtn {
+    color: white;
+    background: linear-gradient(90deg, #fca8fa, #d47fd1);
+    transition: all 0.5s;
+}
+
+.btn .BackBtn {
+    color: rgb(206, 206, 206);
+}
+
+.BackBtn:active {
+    background: transparent;
+}
+
+.BackBtn:focus,
+.BackBtn:hover {
+    background: transparent;
+}
+
+.sliderdot {
+    width: 100%;
+    margin: 20px 0;
+}
+
+.sliderdot .mainSlider {
+    width: max-content;
+    margin: auto;
+}
+
+.dots {
+    border: 1px solid #898989;
+    border-radius: 5px;
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    transition: all 0.5s;
+
+}
+
+.mainSlider .active {
+    width: 20px;
+}
+
+.static_content {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+.skip {
+    width: 100%;
+    text-align: right;
+    margin-bottom: 10px;
+}
+
+.skip button {
+    border: none;
+    outline: none;
+    margin: 10px 0px 0 0;
+    background: #df8adc;
+    padding: 7px 10px;
+    color: white;
+    border-radius: 15px 0 0 15px;
+}
+
+@media only screen and (max-height: 780px) {
+    .heroImage img {
+        width: 70%;
+    }
+
+    .sliderdot {
+        margin: 5px 0;
+    }
+}
+
+@media only screen and (max-height: 730px) {
+    .heroImage img {
+        width: 60%;
+    }
+}
+
+@media only screen and (max-height: 690px) {
+    .heroImage {
+        min-height: 250px;
+    }
+
+    .heroContent {
+        font-size: 25px;
+    }
+
+    .heroContent .about {
+        font-size: 15px;
+    }
+
+}
+
+.page_load_slider {
+    background: white;
+    position: absolute;
+    top: 0;
+    right: 100%;
+    height: 100%;
+    z-index: 1;
+    width: 100%;
+    transition: all 0.5s;
+}
+
+
+.app-container {
+    margin-top: 50px;
+    text-align: center;
+}
+
+.app-logo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: #3498db;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 20px;
+}
+
+.app-logo img {
+    width: 100%;
+    height: 100%;
+}
+
+.app-name {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin: 10px 0;
+}
+
+.install-button {
+    background-color: #3498db;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.install-button:hover {
+    background-color: #2980b9;
+}

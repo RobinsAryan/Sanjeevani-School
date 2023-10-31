@@ -1,0 +1,100 @@
+import express from 'express';
+import passport from 'passport';
+import passportLocal from './Auth/localAuth.js';
+import googleAuth from './Auth/googleAuth.js';
+const app = express();
+import utilsRoute from './utilsRoute.js'
+import classRoute from './classRoutes.js'
+import teacherRoute from './teacherRoutes.js'
+import userRoute from './userRoutes.js'
+import studentRoute from './studentRoutes.js'
+import { checkAuth } from '../utils/middleware.js';
+passportLocal(passport);
+googleAuth(passport);
+
+
+app.get('/', async (req, res) => {
+    if (req.isAuthenticated()) {
+        if (req.user.role === 'Principle') {
+            res.render('principle_home', { profile: req.user.profile, username: req.user.username });
+        } else if (req.user.role === 'Teacher') {
+            res.render('teacher_home');
+        }
+        else {
+            let data = {
+                ...req.user
+            }
+            let today = new Date();
+            today.setHours(0, 0, 0, 0);
+            if (today.getUTCDate() === data.dob.getUTCDate() && today.getUTCMonth() === data.dob.getUTCMonth()) {
+                data["userBirthday"] = 1;
+            }
+            else data["userBirthday"] = 0; 
+            res.render('home', { data });
+        }
+    } else {
+        res.render("base");
+    }
+})
+
+app.get('/login', (req, res) => {
+    if (req.isAuthenticated()) {
+        res.redirect('/');
+    }
+    else {
+        res.render("login");
+    }
+})
+
+app.post('/login', (req, res, next) => {
+    passport.authenticate('local', {
+        failureRedirect: '/loginFail',
+        successRedirect: '/loginSuccess',
+        failureFlash: true,
+    })(req, res, next);
+})
+
+app.get('/loginFail', async (req, res) => {
+    res.json({
+        success: false,
+        msz: res.locals.error.length ? res.locals.error[0] : 'something wrong',
+    })
+})
+
+app.get('/loginSuccess', checkAuth, async (req, res) => {
+    res.json({
+        success: true,
+    })
+})
+
+
+app.get('/logout', (req, res) => {
+    req.logout(function (err) {
+        req.session.destroy(function (err) {
+            res.redirect('/');
+        });
+    });
+});
+
+app.get('/home', checkAuth, async (req, res) => {
+    res.render('home', { username: req.user.username, amount: (await roomPrice()).amount });
+})
+
+app.get('/google', passport.authenticate('google', { scope: ['profile', 'email',] }));
+
+app.get('/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
+    res.redirect('/home');
+})
+
+app.get('/help', (req, res) => {
+    res.render('help');
+})
+
+app.use(utilsRoute);
+
+app.use('/class', classRoute);
+app.use('/teacher', teacherRoute);
+app.use('/user', userRoute);
+app.use('/student', studentRoute);
+
+export default app;

@@ -1,0 +1,76 @@
+#caleandar {
+    background: url(/img/cal_bg2.jpg);
+    background-position: center !important;
+    background-size: cover !important;
+    font-weight: bold;
+}
+
+.cld-main {
+    background: #ffffff7a;
+}
+
+.chart {
+    width: 50%;
+    margin: 10px auto;
+    position: relative;
+    text-align: center;
+}
+
+.chart span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    z-index: -1;
+}
+
+#myChart {
+    width: 100% !important;
+    height: auto !important;
+}
+
+.c1 {
+    filter: hue-rotate(286deg);
+}
+
+.c4 {
+    filter: hue-rotate(133deg);
+}
+
+.fancyCalButton {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px;
+}
+
+.fancyCalButton button {
+    border: 1px solid #e1e1e1;
+    border-bottom: none;
+    transition: all 1s;
+    width: 80px; 
+    outline: none;
+    height: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 12px;
+    border-radius: 10px 10px 0 0;
+    display: none;
+}
+
+.header {
+    padding-left: 15px;
+    padding-right: 10px;
+}
+
+.leftHeader {
+    justify-content: end;
+}
+
+.pageTitle {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 15px;
+}

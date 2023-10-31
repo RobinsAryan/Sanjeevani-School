@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile | <%=data.userName%>
+    </title>
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/profile.css">
+    <link rel="stylesheet" href="/css/popup.css">
+    <script src="https://kit.fontawesome.com/c538c9717e.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+</head>
+
+<body>
+    <input type="text" id="userId" hidden value="<%=data.userId%>">
+    <div class="main">
+        <div class="view">
+            <div class="fancyDiv"></div>
+            <div class="profileTop">
+                <div class="topInfoBox">
+                    <i onclick="history.back()" class="fas fa-arrow-left"></i>
+                    <span>
+                        <%=data.role%>
+                    </span>
+                    <%if(data.access){%>
+                    <i onclick="editProfile()" style="color: #0f57af;" class="far fa-edit"></i>
+                    <%}%>
+                    <h2>
+                        <%=data.userName%>
+                    </h2>
+                    <p><%if(data.gender.split('').includes('f')||data.gender.split('').includes('F')){%>D/O: <%}else{%>S/O: <%}%> <%=data.fname%>
+                    </p>
+                </div>
+                <div class="topProfileImg">
+                    <div>
+                        <img id="userProfile" src="<%=data.profile%>" alt="">
+                    </div>
+                </div>
+            </div>
+            <%if(data.role==='Student'){%>
+                <div class="profileMid">
+                    <div class="info">
+                        <div class="iconMid">
+                            <div style="
+                        color: pink;
+                    "><i class="fas fa-school"></i></div>
+                        </div>
+                        <div class="mainInfo">
+                            <span>Class</span>
+                            <p>
+                                <%=data.className%>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="info">
+                        <div class="iconMid">
+                            <div style="
+                        color: rgb(88 182 62 / 54%);
+                    "><i class="far fa-user"></i></div>
+                        </div>
+                        <div class="mainInfo">
+                            <span>Roll No</span>
+                            <p>
+                                <%=data.rollno%>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="info">
+                        <div class="iconMid">
+                            <div><i class="fas fa-birthday-cake"></i></div>
+                        </div>
+                        <div class="mainInfo">
+                            <span>Date of Birth</span>
+                            <p>
+                                <%=data.dob%>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="info">
+                        <div class="iconMid">
+                            <div style=" color: #94b8ff;">
+                                <i class="fas fa-id-card"></i>
+                            </div>
+                        </div>
+                        <div class="mainInfo">
+                            <span>Student Id</span>
+                            <p>
+                                <%=data.studentId%>
+                            </p>
+                        </div>
+                    </div>
+                    <%if(data.access){%>
+                        <div class="downloadIdcard">
+                            <button onclick="downloadIdcard()" class="normalButton">Download ID card</button>
+                            <button onclick="changePassword()" class="normalButton">Change Password</button>
+                        </div>
+                    <%}%>
+                </div>
+                <%} else if(data.role==='Teacher' ){%>
+                    <div class="profileMid">
+                        <div class="info">
+                            <div class="iconMid">
+                                <div style="
+                                            color: pink;
+                                        "><i class="fas fa-school"></i></div>
+                            </div>
+                            <div class="mainInfo">
+                                <span>InCharge Of</span>
+                                <p>
+                                    <%=data.className%>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="info">
+                            <div class="iconMid">
+                                <div><i class="fas fa-birthday-cake"></i></div>
+                            </div>
+                            <div class="mainInfo">
+                                <span>Date of Birth</span>
+                                <p>
+                                    <%=data.dob%>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <%}%>
+        </div>
+    </div>
+    <div id="popup" class="popup">
+
+    </div>
+    <script src="/js/common.js"></script>
+    <script src="/js/profile.js"></script>
+</body>
+
+</html>

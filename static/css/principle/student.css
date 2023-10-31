@@ -1,0 +1,55 @@
+.student {
+    width: 90%;
+    display: flex;
+    border-radius: 5px;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 5px;
+    box-shadow: 0 0 10px 2px #ececec;
+    margin: 10px 0;
+    background: white;
+}
+
+.student .profile {
+    height: 60px;
+    width: 60px;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-left: 10px;
+}
+
+.student .profile img {
+    height: 100%;
+    width: 100%;
+}
+
+.student .Info {
+    margin-left: 10px;
+    width: 60%;
+}
+
+.student .Info p {
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.popup-form .bigBtn {
+    background: #008798;
+    height: 40px;
+    font-size: 15px;
+    cursor: pointer;
+    width: 80%;
+}
+
+.popup-form input {
+    width: 75%;
+    font-size: 15px;
+    border: none;
+    background: #efefef;
+    padding: 10px;
+    outline: none;
+    border-radius: 5px;
+    margin: 5px 0;
+}

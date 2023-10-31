@@ -1,0 +1,25 @@
+.ebook {
+    justify-content: space-evenly;
+    margin: 15px auto;
+    border-radius: 5px;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    padding: 7px;
+    box-shadow: 0 0 10px 2px gainsboro;
+    width: 90%;
+}
+
+.ebookImg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.ebookInfo{
+    text-align: center;
+}
+.ebookInfo p{
+    word-break: break-word;
+}
+.ebookInfo a{
+    background: #2f73b7;
+}

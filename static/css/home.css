@@ -1,0 +1,372 @@
+.main {
+    width: 100%;
+}
+
+* {
+    scroll-behavior: smooth;
+}
+
+.view {
+    max-width: 30rem;
+    width: 100%;
+    position: relative;
+    margin: auto;
+    box-shadow: 0 0 10px 2px #e0e0e0;
+    padding-bottom: 40px;
+    min-height: 100vh;
+}
+
+.header {
+    display: flex;
+    padding-bottom: 10px;
+    padding-top: 10px;
+    /* border-bottom: 1px solid; */
+    color: white;
+    border-radius: 0 0 10px 10px;
+    /* background-color: blue; */
+    /* background: linear-gradient(21deg, #a6baea, #98cfd8); */
+    background-image: url(../img/bg_head3.jpg);
+    background-position: center;
+    box-shadow: 0 0 10px 2px #cdcdcd;
+    background-size: cover;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.leftHeader {
+    width: 90%;
+    display: flex;
+    align-items: center;
+}
+
+.leftHeader div {
+    width: 40px;
+    height: 40px;
+    margin: 0px 5px 0 10px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.leftHeader div img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.leftHeader p {
+    font-size: 15px;
+}
+
+.rightHeader {
+    width: 10%;
+    display: flex;
+    align-items: center;
+}
+
+.rightHeader div {
+    height: 40px;
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 25px 10px 13px 9px;
+    transform: translate(-15px, 0);
+    box-shadow: 0 0 10px 2px #ededed;
+    background: #005f97;
+    transition: all 0.4s;
+}
+
+.upperBody {
+    margin: 30px auto;
+    max-width: 30rem;
+    text-align: center;
+}
+
+.upperRow {
+    display: flex;
+    justify-content: space-evenly;
+    margin: 10px 0;
+}
+
+
+.c1 {
+    background: url('../img/classMates.jpg');
+}
+
+.c2 {
+    background: url('../img/bg_work.jpg');
+}
+
+.c3 {
+    background: url('../img/bg_attandance.jpg');
+}
+
+.c4 {
+    background: url('../img/bg_book.jpg');
+}
+
+.smallCard p {
+    margin: 10px 0 0 10px;
+    font-size: 15px;
+}
+
+.smallCard {
+    width: 45%;
+    background-position: center;
+    background-size: cover;
+    border-radius: 5px;
+    height: 65px;
+    color: white;
+    box-shadow: 0 0 10px 2px #dbdbdb;
+    cursor: pointer;
+}
+
+.birthDays {
+    width: 100%;
+}
+
+.birthDayHeading {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px;
+    align-items: center;
+}
+
+.birthDayHeading p {
+    font-size: 18px;
+}
+
+.birthDayHeading span {
+    font-size: 13px;
+    color: rgb(155, 155, 155);
+}
+
+.birthDayHeading span i {
+    margin-left: 5px;
+}
+
+.user {
+    box-shadow: 0 0 5px 2px rgb(238 238 238);
+    width: 100px;
+    padding-top: 17px;
+    text-align: center;
+    margin: 10px;
+    position: relative;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.userProfile {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 10px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.user p {
+    font-size: 12px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-weight: bold;
+    width: 100%;
+    overflow: hidden;
+}
+
+.user button {
+    margin: 10px 0;
+    background: #366fb2;
+    font-size: 12px;
+}
+
+.user span {
+    display: block;
+    font-size: 10px;
+    color: gray;
+}
+
+.userProfile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user small {
+    position: absolute;
+    left: 7px;
+    color: orange;
+    top: 5px;
+}
+
+.users {
+    scroll-behavior: smooth;
+    white-space: nowrap;
+    max-width: max-content;
+    overflow: auto;
+}
+
+.users::-webkit-scrollbar {
+    display: none;
+}
+
+.mainPosts {
+    margin-top: 15px;
+}
+
+.mainPosts .birthDayHeading span i {
+    transform: rotate(90deg);
+}
+
+.post {
+    width: 80%;
+    border-radius: 5px;
+    -webkit-box-shadow: 0px 0px 16px -8px rgba(0, 0, 0, 0.68);
+    box-shadow: 0px 0px 16px -8px rgb(0 0 0 / 16%);
+    margin: 10px 0;
+    position: relative;
+    background-color: white;
+    box-shadow: 0px 0px 16px -8px rgb(0 0 0 / 35%);
+}
+
+.postWrapper {
+    padding: 10px;
+}
+
+.postTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.postTopLeft {
+    display: flex;
+    align-items: center;
+}
+
+.postProfileImg {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.postUsername {
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.time {
+    font-size: 11px;
+    color: grey;
+    margin-top: 5px;
+}
+
+.div_post_left {
+    margin-left: 10px;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.postDate {
+    font-size: 12px;
+}
+
+.postImg {
+    margin: 20px 0;
+    width: 100%;
+    max-height: 150px;
+    object-fit: contain;
+}
+
+.postCenter {
+    position: relative;
+    overflow: hidden;
+}
+
+.postText {
+    font-size: 12px;
+}
+
+.post hr {
+    border: 1px solid #d6d6d6;
+    margin-bottom: 5px;
+    transform: translate(0px, -11px);
+}
+
+.postBottom {
+    position: relative;
+}
+
+.post_size {
+    font-size: 10px;
+    color: grey;
+    position: absolute;
+    right: 0;
+    margin-right: 10px;
+    top: 50%;
+    transform: translate(0%, -50%);
+}
+
+.posts {
+    width: 100%;
+}
+
+.post {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.postBottom a {
+    background: #366fb2;
+}
+
+.noBirthday {
+    width: 100%;
+    text-align: center;
+}
+
+.noBirthday img {
+    width: 80%;
+}
+
+.noBirthday p {
+    font-size: 15px;
+    color: gray;
+    transform: translate(0, 40px);
+}
+
+#drawing_canvas {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    transform: scale(1.5);
+}
+
+#canvas {
+    position: fixed;
+    height: 100vh;
+    z-index: 1;
+}
+
+/* .messages {
+    width: 90%;
+    background: #d27575;
+    color: white; 
+    font-size: 12px;
+    border-radius: 5px;
+    padding: 5px;
+    margin: auto;
+    transform: translate(0px, -15px);
+    position: relative;
+}
+.messages span{
+    position: absolute;
+    right: 10px;
+} */

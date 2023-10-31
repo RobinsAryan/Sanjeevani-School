@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        Attandance | <%=className %>
+    </title>
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/principle/class.css">
+    <link rel="stylesheet" href="/css/principle/ebook.css">
+    <link rel="stylesheet" href="/css/principle/student.css">
+    <link rel="stylesheet" href="/css/attandance.css">
+    <link rel="stylesheet" href="/css/popup.css">
+    <script src="https://kit.fontawesome.com/c538c9717e.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+</head>
+
+<body>
+    <input type="text" id="classID" hidden value="<%=classId%>">
+    <div class="header">
+        <i style="font-size: 20px; color: grey;" onclick="history.back()" class="fas fa-arrow-left"></i>
+        <p id="headerTitle">
+            <%= className %>
+                <small>Attandance</small>
+        </p>
+        <i style="font-size: 20px; color: grey;" onclick="location.href='/'" class="fa-solid fa-house"></i>
+    </div>
+    <div class="main">
+        <div class="view">
+            <%if(!todayAttandance){%>
+                <div class="date">
+                    <button style="margin: 10px;" onclick="takeTodayAttandance()" class="normalButton">Take Todays
+                        Attandance</button>
+                </div>
+            <%}else{%>
+                <div class="date">
+                    <p style="margin: 10px;">Today's Attandance is Done</p>
+                </div>
+                <%}%>
+            <div class="date">
+                <p>Choose Date To View Attandance</p>
+                <div>
+                    <input type="date" name="date" id="date">
+                    <button id="searchAttandance" class="normalButton">Search</button>
+                </div>
+            </div>
+            <div id="prevAttandance" class="liveAttandance">
+                <div class="headAttandance">
+                    <p><span class="subInfo">Loading...</span> Attandance</p>
+                    <div style="font-size: 12px;">
+                        <p>Taken By: <span class="subInfo">Loading...</span></p>
+                        <p>At: <span class="subInfo">Loading...</span></p>
+                        <p>Present: <span class="subInfo">Loading...</span></p>
+                        <button onclick="downloadAttandance()" class="normalButton">Download Attandance</button>
+                    </div>
+                </div>
+                <div id="prevAttandanceStudents">
+
+                </div>
+                <div class="finalLiveAttandance">
+                    <button onclick="processPrevUpdates()" class="normalButton">Update Changes</button>
+                </div>
+            </div>
+            <div id="scrollRefrence" style="padding: 40px 0;"></div>
+            <div id="liveAttandance" class="liveAttandance">
+                <div class="headAttandance">
+                    <p>Today's Attandance</p>
+                    <div>
+                        <button class="normalButton" onclick="markAllPresent()">All Present</button>
+                        <button class="normalButton" style="background-color: red;" onclick="markAllAbsent()">All
+                            Absent</button>
+                    </div>
+                </div>
+                <div id="students">
+
+                </div>
+                <div class="finalLiveAttandance">
+                    <button class="normalButton" onclick="uploadAttandance()">Submit</button>
+                </div>
+            </div> 
+        </div>
+    </div>
+    <div id="popup" class="popup">
+
+    </div>
+    <script src="/js/common.js"></script>
+    <script src="/js/attandance.js"></script>
+</body>
+
+</html>

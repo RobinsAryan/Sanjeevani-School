@@ -1,0 +1,115 @@
+.date,
+.liveAttandance {
+    background: white;
+    width: 90%;
+    margin: 10px auto;
+    box-shadow: 0 0 5px 2px #eaeaea;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.liveAttandance {
+    padding: 10px 0;
+    display: none;
+}
+
+.studentBody {
+    box-shadow: 0 0 5px 2px #eaeaea;
+    width: 90%;
+    margin: 10px auto;
+    border-radius: 5px;
+    background: white;
+}
+
+.student {
+    box-shadow: none;
+    width: 100%;
+    background: transparent;
+}
+
+
+.date p {
+    font-size: 15px;
+    text-align: center;
+    padding: 10px 0;
+}
+
+.date div {
+    width: max-content;
+    margin: auto;
+    padding-bottom: 10px;
+}
+
+.date input {
+    width: 150px;
+    height: 30px;
+    border-radius: 5px;
+    font-size: 15px;
+    border: 1px solid grey;
+    outline: none;
+}
+
+.date button {
+    height: 30px;
+}
+
+.studentBody hr {
+    width: 80%;
+    margin: 0 auto 5px;
+}
+
+.attandanceBtn {
+    padding: 10px 0;
+}
+
+.headAttandance p {
+    margin: 10px 0;
+}
+
+.headAttandance div {
+    padding: 10px 0;
+}
+
+.finalLiveAttandance {
+    padding: 15px 0;
+}
+
+.finalLiveAttandance p {
+    font-size: 12px;
+}
+
+.finalLiveAttandance button {
+    margin-top: 10px;
+}
+
+.present {
+    background-color: #cbffcb;
+}
+
+.absent {
+    background-color: #ffd8d8;
+}
+
+.hide {
+    display: none;
+}
+
+a {
+    text-decoration: none;
+}
+
+#showoff {
+    text-align: center;
+    width: 80%;
+    max-width: 300px;
+    background: white;
+    z-index: 1;
+    margin: auto;
+    padding: 20px;
+    position: relative;
+    box-shadow: inset 0 0 100px 2px #f7f7f7;
+}
+
+#showoff img {
+    width: 100%;
+}
