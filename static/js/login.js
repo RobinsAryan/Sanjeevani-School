@@ -33,7 +33,7 @@ myform.addEventListener('submit', async (e) => {
     let result = await myPost('/login', data);
     if (result.success) {
         showSuccess("Login Successfull, Redirecting...");
-        location.href = '/'
+        location.replace('/');
     } else {
         submitBtn.removeAttribute('disabled')
         submitBtn.innerHTML = 'Login'
@@ -52,6 +52,20 @@ const showSuccess = (msz) => {
     document.getElementById('statusMsz').innerText = msz;
 }
 
+
+let passwordVisiblity = document.getElementById('passwordVisiblity')
+passwordVisiblity.addEventListener('click', (e) => {
+    if (passwordVisiblity.children[0].classList.contains('fa-eye')) {
+        passwordVisiblity.children[0].classList.remove('fa-eye');
+        passwordVisiblity.children[0].classList.add('fa-eye-slash');
+        document.getElementById('password').type = "text"
+    }
+    else {
+        passwordVisiblity.children[0].classList.add('fa-eye');
+        passwordVisiblity.children[0].classList.remove('fa-eye-slash');
+        document.getElementById('password').type = "password"
+    }
+})
 
 
 

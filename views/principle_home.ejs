@@ -6,7 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Principle</title>
     <link rel="stylesheet" href="/css/common.css">
-    <link rel="stylesheet" href="/css/principle/home.css">
+    <link rel="stylesheet" href="/css/gallary.css">
+    <link rel="stylesheet" href="/css/principle/home.css"> 
+    <link rel="stylesheet" href="/css/principle/classWork.css"> 
     <link rel="stylesheet" href="/css/popup.css">
     <script src="https://kit.fontawesome.com/c538c9717e.js" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
@@ -47,6 +49,10 @@
                 <i class="fa-solid fa-bullhorn"></i>
                 <span>Announcements</span>
             </div>
+            <div onclick="openPage(4)" class="menu-item">
+                <i class="fas fa-images"></i>
+                <span>Gallary</span>
+            </div>
             <div class="menu-item">
                 <i class="fa-solid fa-phone"></i>
                 <span onclick="window.open('https://wa.me/7027513016')">Contact Us</span>
@@ -54,9 +60,10 @@
         </div>
         <div class="menu-bottom">
             <div class="menu-bottom-user">
-                <img src="<%=profile%>"
-                    alt="">
-                <span><%=username%></span>
+                <img src="<%=profile%>" alt="">
+                <span>
+                    <%=username%>
+                </span>
             </div>
             <i class="far fa-question-circle"></i>
         </div>
@@ -72,23 +79,6 @@
         </div>
     </div>
     <div id="popup" class="popup">
-        <div class="popup-form">
-            <div class="hidePopUp"><i onClick="closePopup()" class="fa-solid fa-xmark"></i></div>
-            <form onreset="resetForm(this)" onSubmit="handleSubmit(event)" id="fileUploadForm">
-                <label for="file">
-                    <div>
-                        <img id="demoImg" src="/img/upload_img.png" alt="">
-                    </div>
-                </label>
-                <input onchange="handleFile(this)" type="file" id="file" name="file" accept=".jpg, .png, .pdf"
-                    hidden><br><br>
-                <input type="text" id="className" name="className" placeholder="Class Name" required><br><br>
-                <div>
-                    <button style="background:#ff4646;" type="reset">Reset</button>
-                    <button type="submit">Submit</button>
-                </div>
-            </form>
-        </div>
     </div>
     <script src="/js/common.js"></script>
     <script src="/js/principle/home.js"></script>

@@ -35,6 +35,17 @@ const user = new mongoose.Schema({
     },
     gender: {
         type: String,
+    },
+    dateofjoin: {
+        type: String,
+    },
+    department: {
+        type: String,
+    },
+    subject: {
+        type: String,
+    }, sub: {
+        type: String,
     }
 },
     { timestamps: true });

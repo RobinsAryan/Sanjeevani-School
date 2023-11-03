@@ -74,6 +74,11 @@ a {
     overflow: hidden;
 }
 
+.postCenter h3{
+    font-size: 17px;
+    margin-bottom: 15px;
+}
+
 .postText {
     font-size: 12px;
 }
@@ -86,6 +91,7 @@ a {
 
 .postBottom {
     position: relative;
+    margin-top: 10px;
 }
 
 .post_size {

@@ -18,6 +18,7 @@ const loadIncharge = async () => {
         inChargeId = data.inCharge;
         initialChargeId = inChargeId;
         let popup_list = document.getElementsByClassName('popup_list')[0];
+        console.log(data.teachers);
         data.teachers.map(teacher => {
             popup_list.innerHTML += `
             <div onClick="setInCharge(this,'${teacher._id}')" class="option ${inChargeId == teacher._id ? 'optionActive' : ''}">
@@ -26,7 +27,7 @@ const loadIncharge = async () => {
                     </div>
                     <div class="optionInfo">
                         <p>${teacher.username}</p>
-                        <p class="optionMail">${teacher.email}</p>
+                        <p class="optionMail">${teacher.subject.length?teacher.subject:teacher.phone}</p>
                     </div>
                 </div>
             `
@@ -100,4 +101,47 @@ const removeClass = async () => {
                     ${showSWrong('removeClassPopup()')}
                 </div>`
     }
+}
+
+
+const editClass = () => { 
+    document.getElementById('popup').style.display = 'block';
+    document.getElementById('popup').innerHTML = `<div class="popup-form">
+        <div class="hidePopUp" ><i onClick = "closePopup()" class="fa-solid fa-xmark"></i></div> 
+            <form onreset = "resetForm(this)" onSubmit="handleSubmitClass(event)" id="fileUploadForm">
+                <input type="text" id="className" name="className" placeholder="New Class Name" required><br><br>
+                <div>
+                    <button style="background:#ff4646;" type="reset">Reset</button>
+                    <button type="submit">Submit</button>
+                </div>
+            </form>
+        </div>`
+}
+
+
+const handleSubmitClass = async(e) => {
+    e.preventDefault();
+    let newClassName = e.target.className.value;
+    if (newClassName.length) {
+        try {
+            document.getElementById('popup').innerHTML = '<div class="loading_div"> <i class="fas fa-spinner rotateMe"></i> </div>'
+            let resData = await myPost(`/class/update/className/${classID}`,{className:newClassName})
+            if (resData.success) {
+                location.reload();
+            } else {
+                document.getElementById('popup').innerHTML = `
+                <div class="popup-form">
+                    <div class="hidePopUp"><i onClick="closePopup()" class="fa-solid fa-xmark"></i></div>
+                    ${showSWrong('editClass()')}
+                </div>`
+            }
+        } catch (err) {
+            document.getElementById('popup').innerHTML = `
+                <div class="popup-form">
+                    <div class="hidePopUp"><i onClick="closePopup()" class="fa-solid fa-xmark"></i></div>
+                    ${showSWrong('editClass()')}
+                </div>`
+        }
+    }
+    else closePopup();
 }

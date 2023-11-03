@@ -54,46 +54,47 @@ const uploadSheet = () => {
 
 const handleSubmit = async (event, id) => {
     event.preventDefault();
-    if (id == 0) {
-        let data = {
-            regId: event.target.rid.value,
-            name: event.target.username.value,
-            rollno: event.target.rollNo.value,
-            phone: event.target.phone.value,
-            dob: event.target.dob.value,
-            fname: event.target.fname.value,
-            add: event.target.add.value,
-            gender:event.target.gender.value,
-        }
-        document.getElementById('popup').innerHTML = '<div class="loading_div"> <i class="fas fa-spinner rotateMe"></i> </div>'
-        let res = await myPost(`/class/addSingleStudent/${classId}`, data);
-        if (res.success) {
-            if (res.added) {
-                closePopup();
-                loadStudents();
+    try {
+        if (id == 0) {
+            let data = {
+                regId: event.target.rid.value,
+                name: event.target.username.value,
+                rollno: event.target.rollNo.value,
+                phone: event.target.phone.value,
+                dob: event.target.dob.value,
+                fname: event.target.fname.value,
+                add: event.target.add.value,
+                gender: event.target.gender.value,
+            }
+            document.getElementById('popup').innerHTML = '<div class="loading_div"> <i class="fas fa-spinner rotateMe"></i> </div>'
+            let res = await myPost(`/class/addSingleStudent/${classId}`, data);
+            if (res.success) {
+                if (res.added) {
+                    closePopup();
+                    loadStudents();
+                }
+                else {
+                    alert(res.msz);
+                    addOne();
+                }
             }
             else {
-                alert(res.msz);
-                addOne();
-            }
-        }
-        else {
-            document.getElementById('popup').innerHTML = `
+                document.getElementById('popup').innerHTML = `
                 <div class="popup-form">
                 ${showSWrong('addStudent()')}
                 </div>
     `
+            }
         }
-    }
-    else if (id == 1) {
-        let file = event.target.file.files[0];
-        document.getElementById('popup').innerHTML = '<div class="loading_div"> <i class="fas fa-spinner rotateMe"></i> </div>'
-        let data = await uploadFile(file, `/class/addMultipleStudents/${classId}`);
-        if (data.success) {
-            if (!data.allInserted) {
-                console.log(data);
-                document.getElementById('popup').innerHTML =
-                    `
+        else if (id == 1) {
+            let file = event.target.file.files[0];
+            document.getElementById('popup').innerHTML = '<div class="loading_div"> <i class="fas fa-spinner rotateMe"></i> </div>'
+            let data = await uploadFile(file, `/class/addMultipleStudents/${classId}`);
+            if (data.success) {
+                if (!data.allInserted) {
+                    console.log(data);
+                    document.getElementById('popup').innerHTML =
+                        `
             <div class="popup-form">
                 <div class="hidePopUp"><i onClick="closePopup()" class="fa-solid fa-xmark"></i></div>
                 <h3 style="color:#f85100;padding-bottom: 20px;">Warning!!!</h3>
@@ -102,18 +103,25 @@ const handleSubmit = async (event, id) => {
                 <button onclick='closePopup();loadStudents()'>Ignore</button>
             </div>
         `
-            }
-            else {
-                closePopup();
-                loadStudents();
-            }
-        } else {
-            document.getElementById('popup').innerHTML = `
+                }
+                else {
+                    closePopup();
+                    loadStudents();
+                }
+            } else {
+                document.getElementById('popup').innerHTML = `
                 <div class="popup-form">
                 ${showSWrong('addStudent()')}
                 </div>
             `
+            }
         }
+    } catch (err) {
+        document.getElementById('popup').innerHTML = `
+                <div class="popup-form">
+                ${showSWrong('addStudent()')}
+                </div>
+            `
     }
 }
 
@@ -136,6 +144,7 @@ const loadStudents = async () => {
     let data = await myGET(`/class/students/all/${classId}`);
     if (data.success) {
         pdiv.innerHTML = '';
+        document.getElementById('totalStudent').innerText = data.data.length;
         data.data.map(student => {
             pdiv.innerHTML += `<div class="student" onclick="location.href='/user/profile/${student.student._id}'">
             <div class="profile">
@@ -144,7 +153,7 @@ const loadStudents = async () => {
                     <div class="Info">
                         <p>${student.student.username}</p>
                         <p style="font-size: 12px; color: gray;">Roll No. ${student.student.rollno}</p>
-                        </div>
+                        </div> 
                         </div>`
         })
     }

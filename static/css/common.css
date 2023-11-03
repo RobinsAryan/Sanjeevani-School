@@ -8,6 +8,8 @@ body {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    user-select: none;
+    -webkit-user-drag: none;
 }
 
 .sWrongImg img {
@@ -25,7 +27,9 @@ body {
     text-align: center;
     padding-top: 30px;
 }
-
+.hide{
+    display: none !important;
+}
 .sWrongRefresh button,
 .standardBtn button {
     width: 100px;
@@ -78,7 +82,7 @@ body {
 #fileUploadForm #className,
 #fileUploadForm #email,
 #fileUploadForm #dob,
-#title,#password,#newPassword,#newPassword2 {
+#title, #fileUploadForm #password,#fileUploadForm #newPassword, #fileUploadForm #newPassword2,#fileUploadForm #subject,#fileUploadForm #doj,#fileUploadForm #phone,#fileUploadForm #department {
     width: 75%;
     font-size: 15px;
     border: none;
@@ -118,3 +122,7 @@ a{
     text-decoration: none;
 }
 
+
+i{
+    cursor: pointer;
+}

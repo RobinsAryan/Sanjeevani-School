@@ -1,4 +1,4 @@
-let userId = null;
+let userId = null, userData = null;
 let originalImage = '';
 let userProfile = document.getElementById('userProfile');
 const downloadIdcard = async () => {
@@ -46,6 +46,9 @@ window.onload = () => {
         alert("Class Not Exist!!");
         location.replace('/');
     }
+    userData = document.getElementById('userData').value;
+    userData = JSON.parse(userData);
+    console.log(userData)
 }
 
 const editProfile = () => {
@@ -125,12 +128,8 @@ const handleSubmit = async (e, num) => {
         let resData = await myPost(`/student/updateProfile/${userId}`, data);
         if (resData.success) {
             if (resData.update) {
-                console.log(resData);
-                console.log(userId);
                 if (resData.id == userId) {
-                    originalImage = resData.profile;
-                    userProfile.src = originalImage;
-                    closePopup();
+                    location.reload();
                 }
                 else {
                     alert("Unexpected Error");
@@ -179,11 +178,15 @@ const handleSubmit = async (e, num) => {
         }
         else {
             document.getElementById('popup').innerHTML = '<div class="loading_div"> <i class="fas fa-spinner rotateMe"></i> </div>'
-            try { 
-                let resData = await myPost(`/student/updatePassword`, { password:password.value, newPassword:newPassword.value });
+            console.log(password.value);
+            try {
+                let resData = await myPost(`/student/updatePassword/${userId}`, { password: password.value, newPassword: newPassword.value });
                 if (resData.success) {
                     if (resData.update) {
-                        location.href = '/logout'
+                        if (resData.by == 'p') {
+                            location.reload();
+                        } else
+                            location.href = '/logout'
                     }
                     else {
                         document.getElementById('popup').innerHTML = `
@@ -213,6 +216,66 @@ const handleSubmit = async (e, num) => {
             `
             }
         }
+    } else if (num == 3) {
+        let data = {
+            regId: e.target.rid.value,
+            name: e.target.username.value,
+            rollno: e.target.rollNo.value,
+            phone: e.target.phone.value,
+            dob: e.target.dob.value,
+            fname: e.target.fname.value,
+            add: e.target.add.value,
+            gender: e.target.gender.value,
+        }
+        document.getElementById('popup').innerHTML = '<div class="loading_div"> <i class="fas fa-spinner rotateMe"></i> </div>'
+        let res = await myPost(`/class/updateStudent/${userId}`, data);
+        if (res.success) {
+            if (res.updated) {
+                closePopup();
+                location.reload();
+            }
+            else {
+                alert(res.msz);
+                closePopup();
+            }
+        }
+        else {
+            document.getElementById('popup').innerHTML = `
+                <div class="popup-form">
+                ${showSWrong('editStudent()')}
+                </div>
+    `
+        }
+    }
+    else if (num == 4) {
+        let data = {
+            name: e.target.username.value, 
+            phone: e.target.phone.value,
+            dob: e.target.dob.value,
+            subject: e.target.subjects.value,
+            doj: e.target.doj.value,
+            department: e.target.department.value
+        }
+        console.log(data);
+        document.getElementById('popup').innerHTML = '<div class="loading_div"> <i class="fas fa-spinner rotateMe"></i> </div>'
+        let res = await myPost(`/teacher/updateTeacher/${userId}`, data);
+        if (res.success) {
+            if (res.updated) {
+                closePopup();
+                location.reload();
+            }
+            else {
+                alert(res.msz);
+                closePopup();
+            }
+        }
+        else {
+            document.getElementById('popup').innerHTML = `
+                <div class="popup-form">
+                ${showSWrong('editTeacher()')}
+                </div>
+    `
+        }
     }
 }
 
@@ -240,11 +303,144 @@ const changePassword = () => {
                 <small style="white-space: nowrap;" id="msz1"><br><br></small>
                 <input type="text" id="newPassword2" name="newPassword2" placeholder="Confirm New Password" required>
                 <small style="white-space: nowrap;" id="msz2"><br><br></small>
-                <input type="text" id="password" name="password" placeholder="Enter Old Password" required><br><br>
+                <input type="text" id="password" name="password" placeholder="Enter Current Password" required><br><br>
                 <div>
                     <button style="background:#ff4646;" type="reset">Reset</button>
                     <button type="submit">Submit</button>
                 </div>
             </form>
         </div>`
+}
+
+
+const deleteStudent = async () => {
+    try {
+        let val = confirm("This Step cant be Undo!!");
+        if (val) {
+            document.getElementById('popup').style.display = 'block';
+            document.getElementById('popup').innerHTML = '<div class="loading_div"> <i class="fas fa-spinner rotateMe"></i> </div>'
+            let resData = await myGET(`/user/profile/remove/${userId}`);
+            if (resData.success) {
+                history.back();
+            } else {
+                document.getElementById('popup').innerHTML = `
+                <div class="popup-form"> 
+                <div class="hidePopUp" ><i onClick = "closePopup()" class="fa-solid fa-xmark"></i></div>
+                ${showSWrong('deleteStudent()')}
+                </div>
+            `
+            }
+        }
+    } catch (err) {
+        document.getElementById('popup').innerHTML = `
+        <div class="popup-form"> 
+        <div class="hidePopUp" ><i onClick = "closePopup()" class="fa-solid fa-xmark"></i></div>
+                ${showSWrong('deleteStudent()')}
+                </div>
+            `
+    }
+}
+
+
+const editStudent = () => {
+    document.getElementById('popup').style.display = 'block';
+    document.getElementById('popup').innerHTML = `
+    <div class="popup-form">
+            <div class="hidePopUp"><i onClick="closePopup()" class="fa-solid fa-xmark"></i></div>
+            <form onSubmit="handleSubmit(event,3)" id="fileUploadForm">
+            <p class="editFormP">Reg Id:</p>
+                <input type="number" id="rid" name="rid" placeholder="Reg. ID" value="${userData.studentId}" required> 
+                <p class="editFormP">User Name:</p>
+                <input type="text" id="username" name="username" placeholder="Name" value="${userData.userName}" required> 
+                <p class="editFormP">Roll No:</p>
+                <input type="number" min="1" id="rollNo" name="rollNo" placeholder="Roll No" value="${userData.rollno}" required> 
+                <p class="editFormP">Phone:</p>
+                <input type="string" id="phone" name="phone" placeholder="Phone" value="${parseInt(userData.email)}" required> 
+                <p class="editFormP">DOB:</p>
+                <input type="date" id="dob" name="dob" placeholder="dob" value="${genrateDateValue(userData.dob)}" required> 
+                <p class="editFormP">Father Name:</p>
+                <input type="text" id="fname" name="fname" placeholder="Father's Name" value="${userData.fname}" required> 
+                <p class="editFormP">Address:</p>
+                <input type="text" id="add" name="add" placeholder="Address" value="${userData.add}" required> 
+                <p class="editFormP">Gender:</p>
+                <input type="text" id="gender" name="gender" placeholder="Gender" value="${userData.gender}" required> 
+                <div>
+                    <button style="background:#ff4646;" type="reset">Reset</button>
+                    <button type="submit">Update</button>
+                </div>
+            </form>
+        </div>
+    `
+}
+
+
+const genrateDateValue = (val) => {
+    let date = new Date(Date.parse(userData.dob));
+    let day = date.getDate();
+    let month = date.getMonth() + 1;
+    let year = date.getFullYear();
+    return `${year}-${month < 10 ? `0${month}` : month}-${day < 10 ? `0${day}` : day}`
+}
+
+
+const deleteTeacher = async () => {
+    try {
+        let val = confirm("This Step cant be Undo!!");
+        if (val) {
+            document.getElementById('popup').style.display = 'block';
+            document.getElementById('popup').innerHTML = '<div class="loading_div"> <i class="fas fa-spinner rotateMe"></i> </div>'
+            let resData = await myGET(`/user/teacher/remove/${userId}`);
+            if (resData.success) {
+                history.back();
+            } else {
+                document.getElementById('popup').innerHTML = `
+                <div class="popup-form"> 
+                <div class="hidePopUp" ><i onClick = "closePopup()" class="fa-solid fa-xmark"></i></div>
+                ${showSWrong('deleteTeacher()')}
+                </div>
+            `
+            }
+        }
+    } catch (err) {
+        document.getElementById('popup').innerHTML = `
+        <div class="popup-form"> 
+        <div class="hidePopUp" ><i onClick = "closePopup()" class="fa-solid fa-xmark"></i></div>
+                ${showSWrong('deleteTeacher()')}
+                </div>
+            `
+    }
+}
+
+
+const editTeacher = () => {
+    document.getElementById('popup').style.display = 'block';
+    document.getElementById('popup').innerHTML = `
+    <div class="popup-form">
+            <div class="hidePopUp"><i onClick="closePopup()" class="fa-solid fa-xmark"></i></div>
+            <form onSubmit="handleSubmit(event,4)" id="fileUploadForm">
+            <p class="editFormP">User Name:</p>
+                <input type="text" id="username" name="username" placeholder="Name" value="${userData.userName}" required> 
+                 <p class="editFormP">Phone:</p>
+                <input type="string" id="phone" name="phone" placeholder="Phone" value="${parseInt(userData.email)}" required> 
+                <p class="editFormP">DOB:</p>
+                <input type="date" id="dob" name="dob" placeholder="dob" value="${genrateDateValue(userData.dob)}" required> 
+                <p class="editFormP">Subjects:</p>
+                <input type="text" id="subjects" name="subjects" placeholder="Subjects" value="${userData.subject || ''}"> 
+                <p class="editFormP">Date of Joining:</p>
+                <input type="text" id="doj" name="doj" placeholder="Date of Joining" value="${userData.doj || ''}"> 
+                <p class="editFormP">Department:</p>
+                <select name="department" id="department">
+                    <option  value="none">Select Employee</option>
+                    <option ${userData.department == 'Teacher' ? 'selected' : ''} value="Teacher">Teacher</option>
+                    <option ${userData.department == 'busDriver' ? 'selected' : ''} value="busDriver">Bus Driver</option>
+                    <option ${userData.department == 'Maid' ? 'selected' : ''} value="Maid">Maid</option>
+                    <option ${userData.department == 'Other' ? 'selected' : ''} value="Other">Other</option>
+                </select>
+                <div>
+                    <button style="background:#ff4646;" type="reset">Reset</button>
+                    <button type="submit">Update</button>
+                </div>
+            </form>
+        </div>
+    `
 }

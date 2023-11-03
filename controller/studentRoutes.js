@@ -111,38 +111,69 @@ app.get('/classMates', checkAuth, async (req, res) => {
 
 
 app.post('/updateProfile/:id', checkAuth, async (req, res) => {
-    try {
-        let user = await User.findById(req.params.id);
-        if (user) {
-            if (user.password === req.body.password) {
-                let updatedUser = await User.findByIdAndUpdate(user._id, { profile: req.body.icon || '/img/nouser.jpg' }, { new: true });
-                res.json({ success: true, update: true, profile: updatedUser.profile, id: updatedUser._id });
+    if (req.user.role === 'Principle') {
+        try {
+            let user = await User.findById(req.user._id);
+            if (req.body.password === user.password) {
+                let updatedUser = await User.findByIdAndUpdate(req.params.id, { profile: req.body.icon || '/img/nouser.jpg' }, { new: true });
+                res.json({ success: true, update: true, by: 'p', id: updatedUser._id });
             }
             else {
-                res.json({ success: true, update: false, msz: "Wrong Password!" });
+                res.json({ success: true, update: false, msz: "Wrong Admin Password!" });
             }
-        } else {
+        } catch (err) {
             res.json({ success: false });
         }
-    } catch (err) {
-        res.json({ success: false });
+    } else {
+        try {
+            let user = await User.findById(req.params.id);
+            if (user) {
+                if (user.password === req.body.password) {
+                    let updatedUser = await User.findByIdAndUpdate(user._id, { profile: req.body.icon || '/img/nouser.jpg' }, { new: true });
+                    res.json({ success: true, update: true, profile: updatedUser.profile, id: updatedUser._id });
+                }
+                else {
+                    res.json({ success: true, update: false, msz: "Wrong Password!" });
+                }
+            } else {
+                res.json({ success: false });
+            }
+        } catch (err) {
+            res.json({ success: false });
+        }
     }
 })
 
 
 
-app.post('/updatePassword', checkAuth, async (req, res) => {
-    try {
-        let user = await User.findById(req.user._id);
-        if (user.password === req.body.password) {
-            let updatedUser = await User.findByIdAndUpdate(user._id, { password: req.body.newPassword }, { new: true });
-            res.json({ success: true, update: true, id: updatedUser._id });
+app.post('/updatePassword/:id', checkAuth, async (req, res) => {
+    if (req.user.role === 'Principle') {
+        try {
+            let user = await User.findById(req.user._id);
+            if (req.body.password === user.password) {
+                let updatedUser = await User.findByIdAndUpdate(req.params.id, { password: req.body.newPassword }, { new: true });
+                res.json({ success: true, update: true, by: 'p', id: updatedUser._id });
+            }
+            else {
+                res.json({ success: true, update: false, msz: "Wrong Admin Password!" });
+            }
+        } catch (err) {
+            res.json({ success: false });
         }
-        else {
-            res.json({ success: true, update: false, msz: "Wrong Password!" });
+    }
+    else {
+        try {
+            let user = await User.findById(req.user._id);
+            if (user.password === req.body.password) {
+                let updatedUser = await User.findByIdAndUpdate(user._id, { password: req.body.newPassword }, { new: true });
+                res.json({ success: true, update: true, id: updatedUser._id, by: 'self' });
+            }
+            else {
+                res.json({ success: true, update: false, msz: "Wrong Password!" });
+            }
+        } catch (err) {
+            res.json({ success: false });
         }
-    } catch (err) {
-        res.json({ success: false });
     }
 })
 

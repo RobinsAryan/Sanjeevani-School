@@ -1,10 +1,13 @@
 import express from 'express';
 const app = express();
 import User from '../models/User.js';
+import Attandance from '../models/Attendance.js';
+import Gallary from '../models/Gallary.js';
 import bcrypt from 'bcryptjs';
 import { checkAuth, checkPrinciple, formatTime } from '../utils/middleware.js';
 import Class from '../models/Class.js';
 import mongoose from 'mongoose';
+import { deleteFile } from '../utils/fileOperation.js';
 
 export const userClass = async (id) => {
     let data = await Class.aggregate([
@@ -57,9 +60,13 @@ app.get('/profile/:id', checkAuth, async (req, res) => {
                     email: user.phone,
                     profile: user.profile || '/img/nouser.png',
                     dob: formatTime(user.dob).split('of').pop(),
-                    access: user._id === req.user._id,
+                    subject: user.subject,
+                    department: user.department,
+                    doj: user.dateofjoin,
+                    access: (user._id.toString() === req.user._id.toString()) || req.user.role === 'Principle',
+                    isPrinciple: (req.user.role === 'Principle')
                 }
-                res.render('profile', { role: 'Student', data })
+                res.render('profile', { data, userData: JSON.stringify(data) })
             }
             else if (user.role === 'Student') {
                 let classData = await userClass(req.params.id);
@@ -75,9 +82,11 @@ app.get('/profile/:id', checkAuth, async (req, res) => {
                     fname: user.fname,
                     studentId: user.rid,
                     gender: user.gender,
-                    access: (user._id.toString() === req.user._id.toString()),
+                    add: user.add,
+                    access: (user._id.toString() === req.user._id.toString()) || req.user.role !== 'Student',
+                    isPrinciple: (req.user.role === 'Principle')
                 }
-                res.render('profile', { role: 'Student', data })
+                res.render('profile', { data, userData: JSON.stringify(data) })
             }
             else {
                 res.send("Unknown Pearson may be Principle of None!");
@@ -89,6 +98,46 @@ app.get('/profile/:id', checkAuth, async (req, res) => {
     }
     catch (err) {
         res.render('500');
+    }
+})
+
+
+app.get('/profile/remove/:id', checkAuth, checkPrinciple, async (req, res) => {
+    try {
+        res.json({ success: true });
+        let user = await User.findByIdAndDelete(req.params.id);
+        let userClass = await Class.findOneAndUpdate(
+            { students: user._id },
+            { $pull: { students: user._id } },
+            { new: true }
+        );
+        if (userClass) {
+            await Attandance.updateMany({ class: userClass._id }, {
+                $pull: {
+                    status: {
+                        userId: user._id,
+                    }
+                }
+            })
+        }
+        if (user.profile) {
+            await deleteFile(`./static${user.profile}`);
+        }
+    } catch (err) {
+        res.json({ success: false });
+    }
+})
+
+app.get('/teacher/remove/:id', checkAuth, checkPrinciple, async (req, res) => {
+    try {
+        res.json({ success: true });
+        let user = await User.findByIdAndDelete(req.params.id);
+        await Class.updateMany({ inCharge: req.params.id }, { $unset: { inCharge: 1 } })
+        if (user.profile != '/img/teacher.jpg') {
+            await deleteFile(`./static${user.profile}`);
+        }
+    } catch (err) {
+        res.json({ success: false });
     }
 })
 
@@ -115,6 +164,52 @@ app.get('/attandance/:id', checkAuth, async (req, res) => {
         else res.render("404");
     } catch (err) {
         res.render("500");
+    }
+})
+
+
+app.get('/gallary', checkAuth, async (req, res) => {
+    try {
+        const data = { ...req.user }
+        res.render('gallary', { data });
+    } catch (err) {
+
+    }
+})
+
+app.post('/gallary/add', checkAuth, checkPrinciple, async (req, res) => {
+    try {
+        let newFrame = new Gallary({
+            title: req.body.title,
+            images: req.body.images
+        })
+        newFrame.save();
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false });
+    }
+})
+
+app.get('/gallary/all', checkAuth, async (req, res) => {
+    try {
+        let data = await Gallary.find().sort({ createdAt: -1 });
+        res.json({ success: true, data });
+    } catch (err) {
+        res.json({ success: false });
+    }
+})
+
+app.get('/gallary/remove/:id', checkAuth, async (req, res) => {
+    try {
+        let frame = await Gallary.findByIdAndDelete(req.params.id);
+        res.json({ success: true });
+        if (frame.images.length) {
+            frame.images.map(async img => {
+                await deleteFile(`./static${img}`);
+            })
+        }
+    } catch (err) {
+        res.json({ success: false });
     }
 })
 

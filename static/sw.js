@@ -1,64 +1,88 @@
-const addResourcesToCache = async (resources) => {
-    const cache = await caches.open('v1');
-    await cache.addAll(resources);
-};
+const CACHE_NAME = 'v1';
 
-const putInCache = async (request, response) => {
-    const cache = await caches.open('v1');
-    await cache.put(request, response);
-};
-
-const cacheFirst = async ({ request, preloadResponsePromise, fallbackUrl }) => {
-    const responseFromCache = await caches.match(request);
-    if (responseFromCache) {
-        return responseFromCache;
-    } 
-    const preloadResponse = await preloadResponsePromise;
-    if (preloadResponse) {
-        console.info('using preload response', preloadResponse);
-        putInCache(request, preloadResponse.clone());
-        return preloadResponse;
-    }
- 
-    try {
-        const responseFromNetwork = await fetch(request.clone()); 
-        putInCache(request, responseFromNetwork.clone());
-        return responseFromNetwork;
-    } catch (error) {
-        console.log(error);
-        const fallbackResponse = await caches.match(fallbackUrl);
-        if (fallbackResponse) {
-            return fallbackResponse;
-        } 
-        return new Response(`Hello`, {
-            status: 408,
-            headers: { 'Content-Type': 'text/plain' },
-        });
-    }
-};
-
-const enableNavigationPreload = async () => {
-    if (self.registration.navigationPreload) {
-        await self.registration.navigationPreload.enable();
-    }
-};
-
-self.addEventListener('activate', (event) => {
-    event.waitUntil(enableNavigationPreload());
-});
+const staticAssets = [];
 
 self.addEventListener('install', (event) => {
     event.waitUntil(
-        addResourcesToCache([])
+        caches.open(CACHE_NAME).then((cache) => {
+            return cache.addAll(staticAssets);
+        })
+    );
+});
+
+self.addEventListener('activate', (event) => {
+    event.waitUntil(
+        caches.keys().then((cacheNames) => {
+            return Promise.all(
+                cacheNames.map((cacheName) => {
+                    if (cacheName !== CACHE_NAME) {
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        })
     );
 });
 
 self.addEventListener('fetch', (event) => {
-    event.respondWith(
-        cacheFirst({
-            request: event.request,
-            preloadResponsePromise: event.preloadResponse,
-            fallbackUrl: './html/noInternet.html',
-        })
+    const request = event.request;
+    const url = new URL(request.url);
+    console.log(url);
+    if (url.pathname.endsWith('.css') || url.pathname.endsWith('.js') || url.pathname.match(/\.(png|jpg|jpeg|gif|svg)$/) || url.pathname.match(/\.(woff|woff2|eot|ttf|otf)$/)) {
+        event.respondWith(
+            caches.match(request).then((cachedResponse) => {
+                if (cachedResponse) {
+                    return cachedResponse;
+                }
+
+                return fetch(request).then((response) => {
+                    if (!response || response.status !== 200 || response.type !== 'basic') {
+                        return response;
+                    }
+
+                    const responseToCache = response.clone();
+
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(request, responseToCache);
+                    });
+
+                    return response;
+                }).catch(() => {
+                    return caches.match('/offline.html');
+                });
+            })
+        )
+    }
+    else {
+        event.respondWith(
+            fetch(request).catch(() => {
+                return caches.match('/offline.html');
+            }));
+    }
+});
+
+
+
+self.addEventListener('push', (event) => {
+    let data = JSON.parse(event.data.text());
+    const options = {
+        body: data.body,
+        icon: './img/hero.jpg',
+        badge: './img/hero.jpg',
+        tag: 'announc',
+
+    };
+    event.waitUntil(
+        self.registration.showNotification(data.title, options)
     );
-}); 
+});
+
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+
+    // Add custom behavior when the notification is clicked
+    // For example, you can open a specific URL
+    event.waitUntil(
+        clients.openWindow('https://example.com')
+    );
+});

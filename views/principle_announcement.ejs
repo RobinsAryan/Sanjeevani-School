@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        Announcement | <%=className %>
+    </title>
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/principle/class.css">
+    <link rel="stylesheet" href="/css/principle/classWork.css">
+    <link rel="stylesheet" href="/css/principle/class_announcement.css">
+    <link rel="stylesheet" href="/css/popup.css">
+    <script src="https://kit.fontawesome.com/c538c9717e.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+</head>
+
+<body>
+    <input type="text" id="classID" hidden value="<%=classId%>">
+    <div class="header">
+        <i style="font-size: 20px; color: grey;" onclick="history.back()" class="fas fa-arrow-left"></i>
+        <p id="headerTitle">
+            <%=className %>
+                <small>Announcement</small>
+        </p>
+        <i onclick="addEbook()" style="font-size: 20px; color: grey;" class="fas fa-plus"></i>
+    </div>
+    <div class="main">
+        <div class="view">
+            <div class="feed">
+                <div class="feedWrapper" id="alluserimg">
+                    <div class="share">
+                        <div class="shareWrapper">
+                            <input type="text" name="title" id="title" placeholder="Title">
+                            <div class="shareTop">
+                                <img class="shareProfileImg" src='/img/nouser.png' id="myimg" alt="">
+                                <div contenteditable id="text">Write Announcement</div>
+                            </div>
+                            <hr class="shareHr">
+                            <form id="shareForm" class="shareBottom">  
+                                    <button type="reset" style="background-color: red;" class="normalButton">Reset</button> 
+                                    <button id="sharePostBtn" class="normalButton">Post</button> 
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="classes">
+            </div>
+        </div>
+    </div>
+    <div id="popup" class="popup">
+
+    </div>
+    <script src="/js/common.js"></script>
+    <script src="/js/principle/notification.js"></script>
+</body>
+
+</html>

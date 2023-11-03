@@ -8,6 +8,7 @@
     box-shadow: 0 0 10px 2px #ececec;
     margin: 10px 0;
     background: white;
+    cursor: pointer;
 }
 
 .student .profile {
@@ -52,4 +53,17 @@
     outline: none;
     border-radius: 5px;
     margin: 5px 0;
+}
+
+.totalStudent {
+    width: 100%;
+    height: 20px;
+    text-align: center;
+    /* padding: 10px 0; */
+    /* background: white; */
+    margin: 10px 0;
+    position: sticky;
+    top: 50px;
+    z-index: 2;
+    font-size: 15px;
 }

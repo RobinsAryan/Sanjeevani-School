@@ -1,0 +1,19 @@
+#headerTitle small {
+    display: block;
+    font-size: 10px;
+    text-align: center;
+    color: gray;
+}
+
+#shareForm div {
+    margin: auto;
+}
+
+#title {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.postBottom{
+    text-align: end;
+}

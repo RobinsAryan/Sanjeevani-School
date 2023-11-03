@@ -145,6 +145,11 @@
 .downloadIdcard {
     width: 100%;
     text-align: center;
+        margin: 10px 0;
+}
+.downloadIdcard button{
+    width: 40%;
+    margin: 0;
 }
 
 @media screen and (max-width: 350px) {
@@ -157,4 +162,16 @@
 
 #fileUploadForm{
     margin-top: 15px;
+}
+
+.editFormP{
+        font-size: 12px;
+            text-align: start;
+            width: 80%;
+            margin: auto;
+            color: gray;
+}
+
+#fileUploadForm div{
+    margin: 10px;
 }

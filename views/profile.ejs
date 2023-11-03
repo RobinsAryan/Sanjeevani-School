@@ -7,6 +7,7 @@
     <title>Profile | <%=data.userName%>
     </title>
     <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/principle/student.css">
     <link rel="stylesheet" href="/css/profile.css">
     <link rel="stylesheet" href="/css/popup.css">
     <script src="https://kit.fontawesome.com/c538c9717e.js" crossorigin="anonymous"></script>
@@ -15,6 +16,7 @@
 
 <body>
     <input type="text" id="userId" hidden value="<%=data.userId%>">
+    <input type="text" id="userData" hidden value="<%=userData%>">
     <div class="main">
         <div class="view">
             <div class="fancyDiv"></div>
@@ -25,13 +27,23 @@
                         <%=data.role%>
                     </span>
                     <%if(data.access){%>
-                    <i onclick="editProfile()" style="color: #0f57af;" class="far fa-edit"></i>
-                    <%}%>
-                    <h2>
-                        <%=data.userName%>
-                    </h2>
-                    <p><%if(data.gender.split('').includes('f')||data.gender.split('').includes('F')){%>D/O: <%}else{%>S/O: <%}%> <%=data.fname%>
-                    </p>
+                        <i onclick="editProfile()" style="color: #0f57af;" class="far fa-edit"></i>
+                        <%}%>
+                            <h2>
+                                <%=data.userName%>
+                            </h2>
+                            <p>
+                                <%if(data.role==='Teacher'){%>
+                                    <%=data.email%>
+                                        <%}else{%>
+                                            <%if(data.gender.includes('f')||data.gender.includes('F')){%>
+                                                D/O:
+                                                <%}else{%>
+                                                    S/O:
+                                                    <%}%>
+                                                        <%=data.fname%>
+                                                            <%}%>
+                            </p>
                 </div>
                 <div class="topProfileImg">
                     <div>
@@ -80,7 +92,7 @@
                     </div>
                     <div class="info">
                         <div class="iconMid">
-                            <div style=" color: #94b8ff;">
+                            <div style=" color:#66ae7c; ">
                                 <i class="fas fa-id-card"></i>
                             </div>
                         </div>
@@ -92,40 +104,123 @@
                         </div>
                     </div>
                     <%if(data.access){%>
+                        <div class="info">
+                            <div class="iconMid">
+                                <div><i class="fas fa-phone-alt"></i></div>
+                            </div>
+                            <div class="mainInfo">
+                                <span>Phone</span>
+                                <p>
+                                    <%=data.email%>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="info">
+                            <div class="iconMid">
+                                <div style=" color: #94b8ff;">
+                                    <i class="fas fa-id-card"></i>
+                                </div>
+                            </div>
+                            <div class="mainInfo">
+                                <span>Address</span>
+                                <p>
+                                    <%=data.add%>
+                                </p>
+                            </div>
+                        </div>
                         <div class="downloadIdcard">
                             <button onclick="downloadIdcard()" class="normalButton">Download ID card</button>
                             <button onclick="changePassword()" class="normalButton">Change Password</button>
                         </div>
-                    <%}%>
+                        <%if(data.isPrinciple){%>
+                            <div class="downloadIdcard">
+                                <button onclick="editStudent()" class="normalButton">Edit Student</button>
+                                <button onclick="deleteStudent()" style="background-color: red;" class="normalButton">Delete Account</button>
+                            </div>
+                            <%}%>
+                                <%}%>
                 </div>
                 <%} else if(data.role==='Teacher' ){%>
                     <div class="profileMid">
-                        <div class="info">
-                            <div class="iconMid">
-                                <div style="
+                        <%if(data.className&&data.className.length){%>
+                            <div class="info">
+                                <div class="iconMid">
+                                    <div style="
                                             color: pink;
                                         "><i class="fas fa-school"></i></div>
+                                </div>
+                                <div class="mainInfo">
+                                    <span>InCharge Of</span>
+                                    <p>
+                                        <%=data.className%>
+                                    </p>
+                                </div>
                             </div>
-                            <div class="mainInfo">
-                                <span>InCharge Of</span>
-                                <p>
-                                    <%=data.className%>
-                                </p>
-                            </div>
-                        </div>
-                        <div class="info">
-                            <div class="iconMid">
-                                <div><i class="fas fa-birthday-cake"></i></div>
-                            </div>
-                            <div class="mainInfo">
-                                <span>Date of Birth</span>
-                                <p>
-                                    <%=data.dob%>
-                                </p>
-                            </div>
-                        </div>
+                            <%}%>
+                                <div class="info">
+                                    <div class="iconMid">
+                                        <div><i class="fas fa-birthday-cake"></i></div>
+                                    </div>
+                                    <div class="mainInfo">
+                                        <span>Date of Birth</span>
+                                        <p>
+                                            <%=data.dob%>
+                                        </p>
+                                    </div>
+                                </div>
+                                <%if(data.subject&&data.subject.length){%>
+                                    <div class="info">
+                                        <div class="iconMid">
+                                            <div style="color: #0f57af;"><i class="fas fa-book"></i></div>
+                                        </div>
+                                        <div class="mainInfo">
+                                            <span>subjects</span>
+                                            <p>
+                                                <%=data.subject%>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <%}%>
+                                        <div class="info">
+                                            <div class="iconMid">
+                                                <div style=" color:#66ae7c; "><i class="fas fa-building"></i></div>
+                                            </div>
+                                            <div class="mainInfo">
+                                                <span>Department</span>
+                                                <p>
+                                                    <%=data.department%>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <%if(data.doj&&data.doj.length){%>
+                                        <div class="info">
+                                            <div class="iconMid">
+                                                <div style="
+                        color: pink;
+                    "><i class="fas fa-calendar-week"></i></div>
+                                            </div>
+                                            <div class="mainInfo">
+                                                <span>Date of Joining</span>
+                                                <p>
+                                                    <%=data.doj%>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <%}%>
                     </div>
-                    <%}%>
+                    <%if(data.access){%>
+                        <div class="downloadIdcard">
+                            <button onclick="changePassword()" class="normalButton">Change Password</button>
+                        </div>
+                        <%}%>
+                        <%if(data.isPrinciple){%>
+                            <div class="downloadIdcard">
+                                <button onclick="editTeacher()" class="normalButton">Edit Teacher</button>
+                                <button onclick="deleteTeacher()" style="background-color: red;" class="normalButton">Delete Account</button>
+                            </div>
+                            <%}%>
+                            <%}%>
+
         </div>
     </div>
     <div id="popup" class="popup">

@@ -1,9 +1,9 @@
-import user from '../../models/User.js'; 
+import user from '../../models/User.js';
 import { Strategy as localStrategy } from 'passport-local';
 
 export default function (passport) {
     passport.use(new localStrategy({ usernameField: 'email' }, async (email, password, done) => {
-        try { 
+        try {
             if (email.length == 4) {
                 let data = await user.findOne({ rid: email });
                 if (!data) {
@@ -17,7 +17,7 @@ export default function (passport) {
                 }
             }
             else {
-                let data = await user.findOne({ phone: email });
+                let data = await user.findOne({ phone: email, role: "Teacher" });
                 if (!data) {
                     return done(null, false, { message: "User Not Exits" });
                 }

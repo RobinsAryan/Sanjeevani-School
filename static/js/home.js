@@ -1,15 +1,19 @@
 let fencyDiv = document.getElementById('fancyDiv');
 let birthdayUser = document.getElementById('birthdayUser');
-let moreBirthday = document.getElementById('moreBirthday')
+let moreBirthday = document.getElementById('moreBirthday');
+let menu = document.getElementsByClassName('menu')[0];
 let userId = null, userBirthday = false;
 setInterval(() => {
     fencyDiv.style.borderRadius = `${10 + Math.random() * 30}px ${10 + Math.random() * 30}px ${10 + Math.random() * 30}px ${10 + Math.random() * 30}px `
 }, 400)
 
 const openUserProfile = () => {
-    location.href = `/user/profile/${userId}`;
+    menu.classList.toggle('hide');
 }
 
+const redirectProfile = () => {
+    location.href = `/user/profile/${userId}`;
+}
 
 
 const loadBirthDays = async () => {
@@ -35,7 +39,6 @@ const loadBirthDays = async () => {
                             <button onclick="location.href='/user/profile/${user._id}'" class="normalButton">Visit</button>
                         </div>`
                 })
-                if (birthdayUser.scrollWidth - 50 < birthdayUser.clientWidth) moreBirthday.style.display = 'none';
             } else {
                 birthdayUser.innerHTML = `<div class="noBirthday">
                             <p>No BirthDay Today</p>
@@ -54,6 +57,7 @@ const loadBirthDays = async () => {
                             <img src="/img/noData.gif" alt="">
                         </div>`
         }
+        if (birthdayUser.scrollWidth - 50 < birthdayUser.clientWidth) moreBirthday.style.display = 'none';
     } catch (err) {
         document.getElementById('popup').style.display = 'block';
         document.getElementById('popup').innerHTML = `
@@ -116,6 +120,7 @@ window.onload = () => {
     else {
         document.getElementById('canvas').remove();
         loadBirthDays();
+        loadAnnouncements();
     }
 }
 
@@ -142,3 +147,142 @@ birthdayUser.addEventListener('scroll', () => {
         moreBirthday.style.display = 'initial'
     }
 })
+
+
+
+
+let announcement = document.getElementById('announcements');
+
+const loadAnnouncements = async() => {
+    try {
+        announcement.innerHTML = `<div style="height: 70px;">
+                            <div class="loading_div">
+                                <i class="fas fa-spinner rotateMe"></i>
+                            </div>
+                        </div>`
+        let resData = await myGET('/class/announcement/all');
+        announcement.innerHTML = '';
+        if (resData.success) {
+            if (resData.data.length) {
+                resData.data.map(announce => {
+                    console.log(announce)
+                    announcement.innerHTML += `<div class="post">
+                                <div class="postWrapper">
+                                    <div class="postTop">
+                                        <div class="postTopLeft">
+                                            <img class="postProfileImg" src='/img/logo.png' alt='user'>
+                                            <div class="div_post_left">
+                                                <span class="postUsername">Principle</span>
+                                                <div class="time">${formatTime(announce.createdAt)}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="postCenter">
+                                        <h3 class="postText">${announce.title}</h3>
+                                        <span class="postText">${announce.body}</span>
+                                        <img class='postImg' src='${announce.icon}' alt='Error While Loading...'></img>
+                                    </div> 
+                                </div>
+                            </div>`
+                })
+            } else {
+                announcement.innerHTML = `<div class="noBirthday">
+                            <p>No Announcements to Show</p>
+                            <img src="/img/noData.gif" alt="">
+                        </div>`
+            }
+        } else { 
+            document.getElementById('popup').style.display = 'block';
+            document.getElementById('popup').innerHTML = `
+                <div class="popup-form">
+                <div class="hidePopUp"><i onClick="closePopup()" class="fa-solid fa-xmark"></i></div>
+                ${showSWrong('loadAnnouncements()')}
+                </div>
+            `
+            birthdayUser.innerHTML = `<div class="noBirthday"> 
+                            <img src="/img/noData.gif" alt="">
+                        </div>`
+        } 
+    } catch (err) {
+        console.log(err);
+        document.getElementById('popup').style.display = 'block';
+        document.getElementById('popup').innerHTML = `
+                <div class="popup-form">
+                <div class="hidePopUp"><i onClick="closePopup()" class="fa-solid fa-xmark"></i></div>
+                ${showSWrong('loadAnnouncements()')}
+                </div>
+            `
+        birthdayUser.innerHTML = `<div class="noBirthday"> 
+                            <img src="/img/noData.gif" alt="">
+                        </div>`
+    }
+}
+
+
+
+
+
+
+
+
+if ('serviceWorker' in navigator && 'Notification' in window) {
+
+    navigator.serviceWorker.register('/sw.js')
+        .then((registration) => { 
+            document.getElementById('subscribeButton').addEventListener('click', subscribeToPush);
+        })
+        .catch((error) => {
+            console.error('Service Worker registration failed:', error);
+        });
+}
+
+
+const PublicKey = 'BMTUJwXpovugSRpuXdZjlS0XhNclQFIER9LcXVemxQSi8hLX3US6-2Eg0Sow74qtHnH_x3FS8yUl3NmCsdlosx8'
+
+
+async function subscribeToPush() {
+    try {
+        // Request permission to show push notifications
+        const permission = await Notification.requestPermission();
+
+        if (permission === 'granted') {
+            // Get the service worker registration
+            const registration = await navigator.serviceWorker.ready;
+
+            // Subscribe to push notifications
+            const subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(PublicKey)
+            });
+
+
+            // Send the subscription to the server
+            await fetch('/subscribe', {
+                method: 'POST',
+                body: JSON.stringify(subscription),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            console.log('Subscribed to push notifications');
+        }
+    } catch (error) {
+        console.error('Error subscribing to push notifications:', error);
+    }
+}
+
+function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; i++) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+}

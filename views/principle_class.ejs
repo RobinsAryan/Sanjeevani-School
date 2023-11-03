@@ -21,7 +21,7 @@
         <p id="headerTitle">
             <%=className %>
         </p>
-        <i style="font-size: 20px; color: grey;" onclick="location.href='/'" class="fa-solid fa-house"></i>
+        <i style="font-size: 20px; color: grey;" onclick="editClass()" class="far fa-edit"></i> 
     </div>
     <div class="main">
         <div class="view">
@@ -65,6 +65,14 @@
                         </div>
                     </div>
                     <p>Attandance</p>
+                </div>
+                <div class="class" onclick="location.href = '/class/announcement/<%=classId%>'">
+                    <div class="classImg">
+                        <div>
+                            <img src="/img/announcement.jpg" alt="">
+                        </div>
+                    </div>
+                    <p>Announcment</p>
                 </div>
             </div>
             <div class="standardBtn">

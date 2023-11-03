@@ -10,6 +10,9 @@ import fs from 'fs';
 import XLSX from 'xlsx'
 import classWork from '../models/classWork.js';
 import Attendance from '../models/Attendance.js';
+import { deleteFile } from '../utils/fileOperation.js';
+import Notification from '../models/Notification.js';
+import { userClass } from './userRoutes.js';
 
 //class routes
 app.get('/single/:id', checkAuth, async (req, res) => {
@@ -44,9 +47,22 @@ app.post('/add', checkAuth, checkPrinciple, async (req, res) => {
 })
 
 
+app.post('/update/className/:id', checkAuth, async (req, res) => {
+    try {
+        await Class.findByIdAndUpdate(req.params.id, { className: req.body.className });
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false });
+    }
+})
+
+
 app.get('/remove/:id', checkAuth, checkPrinciple, async (req, res) => {
     try {
-        await Class.findByIdAndDelete(req.params.id);
+        let data = await Class.findByIdAndDelete(req.params.id);
+        if (data.icon != "/img/class.jpg") {
+            await deleteFile(`./static${data.icon}`);
+        }
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false });
@@ -66,13 +82,15 @@ app.get('/inCharge/:id', checkAuth, async (req, res) => {
         let teachers = await User.aggregate([
             {
                 '$match': {
-                    'role': 'Teacher'
+                    'role': 'Teacher',
+                    'department': 'Teacher'
                 }
             }, {
                 '$project': {
                     'username': 1,
-                    'email': 1,
-                    'profile': 1
+                    'phone': 1,
+                    'profile': 1,
+                    'subject': 1
                 }
             }, {
                 '$sort': {
@@ -158,9 +176,13 @@ app.get('/students/all/:classID', checkAuth, async (req, res) => {
 
 
 const addStudent = (data, id) => {
-    const { regId, name, rollno, phone, dob, fname, add, gender } = data;
+    let { regId, name, rollno, phone, dob, fname, add, gender } = data;
     return new Promise(async (resolve, reject) => {
         try {
+            let isSameId = await User.find({ rid: regId });
+            if (isSameId.length) {
+                resolve({ success: true, added: false, msz: "Duplicate Reg. Id within School!" });
+            }
             let isSameRoll = await Class.aggregate([
                 {
                     '$match': {
@@ -238,6 +260,7 @@ app.post('/addMultipleStudents/:classID', checkAuth, checkPrinciple, upload.sing
         let classID = req.params.classID;
         fs.readFile(req.file.path, async (err, data) => {
             try {
+                await deleteFile(req.file.path);
                 const workbook = XLSX.read(data);
                 const sheet_name_list = workbook.SheetNames;
                 let students = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
@@ -347,8 +370,114 @@ app.post('/addMultipleStudents/:classID', checkAuth, checkPrinciple, upload.sing
 })
 
 
+app.post('/updateStudent/:id', checkAuth, checkPrinciple, async (req, res) => {
+    try {
+        let userData = await User.findById(req.params.id);
+        let { regId, name, rollno, phone, dob, fname, add, gender } = req.body;
+        dob = parseDateString(dob);
+        let isSameIdUser = await User.find({ rid: regId });
+        if (isSameIdUser.length && isSameIdUser[0]._id.toString() != req.params.id) {
+            return res.json({ success: true, updated: false, msz: "Duplicate Reg. Id within School!" });
+        }
+        let classData = await userClass(req.params.id);
+        let isSameRollUser = await Class.aggregate([
+            {
+                '$match': {
+                    '_id': new mongoose.Types.ObjectId(classData._id)
+                }
+            }, {
+                '$unwind': {
+                    'path': '$students'
+                }
+            }, {
+                '$lookup': {
+                    'from': 'users',
+                    'localField': 'students',
+                    'foreignField': '_id',
+                    'as': 'student'
+                }
+            }, {
+                '$match': {
+                    'student.rollno': parseInt(rollno)
+                }
+            }
+        ]);
+        if (isSameRollUser.length && isSameRollUser[0].students.toString() != req.params.id) {
+            res.json({ success: true, added: false, msz: "Duplicate Roll within Class" });
+        }
+        else {
+            let possibleOldPassword = `${userData.username.slice(0, 3)}${parseInt(userData.phone) % 10000}`;
+            let newPassword = userData.password;
+            if (possibleOldPassword == userData.password) {
+                if (typeof (phone) === 'string') phone = parseInt(phone);
+                newPassword = `${name.slice(0, 3)}${phone % 10000}`;
+            }
 
+            await User.findByIdAndUpdate(req.params.id, {
+                rid: regId,
+                username: name,
+                phone,
+                dob,
+                fname,
+                password: newPassword,
+                role: 'Student',
+                rollno,
+                add,
+                gender
+            });
+            res.json({ success: true, updated: true });
+        }
+    } catch (err) {
+        res.json({ success: false });
+    }
+})
 
+//Announcement
+
+app.post('/announcement/add', checkAuth, checkPrinciple, async (req, res) => {
+    try {
+        let newNotification = new Notification({
+            title: req.body.title,
+            body: req.body.body,
+            icon: req.body.icon,
+            scope: "School"
+        });
+        await newNotification.save();
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false });
+    }
+})
+
+app.get('/announcement/all', checkAuth, async (req, res) => {
+    try {
+        let data = await Notification.aggregate([
+            {
+                $match: {
+                    'scope': 'School'
+                }
+            }, {
+                $sort: {
+                    createdAt: -1
+                }
+            }
+        ])
+        res.json({ success: true, data });
+    } catch (err) {
+        res.json({ success: false });
+    }
+})
+
+app.get('/announcement/remove/:id', checkAuth, checkPrinciple, async (req, res) => {
+    try {
+        res.json({ success: true });
+        let notify = await Notification.findByIdAndDelete(req.params.id);
+        if (notify.icon !== '/img/logo.png')
+            await deleteFile(`./static${notify.icon}`);
+    } catch (err) {
+        res.json({ success: false });
+    }
+})
 
 
 
@@ -398,7 +527,8 @@ app.post('/ebook/add/:id', checkAuth, async (req, res) => {
 
 app.get('/ebook/remove/:id', checkAuth, async (req, res) => {
     try {
-        await Ebook.findByIdAndDelete(req.params.id);
+        let ebook = await Ebook.findByIdAndDelete(req.params.id);
+        await deleteFile(`./static/downloads/${ebook.url}`);
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false });
@@ -484,8 +614,11 @@ app.post('/classWork/add/:id', checkAuth, async (req, res) => {
 
 app.get('/classWork/remove/:id', checkAuth, async (req, res) => {
     try {
-        await classWork.findByIdAndDelete(req.params.id);
+        let work = await classWork.findByIdAndDelete(req.params.id);
         res.json({ success: true });
+        if (work.file.length) {
+            await deleteFile(`./static/downloads/${work.file}`);
+        }
     } catch (err) {
         res.json({ success: false });
     }
@@ -497,7 +630,7 @@ app.get('/classWork/remove/:id', checkAuth, async (req, res) => {
 //Attandance
 app.get('/attandance/:id', checkAuth, checkPrinciple, async (req, res) => {
     let data = await Class.findById(req.params.id);
-    let startDate = new Date(); 
+    let startDate = new Date();
     startDate.setHours(0, 0, 0, 0);
     let endDate = new Date();
     endDate.setHours(23, 59, 59, 999);
@@ -622,11 +755,11 @@ app.get('/attandance/download/:id', checkAuth, async (req, res) => {
 
 app.get('/attandance/prev/:classID/:date', checkAuth, async (req, res) => {
     try {
-        const searchDate = new Date(req.params.date); 
+        const searchDate = new Date(req.params.date);
         const startDate = new Date(searchDate);
         startDate.setHours(0, 0, 0, 0);
         const endDate = new Date(searchDate);
-        endDate.setHours(23, 59, 59, 999); 
+        endDate.setHours(23, 59, 59, 999);
         let data = await Attendance.aggregate([
             {
                 '$match': {
@@ -716,6 +849,93 @@ app.post('/attandance/update/:sheetId', checkAuth, async (req, res) => {
         res.json({ success: false });
     }
 })
+
+
+
+
+
+
+// Class Announcement
+
+app.get('/announcement/:id', checkAuth, async (req, res) => {
+    try {
+        let data = await Class.findById(req.params.id);
+        if (data) {
+            res.render('principle_announcement', { className: data.className, classId: req.params.id });
+        }
+        else {
+            res.render("404")
+        }
+    } catch (err) {
+        res.render("500")
+    }
+})
+app.post('/announcement/add/:id', checkAuth, async (req, res) => {
+    try {
+        let data = await Class.findById(req.params.id);
+        if (data) {
+            await (new Notification({
+                title: req.body.title,
+                body: req.body.body,
+                class: req.params.id,
+                author: req.user._id,
+                scope: "Class"
+            })).save();
+            res.json({ success: true });
+        }
+        else {
+            res.json({ success: false });
+        }
+    } catch (err) {
+        res.json({ success: false });
+    }
+})
+
+app.get('/announcement/all/:id', checkAuth, async (req, res) => {
+    try {
+        let data = await Notification.aggregate([
+            {
+                '$match': {
+                    'scope': 'Class'
+                }
+            },
+            {
+                '$match': {
+                    'class': new mongoose.Types.ObjectId(req.params.id)
+                }
+            }, {
+                '$lookup': {
+                    'from': 'users',
+                    'localField': 'author',
+                    'foreignField': '_id',
+                    'as': 'author'
+                }
+            }, {
+                '$unwind': {
+                    'path': '$author'
+                }
+            }, {
+                '$project': {
+                    'title': 1,
+                    'body': 1,
+                    'author._id': 1,
+                    'author.username': 1,
+                    'author.profile': 1,
+                    'createdAt': 1
+                }
+            }, {
+                '$sort': {
+                    'createdAt': -1
+                }
+            }
+        ])
+        res.json({ success: true, data });
+    } catch (err) {
+        res.json({ success: false });
+    }
+})
+
+
 
 
 export default app;

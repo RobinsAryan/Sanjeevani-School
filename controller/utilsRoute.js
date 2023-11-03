@@ -68,14 +68,14 @@ app.post('/saveFile', checkAuth, checkPrinciple, uploadDownloads.single('file'),
 app.get('/birthdays', checkAuth, async (req, res) => {
     try {
         let today = new Date();
-        today.setHours(0, 0, 0, 0);  
+        today.setHours(0, 0, 0, 0); 
         const day = today.getUTCDate();
-        const month = today.getUTCMonth() + 1;  
+        const month = today.getUTCMonth() + 1; 
         const data = await User.aggregate([
             {
                 $project: {
                     username: 1,
-                    profile:1,
+                    profile: 1,
                     dayOfBirth: { $dayOfMonth: '$dob' },
                     monthOfBirth: { $month: '$dob' },
                 },
@@ -103,7 +103,7 @@ app.get('/birthdays', checkAuth, async (req, res) => {
                     'class.className': 1
                 }
             }
-        ]);
+        ]); 
         res.json({ success: true, data });
     } catch (err) {
         res.json({ success: false });
