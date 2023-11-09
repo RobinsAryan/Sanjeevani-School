@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        Schedule | <%=className %>
+    </title>
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/principle/class.css">
+    <link rel="stylesheet" href="/css/principle/ebook.css">
+    <link rel="stylesheet" href="/css/popup.css">
+    <script src="https://kit.fontawesome.com/c538c9717e.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+</head>
+
+<body>
+    <input type="text" id="classID" hidden value="<%=classId%>">
+    <div class="header">
+        <i style="font-size: 20px; color: grey;" onclick="history.back()" class="fas fa-arrow-left"></i>
+        <p id="headerTitle">
+            <%=className %>
+                <small>Schedule</small>
+        </p>
+        <i onclick="uploadSyllabus()" style="font-size: 20px; color: grey;" class="fas fa-plus"></i>
+    </div>
+    <div class="main">
+        <div class="view">
+            <div class="classes">
+                <%if(schedule){%>
+                    <div class="syllabus" style="    padding: 40px 0;
+    text-align: center;">
+                        <p style="font-size: 15px;
+    color: gray;
+    margin-bottom: 25px;">
+                            Download Schedule of class <%=className%>
+                        </p>
+                        <button onclick="location.href='/download/<%=schedule%>'" class="normalButton">Download</button>
+                    </div>
+                    <%}else{%>
+                        <div class="syllabus" style="    padding: 40px 0;
+                        text-align: center;">
+                            <p style="font-size: 15px;
+                        color: gray;
+                        margin-bottom: 25px;">
+                                No Schedule of class <%=className%> is avalible
+                            </p>
+                        </div>
+                        <%}%>
+            </div>
+        </div>
+    </div>
+    <div id="popup" class="popup">
+
+    </div>
+    <script src="/js/common.js"></script>
+    <script src="/js/principle/schedule.js"></script>
+</body>
+
+</html>

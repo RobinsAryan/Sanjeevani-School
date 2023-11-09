@@ -2,7 +2,7 @@ const lineContainer = document.querySelector(".line-container");
 let page = document.getElementsByClassName('classes')[0];
 let createBtn = document.getElementById('createBtn');
 const menu = document.querySelector(".menu");
-
+let refrenceLoad = document.getElementById('refrence');
 
 
 lineContainer.addEventListener("click", () => {
@@ -36,6 +36,11 @@ const pages = [
     },
     {
         title: 'Gallary',
+        url: '/',
+        btnText: 'New Posts'
+    },
+    {
+        title: 'Home',
         url: '/',
         btnText: 'New Posts'
     },
@@ -106,7 +111,10 @@ const openPage = async (num, toggle = 1) => {
     if (openedPage === num) return;
     openedPage = num;
     document.getElementById('headerTitle').innerText = pages[openedPage].title;
+    createBtn.style.display = 'initial';
     createBtn.innerText = pages[openedPage].btnText;
+    page.innerHTML = ''
+    refrenceLoad.innerHTML = ''
     if (openedPage == 0) {
         showClasses();
     }
@@ -114,10 +122,58 @@ const openPage = async (num, toggle = 1) => {
         showTeachers();
     }
     else if (openedPage == 3) {
-        showAnnouncement();
+        showAnnouncement(0);
     }
     else if (openedPage == 4) {
-        showGallary();
+        showGallary(0);
+    }
+    else if (openedPage == 5) {
+        createBtn.style.display = 'none';
+        page.innerHTML = ` <div class="mainHome">
+                    <div class="searchData">
+                        <input type="text" name="search" id="search" placeholder="Search">
+                        <button>Search</button>
+                    </div>
+                    <div class="homeHead">
+                        <i class="fas fa-graduation-cap"></i>
+                        <h3>Student Strength</h3>
+                    </div>
+                    <div class="studentCount">
+                        <p>Total Students: <span id="totalStudents">...</span></p>
+                    </div>
+                    <div class="studentsDetails">
+                        <div class="sdRow">
+                            <div class="sdItem" style="border-right: 1px solid #b7b7b7;">
+                                <div class="sdicon">
+                                    <img src="/img/male.png" alt="">
+                                </div>
+                                <div class="sdData">
+                                    <small>Male <span id="maleCount">...</span></small>
+                                    <p id="maleNo">...</p>
+                                </div>
+                            </div>
+                            <div class="sdItem">
+                                <div class="sdicon">
+                                    <img src="/img/female.png" alt="">
+                                </div>
+                                <div class="sdData">
+                                    <small>Female <span id="femaleCount">...</span></small>
+                                    <p id="femaleNo">...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="studentsDetails">
+                         <div class="studentGraph">
+                            <p1>Distrubution of Students<small>(Standard Wise)</small></p1>
+                            
+                            <div class="studentMainGraph">
+                                <canvas id="studentChart1"></canvas> 
+                            </div>
+                         </div>
+                    </div> 
+                </div>`
+        loadHome();
     }
     else page.innerHTML = 'Upcoming...'
 }
@@ -404,7 +460,7 @@ const resetForm2 = (HTMLFormInput) => {
 
 
 window.onload = () => {
-    let pageNum = 0;
+    let pageNum = 5;
     let data = localStorage.getItem('openedPage');
     if (data) {
         data = JSON.parse(data);
@@ -420,20 +476,25 @@ const toggleImages = (e) => {
 }
 
 
-const showGallary = async () => {
-    page.innerHTML = ` 
-            <i class="fas fa-spinner rotateMe"></i> 
-        `
-    let data = await myGET('/user/gallary/all');
+let gallaryPage = 0, showMoreGallaryPage = false;
+
+const showGallary = async (pageNum) => {
+    showMoreGallaryPage = false;
+    refrenceLoad.innerHTML = '<i class="fas fa-spinner rotateMe"></i>';
+    let data = await myGET(`/user/gallary/all?page=${pageNum}`);
     if (data.success) {
         data = data.data;
-        page.innerHTML = ``
+        if (data.length == 0) {
+            refrenceLoad.innerHTML = 'Page End!';
+            return;
+        }
         data.forEach((frame, index) => {
             page.innerHTML += genrateFrame(frame, index);
         });
+        showMoreGallaryPage = true;
     }
     else {
-        page.innerHTML = showSWrong('showClasses()');
+        refrenceLoad.innerHTML = showSWrong(`showGallary(${pageNum})`);
     }
 }
 
@@ -466,27 +527,29 @@ const deleteFrame = async (id) => {
         console.log(val);
         if (val) {
             await myGET(`/user/gallary/remove/${id}`);
-            showGallary();
+            showGallary(0);
         }
     } catch (err) {
-        showGallary();
+        showGallary(0);
     }
 }
 
 
+let announcementPage = 0, showMoreAnnouncementPage = false;
 
-const showAnnouncement = async () => {
-    page.innerHTML = ` 
-            <i class="fas fa-spinner rotateMe"></i> 
-        `
-    let data = await myGET('/class/announcement/all');
+const showAnnouncement = async (pageNum) => {
+    showMoreAnnouncementPage = false;
+    refrenceLoad.innerHTML = '<i class="fas fa-spinner rotateMe"></i>';
+    let data = await myGET(`/class/announcement/all?page=${pageNum}`);
     if (data.success) {
         data = data.data;
-        page.innerHTML = ``
+        if (data.length == 0) {
+            refrenceLoad.innerHTML = 'You Reached At End!'
+            return;
+        }
         data.forEach(data => {
-            console.log(data);
             page.innerHTML += `
-            <div class="post">
+            <div class="post lastPost">
                     <div class="postWrapper">
                         <div class="postTop">
                             <div class="postTopLeft">
@@ -511,11 +574,38 @@ const showAnnouncement = async () => {
                 </div>
             `
         });
+        showMoreAnnouncementPage = true;
     }
     else {
-        page.innerHTML = showSWrong('showClasses()');
+        refrenceLoad.innerHTML = showSWrong(`showAnnouncement(${pageNum})`);
     }
 }
+
+
+window.addEventListener('scroll', () => {
+    handleScroll();
+})
+
+const isElementInView = () => {
+    const rect = refrenceLoad.getBoundingClientRect();
+    return (
+        (rect.bottom - 300) <= (window.innerHeight || document.documentElement.clientHeight)
+    );
+};
+
+const handleScroll = () => {
+    if (openedPage == 3 && showMoreAnnouncementPage && isElementInView()) {
+        announcementPage++;
+        showAnnouncement(announcementPage);
+    }
+    else if (openedPage == 4 && showMoreGallaryPage && isElementInView()) {
+        gallaryPage++;
+        showGallary(gallaryPage);
+    }
+};
+
+
+
 
 
 const deleteAnnouncement = async (id) => {
@@ -546,4 +636,70 @@ const textAreaBlur = (e) => {
     if (e.innerHTML.split('&nbsp;').join('').trim() === '') {
         e.innerHTML = 'Write About this...';
     }
-} 
+}
+
+
+
+
+
+
+
+const createGraph = (data) => {
+    const ctx = document.getElementById("studentChart1").getContext("2d");
+    const labels = ["janfsdf", 'sfsafasf', 'afdsafasf', 'sffasfdfafsd', 'wresdfsaf', 'xcfaefwer', 'fsafsafsf', "janfsdf", 'sfsafasf', 'afdsafasf', 'sffasfdfafsd',]
+    new Chart(ctx, {
+        type: "bar",
+        data: data,
+        options: {
+            maintainAspectRatio: false,
+        }
+    });
+}
+let totalBGColors = [
+    ['rgba(255, 99, 132, 0.2)', 'rgb(255, 99, 132)'],
+    ['rgba(255, 159, 64, 0.2)', 'rgb(255, 159, 64)'],
+    ['rgba(255, 205, 86, 0.2)', 'rgb(255, 205, 86)'],
+    ['rgba(75, 192, 192, 0.2)', 'rgb(75, 192, 192)'],
+    ['rgba(54, 162, 235, 0.2)', 'rgb(54, 162, 235)'],
+    ['rgba(153, 102, 255, 0.2)', 'rgb(153, 102, 255)'],
+    ['rgba(201, 203, 207, 0.2)', 'rgb(201, 203, 207)']
+]
+
+const loadHome = async () => {
+    try {
+        let resData = await myGET('/studentsInfo');
+        if (resData.success) {
+            document.getElementById('totalStudents').innerHTML = resData.male + resData.female;
+            document.getElementById('maleCount').innerHTML = `${((resData.male / (resData.male + resData.female)) * 100).toFixed(2)}%`;
+            document.getElementById('femaleCount').innerHTML = `${((resData.female / (resData.male + resData.female)) * 100).toFixed(2)}%`;
+            document.getElementById('maleNo').innerHTML = resData.male;
+            document.getElementById('femaleNo').innerHTML = resData.female;
+            let lebals = [], dataset = [], backgroundColor = [], borderColor = [];
+            let rno = 0;
+            resData.perClass.map(item => {
+                lebals.push(item.className);
+                dataset.push(item.count);
+                backgroundColor.push(totalBGColors[rno][0])
+                borderColor.push(totalBGColors[rno][1])
+                rno++;
+                if (rno >= 7) rno = 0;
+            })
+            const data = {
+                labels: lebals,
+                datasets: [{
+                    label: 'Students',
+                    data: dataset,
+                    backgroundColor,
+                    borderColor,
+                    borderWidth: 1
+                }]
+            };
+            console.log(data);
+            createGraph(data);
+        } else {
+
+        }
+    } catch (err) {
+        console.log(err)
+    }
+}

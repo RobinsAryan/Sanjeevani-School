@@ -20,6 +20,7 @@ body {
     background: white;
     position: sticky;
     top: 0;
+    z-index: 1;
 }
 
 .header p {
@@ -349,4 +350,148 @@ body {
 #Announcetext:focus {
     min-height: 60px;
     font-size: 15px;
+}
+
+#refrence {
+    width: 100%;
+    min-height: 100px;
+    /* text-align: center; */
+    display: flex;
+    font-size: 25px;
+    align-items: center;
+    justify-content: center;
+}
+
+.mainHome {
+    width: 92%;
+    background: white;
+    margin: auto;
+    border-radius: 5px;
+    padding: 5px;
+    box-shadow: 0 0 10px 2px #e2e2e2;
+}
+
+.homeHead {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    margin: 10px;
+}
+
+.homeHead i {
+    margin-right: 5px;
+    font-size: 17px;
+    color: #46b5d5;
+}
+
+.studentCount {
+    height: 60px;
+    display: flex;
+    font-weight: bold;
+    border-radius: 5px;
+    margin: 10px;
+    font-size: 15px;
+    padding: 10px;
+    background: linear-gradient(66deg, #aaece9, #fcd9e5);
+    align-items: center;
+}
+
+.studentsDetails {
+    margin: 10px;
+    border: 1px solid #c7c7c7;
+    /* padding: 10px; */
+    border-radius: 5px;
+}
+
+.sdRow {
+    display: flex;
+}
+
+
+.sdItem {
+    flex: 5;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.sdicon {
+    width: 40px;
+    height: 40px;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-right: 7px;
+
+}
+
+.sdicon img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+}
+
+.sdData {
+    font-weight: bold;
+}
+
+.sdData small {
+    font-size: 10px;
+}
+
+.sdData p {
+    font-size: 15px;
+}
+
+.sdData span {
+    color: #69c9f3;
+}
+
+.studentGraph {
+    margin: 10px
+}
+
+.studentGraph p1 {
+    font-size: 14px;
+}
+
+.studentGraph p1 small {
+    display: block;
+    font-size: 10px;
+    color: gray;
+}
+
+.studentMainGraph {
+    height: 350px;
+}
+
+.searchData {
+    margin: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.searchData input {
+    width: 75%;
+    height: 30px;
+    border: 1px solid gray;
+    outline: none;
+    border-radius: 5px;
+    padding: 5px;
+    font-size: 15px;
+}
+ 
+
+.searchData button {
+    height: 28px;
+    padding: 5px;
+    font-size: 15px;
+    width: 20%;
+    border: none;
+    background: linear-gradient(45deg, #abece9, #f7dae5);
+    outline: none;
+    border-radius: 5px;
+    color: black;
+    font-weight: bold;
 }

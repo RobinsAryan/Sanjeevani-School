@@ -451,6 +451,7 @@ app.post('/announcement/add', checkAuth, checkPrinciple, async (req, res) => {
 
 app.get('/announcement/all', checkAuth, async (req, res) => {
     try {
+        let pageNum = parseInt(req.query.page);
         let data = await Notification.aggregate([
             {
                 $match: {
@@ -460,6 +461,12 @@ app.get('/announcement/all', checkAuth, async (req, res) => {
                 $sort: {
                     createdAt: -1
                 }
+            },
+            {
+                $skip: pageNum * 2,
+            },
+            {
+                $limit: 2
             }
         ])
         res.json({ success: true, data });
@@ -935,6 +942,63 @@ app.get('/announcement/all/:id', checkAuth, async (req, res) => {
     }
 })
 
+
+
+//Syllabus
+app.get('/syllabus/:id', checkAuth, async (req, res) => {
+    try {
+        let data = await Class.findById(req.params.id);
+        if (data) {
+            res.render('syllabus', { className: data.className, classId: req.params.id, syllabus: data.syllabus || false });
+        }
+        else {
+            res.render("404")
+        }
+    } catch (err) {
+        res.render("500")
+    }
+})
+
+
+app.post('/syllabus/add/:id', checkAuth, async (req, res) => {
+    try {
+        await Class.findByIdAndUpdate(req.params.id, {
+            syllabus: req.body.url,
+        }) 
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false });
+    }
+})
+
+
+
+//Schedule
+app.get('/schedule/:id', checkAuth, async (req, res) => {
+    try {
+        let data = await Class.findById(req.params.id);
+        if (data) {
+            res.render('schedule', { className: data.className, classId: req.params.id, schedule: data.schedule || false });
+        }
+        else {
+            res.render("404")
+        }
+    } catch (err) {
+        res.render("500")
+    }
+})
+
+
+app.post('/schedule/add/:id', checkAuth, async (req, res) => {
+    try {
+        await Class.findByIdAndUpdate(req.params.id, {
+            schedule: req.body.url,
+        }) 
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false });
+    }
+})
 
 
 

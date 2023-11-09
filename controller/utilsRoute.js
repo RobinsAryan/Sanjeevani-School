@@ -1,6 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import User from '../models/User.js';
+import Class from '../models/Class.js';
 import { checkAuth, checkPrinciple } from '../utils/middleware.js';
 const app = express();
 app.use(express.static('static'));
@@ -68,9 +69,9 @@ app.post('/saveFile', checkAuth, checkPrinciple, uploadDownloads.single('file'),
 app.get('/birthdays', checkAuth, async (req, res) => {
     try {
         let today = new Date();
-        today.setHours(0, 0, 0, 0); 
+        today.setHours(0, 0, 0, 0);
         const day = today.getUTCDate();
-        const month = today.getUTCMonth() + 1; 
+        const month = today.getUTCMonth() + 1;
         const data = await User.aggregate([
             {
                 $project: {
@@ -103,9 +104,59 @@ app.get('/birthdays', checkAuth, async (req, res) => {
                     'class.className': 1
                 }
             }
-        ]); 
+        ]);
         res.json({ success: true, data });
     } catch (err) {
+        res.json({ success: false });
+    }
+})
+
+
+app.get('/studentsInfo', checkAuth, checkPrinciple, async (req, res) => {
+    try {
+        let data = await User.aggregate([
+            {
+                '$match': {
+                    'role': 'Student'
+                }
+            }, {
+                '$project': {
+                    'gender': 1
+                }
+            }, {
+                '$sortByCount': '$gender'
+            }
+        ]);
+        let totalMaleStudents = 0, feMaleStudents = 0;
+        data.forEach(obj => {
+            if (obj._id.includes('F') || obj._id.includes('f')) feMaleStudents += obj.count;
+            else totalMaleStudents += obj.count;
+        })
+        let reqData = { male: totalMaleStudents, female: feMaleStudents };
+        let classWiseData = await Class.aggregate([
+            {
+                $project: {
+                    students: 1,
+                    className: 1,
+                    createdAt: 1
+                }
+            },
+            {
+                $sort: {
+                    createdAt: 1
+                }
+            }
+        ])
+        let newClassData = [];
+        newClassData = classWiseData.map(cd => {
+            return {
+                className: cd.className,
+                count: cd.students.length
+            }
+        });
+        res.send({ success: true, ...reqData, perClass: newClassData })
+    } catch (err) {
+        console.log(err)
         res.json({ success: false });
     }
 })

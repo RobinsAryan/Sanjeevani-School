@@ -17,7 +17,7 @@ export const userClass = async (id) => {
             }
         }, {
             $project: {
-                className: 1,
+                students: 0,
             }
         }
     ])
@@ -192,7 +192,20 @@ app.post('/gallary/add', checkAuth, checkPrinciple, async (req, res) => {
 
 app.get('/gallary/all', checkAuth, async (req, res) => {
     try {
-        let data = await Gallary.find().sort({ createdAt: -1 });
+        let pageNum = parseInt(req.query.page);
+        let data = await Gallary.aggregate([
+            {
+                $sort: {
+                    createdAt: -1
+                }
+            },
+            {
+                $skip: pageNum * 2,
+            },
+            {
+                $limit: 2
+            }
+        ])
         res.json({ success: true, data });
     } catch (err) {
         res.json({ success: false });

@@ -7,11 +7,12 @@
     <title>Principle</title>
     <link rel="stylesheet" href="/css/common.css">
     <link rel="stylesheet" href="/css/gallary.css">
-    <link rel="stylesheet" href="/css/principle/home.css"> 
-    <link rel="stylesheet" href="/css/principle/classWork.css"> 
+    <link rel="stylesheet" href="/css/principle/home.css">
+    <link rel="stylesheet" href="/css/principle/classWork.css">
     <link rel="stylesheet" href="/css/popup.css">
     <script src="https://kit.fontawesome.com/c538c9717e.js" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -33,6 +34,10 @@
             </div>
         </div>
         <div class="menu-center">
+            <div onclick="openPage(5)" class="menu-item">
+                <i class="fa-solid fa-home"></i>
+                <span>Home</span>
+            </div>
             <div onclick="openPage(0)" class="menu-item">
                 <i class="fa-solid fa-users-line"></i>
                 <span>Classes</span>
@@ -74,7 +79,9 @@
                 <button id="createBtn">ADD Class</button>
             </div>
             <div class="classes">
-
+            </div> 
+            <div id="refrence">
+                <i class="fas fa-spinner rotateMe"></i>
             </div>
         </div>
     </div>

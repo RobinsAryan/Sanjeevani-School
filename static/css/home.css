@@ -112,6 +112,13 @@
 .c6 {
     background: url('../img/bg_result.jpg');
 }
+.c7 {
+    background: url('../img/syllabus.jpg');
+}
+
+.c8 {
+    background: url('../img/schedule.jpg');
+}
 
 .smallCard p {
     margin: 10px 0 0 10px;

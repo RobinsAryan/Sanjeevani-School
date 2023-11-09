@@ -3,6 +3,7 @@ let birthdayUser = document.getElementById('birthdayUser');
 let moreBirthday = document.getElementById('moreBirthday');
 let menu = document.getElementsByClassName('menu')[0];
 let userId = null, userBirthday = false;
+let loadingPost = document.getElementById('loadingPost')
 setInterval(() => {
     fencyDiv.style.borderRadius = `${10 + Math.random() * 30}px ${10 + Math.random() * 30}px ${10 + Math.random() * 30}px ${10 + Math.random() * 30}px `
 }, 400)
@@ -120,7 +121,7 @@ window.onload = () => {
     else {
         document.getElementById('canvas').remove();
         loadBirthDays();
-        loadAnnouncements();
+        loadAnnouncements(0);
     }
 }
 
@@ -152,16 +153,12 @@ birthdayUser.addEventListener('scroll', () => {
 
 
 let announcement = document.getElementById('announcements');
+let needLoadMore = false, pageCount = 0;
 
-const loadAnnouncements = async() => {
+const loadAnnouncements = async (page) => {
+    needLoadMore = false;
     try {
-        announcement.innerHTML = `<div style="height: 70px;">
-                            <div class="loading_div">
-                                <i class="fas fa-spinner rotateMe"></i>
-                            </div>
-                        </div>`
-        let resData = await myGET('/class/announcement/all');
-        announcement.innerHTML = '';
+        let resData = await myGET(`/class/announcement/all?page=${page}`);
         if (resData.success) {
             if (resData.data.length) {
                 resData.data.map(announce => {
@@ -185,14 +182,17 @@ const loadAnnouncements = async() => {
                                     </div> 
                                 </div>
                             </div>`
+                    needLoadMore = true;
                 })
             } else {
-                announcement.innerHTML = `<div class="noBirthday">
+                loadingPost.style.display = 'none'
+                announcement.innerHTML += `<div class="noBirthday">
                             <p>No Announcements to Show</p>
                             <img src="/img/noData.gif" alt="">
                         </div>`
             }
-        } else { 
+        } else {
+            loadingPost.style.display = 'none'
             document.getElementById('popup').style.display = 'block';
             document.getElementById('popup').innerHTML = `
                 <div class="popup-form">
@@ -200,11 +200,12 @@ const loadAnnouncements = async() => {
                 ${showSWrong('loadAnnouncements()')}
                 </div>
             `
-            birthdayUser.innerHTML = `<div class="noBirthday"> 
+            announcement.innerHTML += `<div class="noBirthday"> 
                             <img src="/img/noData.gif" alt="">
                         </div>`
-        } 
+        }
     } catch (err) {
+        loadingPost.style.display = 'none'
         console.log(err);
         document.getElementById('popup').style.display = 'block';
         document.getElementById('popup').innerHTML = `
@@ -213,15 +214,30 @@ const loadAnnouncements = async() => {
                 ${showSWrong('loadAnnouncements()')}
                 </div>
             `
-        birthdayUser.innerHTML = `<div class="noBirthday"> 
+        announcement.innerHTML += `<div class="noBirthday"> 
                             <img src="/img/noData.gif" alt="">
                         </div>`
     }
 }
 
+window.addEventListener('scroll', () => {
+    handleScroll();
+})
 
 
+const isElementInView = () => {
+    const rect = loadingPost.getBoundingClientRect();
+    return (
+        (rect.bottom - 300) <= (window.innerHeight || document.documentElement.clientHeight)
+    );
+};
 
+const handleScroll = () => {
+    if (needLoadMore && isElementInView()) {
+        pageCount++;
+        loadAnnouncements(pageCount);
+    }
+};
 
 
 
@@ -229,7 +245,7 @@ const loadAnnouncements = async() => {
 if ('serviceWorker' in navigator && 'Notification' in window) {
 
     navigator.serviceWorker.register('/sw.js')
-        .then((registration) => { 
+        .then((registration) => {
             document.getElementById('subscribeButton').addEventListener('click', subscribeToPush);
         })
         .catch((error) => {
@@ -286,3 +302,5 @@ function urlBase64ToUint8Array(base64String) {
     }
     return outputArray;
 }
+
+

@@ -1,18 +1,18 @@
 import express from 'express';
 import passport from 'passport';
-import passportLocal from './Auth/localAuth.js'; 
+import passportLocal from './Auth/localAuth.js';
 const app = express();
 import utilsRoute from './utilsRoute.js'
 import classRoute from './classRoutes.js'
 import teacherRoute from './teacherRoutes.js'
-import userRoute from './userRoutes.js'
+import userRoute, { userClass } from './userRoutes.js'
 import studentRoute from './studentRoutes.js'
 import { checkAuth } from '../utils/middleware.js';
-import webPush from '../utils/webPush.js' 
-passportLocal(passport); 
+import webPush from '../utils/webPush.js'
+passportLocal(passport);
 
 
-app.get('/', async (req, res) => { 
+app.get('/', async (req, res) => {
     if (req.isAuthenticated()) {
         if (req.user.role === 'Principle') {
             res.render('principle_home', { profile: req.user.profile, username: req.user.username });
@@ -28,10 +28,11 @@ app.get('/', async (req, res) => {
             if (today.getUTCDate() === data.dob.getUTCDate() && today.getUTCMonth() === data.dob.getUTCMonth()) {
                 data["userBirthday"] = 1;
             }
-            else data["userBirthday"] = 0; 
-            res.render('home', { data });
+            else data["userBirthday"] = 0;
+            let classData = await userClass(req.user._id)
+            res.render('home', { data, classData });
         }
-    } else {  
+    } else {
         res.render("base");
     }
 })
@@ -60,7 +61,7 @@ app.get('/loginFail', async (req, res) => {
     })
 })
 
-app.get('/loginSuccess', checkAuth, async (req, res) => { 
+app.get('/loginSuccess', checkAuth, async (req, res) => {
     res.json({
         success: true,
     })
@@ -89,6 +90,6 @@ app.use('/class', classRoute);
 app.use('/teacher', teacherRoute);
 app.use('/user', userRoute);
 app.use('/student', studentRoute);
-app.use(webPush); 
+app.use(webPush);
 
 export default app;

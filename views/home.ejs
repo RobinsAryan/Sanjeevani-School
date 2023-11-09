@@ -31,7 +31,7 @@
                             </div>
                             <p>Hi, <%=data.username%>
                             </p>
-                        </div> 
+                        </div>
                         <div class="rightHeader">
                             <div id="fancyDiv" onclick="openUserProfile()">
                                 <i class="far fa-user"></i>
@@ -46,7 +46,8 @@
 
                                         <span>Profile</span>
 
-                                    </button></li>
+                                    </button>
+                                </li>
                             </ul>
 
 
@@ -54,7 +55,7 @@
                                 <li class="menu-item"><button class="menu-button">
                                         <i class="fas fa-bell"></i>
 
-                                        <span>Notifications</span> 
+                                        <span>Notifications</span>
                                     </button></li>
 
                                 <!-- <li class="menu-item"><button class="menu-button">
@@ -80,7 +81,8 @@
                                         <i class="fas fa-sign-out-alt"></i>
 
                                         <span>LogOut</span>
-                                    </button></li>
+                                    </button>
+                                </li>
 
 
                             </ul>
@@ -112,10 +114,22 @@
                                 <p>Result</p>
                             </div>
                         </div>
+                        <div class="upperRow">
+                            <%if(classData.syllabus){%>
+                            <div onclick="location.href='/downloads/<%=classData.syllabus%>'" class="smallCard c7">
+                                <p>Syllabus</p>
+                            </div>
+                            <%}%>
+                            <%if(classData.schedule){%>
+                            <div onclick="location.href='/downloads/<%=classData.schedule%>'" class="smallCard c8">
+                                <p>Schedule</p>
+                            </div>
+                            <%}%>
+                        </div>
                     </div>
 
                     <!-- <div class="messages">Kindly Change Your Password
-                        <span onclick="document.getElementsByClassName('messages')[0].remove()">X</span>
+                        <span onclick="document.getElementsByclass('messages')[0].remove()">X</span>
                     </div> -->
                     <div class="birthDays">
                         <div class="birthDayHeading">
@@ -135,70 +149,35 @@
                                     class="fas fa-chevron-circle-right"></i></span>
                         </div>
                         <div class="posts" id="announcements">
-                            <div class="post">
-                                <div class="postWrapper">
-                                    <div class="postTop">
-                                        <div class="postTopLeft">
-                                            <img class="postProfileImg" src='/img/me.jpg' alt='user'>
-                                            <div class="div_post_left">
-                                                <span class="postUsername">Deepak Suthar</span>
-                                                <div class="time">10:20 of 25 Oct 2023</div>
-                                            </div>
+
+                        </div>
+                        <div id="loadingPost" class="post">
+                            <div class="postWrapper">
+                                <div class="postTop">
+                                    <div class="postTopLeft">
+                                        <span class="animated-background" style="border-radius: 50%;">
+                                            <div style="height: 40px;width: 40px;"
+                                                class="background-masker btn-divide-left"></div>
+                                        </span>
+                                        <div class="div_post_left">
+                                            <span style="margin-bottom: 5px;" class="postUsername animated-background">
+                                                <div style="height: 10px; width: 50px;"
+                                                    class="background-masker btn-divide-left"></div>
+                                            </span>
+                                            <span style="margin-top: 5px;" class="animated-background">
+                                                <div style="height: 10px; width: 50px;"
+                                                    class="background-masker btn-divide-left"></div>
+                                            </span>
                                         </div>
-                                    </div>
-                                    <hr>
-                                    <div class="postCenter">
-                                        <span class="postText">THis is sample post</span>
-                                        <img class='postImg' src='/img/ebook.jpg' alt='Error While Loading...'></img>
-                                    </div>
-                                    <div class="postBottom">
-                                        <a class="normalButton" target='__blank'>Save</a>
-                                        <span class="post_size">Size: 50KB</span>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="post">
-                                <div class="postWrapper">
-                                    <div class="postTop">
-                                        <div class="postTopLeft">
-                                            <img class="postProfileImg" src='/img/me.jpg' alt='user'>
-                                            <div class="div_post_left">
-                                                <span class="postUsername">Deepak Suthar</span>
-                                                <div class="time">10:20 of 25 Oct 2023</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    <div class="postCenter">
-                                        <span class="postText">THis is sample post</span>
-                                        <img class='postImg' src='/img/ebook.jpg' alt='Error While Loading...'></img>
-                                    </div>
-                                    <div class="postBottom">
-                                        <a class="normalButton" target='__blank'>Download</a>
-                                        <span class="post_size">Size: 50KB</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="post">
-                                <div class="postWrapper">
-                                    <div class="postTop">
-                                        <div class="postTopLeft">
-                                            <img class="postProfileImg" src='/img/me.jpg' alt='user'>
-                                            <div class="div_post_left">
-                                                <span class="postUsername">Deepak Suthar</span>
-                                                <div class="time">10:20 of 25 Oct 2023</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    <div class="postCenter">
-                                        <span class="postText">THis is sample post</span>
-                                        <img class='postImg' src='/img/ebook.jpg' alt='Error While Loading...'></img>
-                                    </div>
-                                    <div class="postBottom">
-                                        <a class="normalButton" target='__blank'>Download</a>
-                                        <span class="post_size">Size: 50KB</span>
-                                    </div>
+                                <div class="postCenter">
+                                    <span class="postText animated-background">
+                                        <div class="background-masker btn-divide-left"></div>
+                                    </span>
+                                    <span style="height: 220px;display: block;" class="animated-background">
+                                        <div class="background-masker btn-divide-left"></div>
+                                    </span>
                                 </div>
                             </div>
                         </div>

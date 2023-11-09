@@ -8,15 +8,15 @@
     </title>
     <link rel="stylesheet" href="/css/common.css">
     <link rel="stylesheet" href="/css/home.css">
-    <link rel="stylesheet" href="/css/student/attandance.css">  
-    <link rel="stylesheet" href="/css/gallary.css">  
+    <link rel="stylesheet" href="/css/student/attandance.css">
+    <link rel="stylesheet" href="/css/gallary.css">
     <link rel="stylesheet" href="/css/popup.css">
     <script rel=preconnect src="https://kit.fontawesome.com/c538c9717e.js" crossorigin="anonymous"></script>
     <script rel=preconnect src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 </head>
 
 <body>
-    <input type="text" id="userId" hidden value="<%=data._id%>"> 
+    <input type="text" id="userId" hidden value="<%=data._id%>">
     <div class="main">
         <div class="view">
             <div class="header">
@@ -39,14 +39,37 @@
             </div>
             <div class="abs" id="mainGallary">
             </div>
+            <div id="refrence">
+                <div class="gallaryFrame">
+                    <span style="width: 100px;" class="animated-background">
+                        <div style="height: 15px;" class="text"></div>
+                    </span>
+                    <span class="animated-background">
+                        <div class="mainPhoto">
+                            
+                        </div>
+                    </span>
+                    <div class="imagesScroller" style="display: flex;
+    justify-content: space-around;">
+                        <span style="width: 48%;" class="animated-background">
+                            <div>
+                            </div>
+                        </span>
+                        <span style="width: 48%;" class="animated-background">
+                            <div>
+                            </div>
+                        </span>
+                    </div> 
+                </div> 
+            </div>
 
         </div>
     </div>
     <div id="popup" class="popup">
 
     </div>
-    <script src="/js/common.js"></script> 
-    <script src="/js/gallary.js"></script> 
+    <script src="/js/common.js"></script>
+    <script src="/js/gallary.js"></script>
 </body>
 
 </html>

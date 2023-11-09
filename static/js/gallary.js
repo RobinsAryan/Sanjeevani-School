@@ -1,5 +1,6 @@
 let gallary = document.getElementById('mainGallary');
-let userId = null;
+let userId = null, curruntPage = 0, morePage = false;
+let refrenceDiv = document.getElementById('refrence');
 
 window.onload = () => {
     userId = document.getElementById('userId').value;
@@ -7,24 +8,53 @@ window.onload = () => {
         alert("User Not Exist!!");
         location.replace('/');
     }
-    loadGallary();
+    loadGallary(0);
 }
 
 const openUserProfile = () => {
     location.href = `/user/profile/${userId}`;
 }
 
-const loadGallary = async () => {
-    let resData = await myGET('/user/gallary/all')
+const loadGallary = async (pageNum) => {
+    morePage = false;
+    let resData = await myGET(`/user/gallary/all?page=${pageNum}`)
     if (resData.success) {
+        if (resData.data.length == 0) {
+            refrenceDiv.innerHTML = '';
+            gallary.innerHTML += `<div class="noBirthday"> 
+                            <img src="/img/noData.gif" alt="">
+                        </div>`
+            return;
+        }
         resData.data.map((item, index) => {
             gallary.innerHTML += genrateFrame(item, index);
         })
-        console.log(resData)
-    } else {
-
+        morePage = true; 
+    } else { 
+        refrenceDiv.innerHTML = showSWrong(`loadGallary(${pageNum})`);
     }
 }
+
+
+window.addEventListener('scroll', () => {
+    handleScroll();
+})
+
+
+const isElementInView = () => {
+    const rect = refrenceDiv.getBoundingClientRect();
+    return (
+        (rect.bottom - 300) <= (window.innerHeight || document.documentElement.clientHeight)
+    );
+};
+
+const handleScroll = () => {
+    if (morePage && isElementInView()) {
+        curruntPage++;
+        loadGallary(curruntPage);
+    }
+};
+
 
 const genrateFrame = (data, index) => {
     console.log(data);

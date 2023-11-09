@@ -19,9 +19,10 @@
 .mainPhoto img {
     width: 100%;
     height: 100%;
+    object-fit: cover;
 }
 
-.imagesScroller div {
+.imagesScroller div{
     width: 100px;
     height: 80px;
     display: inline-block;
@@ -30,6 +31,7 @@
 
 .imagesScroller div img {
     width: 100%;
+    object-fit: cover;
     height: 100%;
 }
 
