@@ -108,7 +108,13 @@ const loadSlide = (num, dir) => {
 }
 
 window.onload = () => {
-    loadSlide(slideNumber, 0);
+    if (localStorage.getItem('lastLogin')) {
+        location.replace('/login');
+    }
+    else {
+        localStorage.setItem('lastLogin', 'true');
+        loadSlide(slideNumber, 0);
+    }
 }
 
 

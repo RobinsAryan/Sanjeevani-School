@@ -220,7 +220,7 @@ app.get('/gallary/remove/:id', checkAuth, async (req, res) => {
             frame.images.map(async img => {
                 await deleteFile(`./static${img}`);
             })
-        }
+        } 
     } catch (err) {
         res.json({ success: false });
     }

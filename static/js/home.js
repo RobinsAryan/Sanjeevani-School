@@ -121,8 +121,10 @@ window.onload = () => {
     else {
         document.getElementById('canvas').remove();
         loadBirthDays();
-        loadAnnouncements(0);
     }
+    setTimeout(() => {
+        loadAnnouncements(0);
+    }, 2000);
 }
 
 
