@@ -9,13 +9,14 @@ webPush.setVapidDetails('mailto: deepaksuthar40128@gmail.com', process.env.Publi
 
 app.post('/subscribe', async (req, res) => {
     const subscription = req.body;
-    res.json({ success: true }); 
+    res.json({ success: true });
+    console.log(subscription);
     await User.findByIdAndUpdate(req.user._id, { sub: JSON.stringify(subscription) });
 })
 
 export const putNotification = async (id, title, body) => {
     let user = await User.findById(id);
-    if (user.sub) {
+    if (user && user.sub) {
         let subscription = JSON.parse(user.sub);
         webPush.sendNotification(subscription, JSON.stringify({ title, body })).catch((err) => console.log(err));
     }
@@ -23,7 +24,9 @@ export const putNotification = async (id, title, body) => {
 
 
 // app.get('/try', (req, res) => {
-//     res.send("hello")
-//     putNotification(req.user._id, "Hello Boyus", "Hello");
+//     putNotification(req.user._id, "Hello Deepak", "Hello");
+//     setTimeout(() => {
+//         res.send("hello")
+//     }, 5000);
 // })
 export default app;

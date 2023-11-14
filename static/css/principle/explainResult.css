@@ -1,0 +1,93 @@
+#selectResult {
+    text-align: center;
+    padding: 10px;
+}
+
+.chart {
+    height: 400px;
+}
+
+.charts {
+    padding: 10px 0;
+    margin: 10px;
+    background: white;
+}
+
+.chartHeading {
+    margin: 10px;
+    position: relative;
+}
+
+.chartHeading p {
+    font-size: 15px;
+}
+
+.chartHeading small {
+    font-size: 10px;
+    color: gray;
+}
+
+.chartHeading div {
+    height: 30px;
+    width: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #1bb1c8;
+    border-radius: 50%;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transform: scale(0.6);
+    color: #1ab3ca;
+    cursor: pointer;
+}
+
+.perStudent {
+    background: white;
+    padding: 10px;
+    text-align: left;
+    position: relative;
+}
+
+.perStudent p {
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.perStudent span {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translate(-14px, -50%);
+    font-size: 15px;
+}
+
+#resultInfo {
+    margin: 10px;
+    padding: 10px;
+    background: white;
+    text-align: center;
+    position: relative;
+}
+
+#resultInfo p {
+    width: 100%;
+    font-size: 15px;
+    font-weight: bold;
+    text-align: left;
+}
+
+#resultInfo span {
+    font-size: 12px;
+    color: gray;
+    width: 100%;
+    display: block;
+    text-align: left;
+}
+
+#resultInfo i {
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+}

@@ -39,3 +39,7 @@ const loadStudents = async () => {
         pdiv.innerHTML = showSWrong('loadStudents()');
     }
 }
+
+const openUserProfile = () => {
+    location.href = `/user/profile/${userId}`;
+}

@@ -1,10 +1,15 @@
 {
     "name": "Sanjeevani School",
     "short_name": "Sanjeevani School",
-    "start_url": "/", 
-    "display": "minimal-ui",
-    "background_color": "#fff",
-    "description": "A app for Schoool.",
+    "description": "An app for Sanjeevani School.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#4285f4",
+    "orientation": "portrait",
+    "scope": "/",
+    "lang": "en",
+    "dir": "ltr",
     "icons": [
         {
             "src": "../img/logo.png",
@@ -43,13 +48,38 @@
             "sizes": "1280x720",
             "type": "image/webp",
             "form_factor": "wide",
-            "label": "Homescreen of Awesome App"
+            "label": "Homescreen of Sanjeevani School App"
         },
         {
             "src": "../img/ss2.png",
             "type": "image/webp",
             "form_factor": "narrow",
-            "label": "Login of Awesome App"
+            "label": "Login of Sanjeevani School App"
         }
-    ]
+    ],
+    "prefer_related_applications": false,
+    "related_applications": [],
+    "categories": [
+        "education"
+    ],
+    "serviceworker": {
+        "src": "../sw.js",
+        "scope": "/",
+        "use_cache": true
+    },
+    "permissions": [
+        "geolocation",
+        "notifications",
+        "openExternalLinks"
+    ],
+    "features": {
+        "deeplinking": "true",
+        "openExternalLinks": "true"
+    },
+    "web_app_manifest": {
+        "returnLink": {
+            "url": "/",
+            "label": "Return to Sanjeevani School"
+        }
+    }
 }

@@ -106,9 +106,10 @@ window.onload = () => {
         let wished = localStorage.getItem('wished');
         if (wished) {
             wished = JSON.parse(wished);
-            console.log
             if (new Date(wished.date + 48 * 60 * 60 * 1000) < new Date()) {
                 wishBirthday();
+                loadBirthDays();
+                PolicyAggrement();
             }
             else {
                 document.getElementById('canvas').remove();
@@ -116,11 +117,13 @@ window.onload = () => {
             }
         } else {
             wishBirthday();
+            PolicyAggrement();
         }
     }
     else {
         document.getElementById('canvas').remove();
         loadBirthDays();
+        PolicyAggrement();
     }
     setTimeout(() => {
         loadAnnouncements(0);
@@ -207,6 +210,7 @@ const loadAnnouncements = async (page) => {
                         </div>`
         }
     } catch (err) {
+        console.log(err);
         loadingPost.style.display = 'none'
         console.log(err);
         document.getElementById('popup').style.display = 'block';
@@ -242,6 +246,21 @@ const handleScroll = () => {
 };
 
 
+const PolicyAggrement = () => {
+    if (!localStorage.getItem('policyAggrement')) {
+        document.getElementById('popup').style.display = 'block';
+        document.getElementById('popup').innerHTML = `
+        <div class="popup-form"> 
+        <h2 style="font-size:15px;margin-bottom:20px">Terms of Use App!</h2>
+        <p style="font-size:12px">Notifications must be allowed to continue with App!</p>
+        <button onclick="location.href='/logout'" class="normalButton" style="background:red;margin-top:10px">Deny</button>
+        <button onclick="subscribeToPush()" class="normalButton" style="margin-top:10px">Allow</button>
+        </div>
+        `
+    }
+}
+
+
 
 
 if ('serviceWorker' in navigator && 'Notification' in window) {
@@ -261,6 +280,7 @@ const PublicKey = 'BMTUJwXpovugSRpuXdZjlS0XhNclQFIER9LcXVemxQSi8hLX3US6-2Eg0Sow7
 
 async function subscribeToPush() {
     try {
+        document.getElementById('popup').innerHTML = '<div class="loading_div"> <i class="fas fa-spinner rotateMe"></i> </div>'
         // Request permission to show push notifications
         const permission = await Notification.requestPermission();
 
@@ -283,8 +303,9 @@ async function subscribeToPush() {
                     'Content-Type': 'application/json'
                 }
             });
-
+            localStorage.setItem('policyAggrement', (Date.now()).toString());
             console.log('Subscribed to push notifications');
+            closePopup();
         }
     } catch (error) {
         console.error('Error subscribing to push notifications:', error);

@@ -645,8 +645,7 @@ const textAreaBlur = (e) => {
 
 
 const createGraph = (data) => {
-    const ctx = document.getElementById("studentChart1").getContext("2d");
-    const labels = ["janfsdf", 'sfsafasf', 'afdsafasf', 'sffasfdfafsd', 'wresdfsaf', 'xcfaefwer', 'fsafsafsf', "janfsdf", 'sfsafasf', 'afdsafasf', 'sffasfdfafsd',]
+    const ctx = document.getElementById("studentChart1").getContext("2d"); 
     new Chart(ctx, {
         type: "bar",
         data: data,
@@ -693,8 +692,7 @@ const loadHome = async () => {
                     borderColor,
                     borderWidth: 1
                 }]
-            };
-            console.log(data);
+            }; 
             createGraph(data);
         } else {
 

@@ -108,7 +108,7 @@ const editClass = () => {
     document.getElementById('popup').style.display = 'block';
     document.getElementById('popup').innerHTML = `<div class="popup-form">
         <div class="hidePopUp" ><i onClick = "closePopup()" class="fa-solid fa-xmark"></i></div> 
-            <form onreset = "resetForm(this)" onSubmit="handleSubmitClass(event)" id="fileUploadForm">
+            <form onSubmit="handleSubmitClass(event)" id="fileUploadForm">
                 <input type="text" id="className" name="className" placeholder="New Class Name" required><br><br>
                 <div>
                     <button style="background:#ff4646;" type="reset">Reset</button>

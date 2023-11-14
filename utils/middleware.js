@@ -1,4 +1,7 @@
 import moment from "moment";
+import Class from "../models/Class.js";
+import mongoose from "mongoose";
+import { putNotification } from "./webPush.js";
 
 export function checkAuth(req, res, next) {
     if (req.isAuthenticated()) {
@@ -58,3 +61,27 @@ export const istToUtc = (date) => {
     const istOffset = 330 * 60 * 1000;
     return new Date(date.getTime() - istOffset);
 };
+
+
+
+export const sendNotificationToClass = async (classId, title, body) => {
+    let allStudents = await Class.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(classId)
+            }
+
+        }, {
+            $project: {
+                students: 1,
+            }
+        }
+    ])
+    // console.log(allStudents)
+    allStudents = allStudents[0].students;
+    if (allStudents.length) {
+        allStudents.map(student => {
+            putNotification(student, title, body);
+        })
+    }
+}

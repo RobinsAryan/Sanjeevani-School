@@ -177,4 +177,20 @@ app.post('/updatePassword/:id', checkAuth, async (req, res) => {
     }
 })
 
+
+
+
+
+
+app.get('/result', checkAuth, async (req, res) => {
+    try {
+        const data = { ...req.user }
+        let classData = await userClass(data._id);
+        data.classId = classData._id;
+        data.className = classData.className;
+        res.render('selectResult', { data })
+    } catch (err) {
+        res.json({ success: false });
+    }
+})
 export default app;

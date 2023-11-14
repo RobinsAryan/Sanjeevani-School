@@ -94,3 +94,7 @@ const renderPostBottom = (file, size) => {
                 <span class="post_size">Size: ${formatFileSize(size)}</span>`
     }
 }
+
+const openUserProfile = () => {
+    location.href = `/user/profile/${userId}`;
+}

@@ -3,7 +3,7 @@ const app = express();
 import User from '../models/User.js';
 import Class from '../models/Class.js';
 import Ebook from '../models/Ebook.js';
-import { checkAuth, checkPrinciple, istToUtc, parseDateString } from '../utils/middleware.js';
+import { checkAuth, checkPrinciple, formatTime, istToUtc, parseDateString, sendNotificationToClass } from '../utils/middleware.js';
 import mongoose from 'mongoose';
 import { upload } from './utilsRoute.js';
 import fs from 'fs';
@@ -13,6 +13,7 @@ import Attendance from '../models/Attendance.js';
 import { deleteFile } from '../utils/fileOperation.js';
 import Notification from '../models/Notification.js';
 import { userClass } from './userRoutes.js';
+import Result from '../models/Result.js';
 
 //class routes
 app.get('/single/:id', checkAuth, async (req, res) => {
@@ -517,6 +518,8 @@ app.get('/ebooks/all/:id', checkAuth, async (req, res) => {
     }
 })
 
+
+
 app.post('/ebook/add/:id', checkAuth, async (req, res) => {
     try {
         let ebook = new Ebook({
@@ -527,6 +530,7 @@ app.post('/ebook/add/:id', checkAuth, async (req, res) => {
         })
         await ebook.save();
         res.json({ success: true });
+        sendNotificationToClass(req.params.id, "Ebooks", `Book ${req.body.title} is Added in Classroom`)
     } catch (err) {
         res.json({ success: false });
     }
@@ -889,6 +893,7 @@ app.post('/announcement/add/:id', checkAuth, async (req, res) => {
                 scope: "Class"
             })).save();
             res.json({ success: true });
+            sendNotificationToClass(req.params.id, req.body.title, req.body.body)
         }
         else {
             res.json({ success: false });
@@ -964,7 +969,7 @@ app.post('/syllabus/add/:id', checkAuth, async (req, res) => {
     try {
         await Class.findByIdAndUpdate(req.params.id, {
             syllabus: req.body.url,
-        }) 
+        })
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false });
@@ -993,13 +998,443 @@ app.post('/schedule/add/:id', checkAuth, async (req, res) => {
     try {
         await Class.findByIdAndUpdate(req.params.id, {
             schedule: req.body.url,
-        }) 
+        })
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false });
     }
 })
 
+
+
+//Result
+app.get('/principleResult/:id', checkAuth, async (req, res) => {
+    try {
+        let data = await Class.findById(req.params.id);
+        if (data) {
+            res.render('principle_result', { className: data.className, classId: req.params.id });
+        }
+        else {
+            res.render("404")
+        }
+    } catch (err) {
+        res.render("500")
+    }
+})
+
+
+app.post('/result/upload/:id', checkAuth, async (req, res) => {
+    try {
+        let filePath = `./static/downloads/${req.body.url}`;
+        fs.readFile(filePath, async (err, data) => {
+            await deleteFile(filePath);
+            const workbook = XLSX.read(data);
+            const sheet_name_list = workbook.SheetNames;
+            let resultData = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
+            let JSONResult = [], errorData = [];
+            await Promise.all(resultData.map(async item => {
+                let student = await User.findOne({ rid: item['Reg. ID'] });
+                if (student && student.role === 'Student') {
+                    let classData = await userClass(student._id);
+                    if (classData && classData._id.toString() === req.params.id) {
+                        let result = resultBuilder(item);
+                        JSONResult.push({
+                            userId: student._id,
+                            desc: result
+                        })
+                    }
+                    else if (classData) {
+                        errorData.push({
+                            rid: item['Reg. ID'],
+                            reasone: `Student of ${classData.className} Class`,
+                        })
+                    }
+                    else {
+                        errorData.push({
+                            rid: item['Reg. ID'],
+                            reasone: `Student of Unknown Class`,
+                        })
+                    }
+                } else {
+                    errorData.push({
+                        rid: item['Reg. ID'],
+                        reasone: "Not a Valid Reg. ID",
+                    })
+                }
+            }))
+            if (resultData.length === JSONResult.length) {
+                console.log(JSONResult);
+                console.log(errorData);
+                await (new Result({
+                    title: req.body.title,
+                    class: req.params.id,
+                    result: JSONResult
+                })).save();
+            } else {
+                console.log(JSONResult);
+                console.log(errorData);
+                return res.json({ success: true, uploaded: false, data: errorData });
+            }
+            res.json({ success: true, uploaded: true });
+        })
+    } catch (err) {
+        console.log(err);
+        res.json({ success: false });
+    }
+})
+
+const resultBuilder = (data) => {
+    delete data['Reg. ID'];
+    return JSON.stringify(data);
+}
+
+
+app.get('/result/all/:id', checkAuth, async (req, res) => {
+    try {
+        console.log(req.params.id)
+        let data = await Result.aggregate([
+            {
+                $match: {
+                    classId: new mongoose.Types.ObjectId(req.params.id)
+                }
+            },
+            {
+                $project: {
+                    title: 1,
+                    createdAt: 1,
+                }
+            },
+            {
+                $sort: {
+                    createdAt: -1
+                }
+            }
+        ])
+        res.json({ success: true, data });
+    } catch (err) {
+        console.log(err)
+        res.json({ success: false });
+    }
+})
+
+
+app.get('/explainResult/:id/:classId', checkAuth, async (req, res) => {
+    try {
+        let data = await Class.findById(req.params.classId);
+        if (data) {
+            res.render('principle_explain_result', { className: data.className, classId: req.params.id, resultId: req.params.id });
+        }
+        else {
+            res.render("404")
+        }
+    } catch (err) {
+        res.render("500")
+    }
+})
+
+
+app.get('/result/single/:id', checkAuth, async (req, res) => {
+    try {
+        let data = await Result.aggregate([
+            {
+                '$match': {
+                    '_id': new mongoose.Types.ObjectId(req.params.id)
+                }
+            }, {
+                '$lookup': {
+                    'from': 'classes',
+                    'localField': 'classId',
+                    'foreignField': '_id',
+                    'as': 'class'
+                }
+            }, {
+                '$unwind': {
+                    'path': '$class'
+                }
+            }, {
+                '$project': {
+                    'title': 1,
+                    'result': 1,
+                    'createdAt': 1,
+                    'class.className': 1,
+                    'class.icon': 1
+                }
+            }
+        ])
+        res.json({ success: true, data });
+    } catch (err) {
+        console.log(err);
+        res.json({ success: false });
+    }
+})
+
+app.get('/result/students/:id', checkAuth, async (req, res) => {
+    try {
+        let data = await Result.aggregate(
+            [
+                {
+                    '$match': {
+                        '_id': new mongoose.Types.ObjectId(req.params.id)
+                    }
+                }, {
+                    '$unwind': {
+                        'path': '$result'
+                    }
+                }, {
+                    '$group': {
+                        '_id': '$_id',
+                        'class': {
+                            '$first': '$classId'
+                        },
+                        'title': {
+                            '$first': '$title'
+                        },
+                        'students': {
+                            '$sum': 1
+                        }
+                    }
+                }, {
+                    '$lookup': {
+                        'from': 'classes',
+                        'localField': 'class',
+                        'foreignField': '_id',
+                        'as': 'class'
+                    }
+                }, {
+                    '$unwind': {
+                        'path': '$class'
+                    }
+                }, {
+                    '$unwind': {
+                        'path': '$class.students'
+                    }
+                }, {
+                    '$group': {
+                        '_id': '$_id',
+                        'className': {
+                            '$first': '$class.className'
+                        },
+                        'totalStudents': {
+                            '$sum': 1
+                        },
+                        'resultedStudents': {
+                            '$first': '$students'
+                        },
+                        'title': {
+                            '$first': '$title'
+                        }
+                    }
+                }
+            ]
+        )
+
+        if (data.length) {
+            res.render('principle_result_students', { data: data[0] });
+        }
+        else {
+            res.render("404")
+        }
+    } catch (err) {
+        res.render("500")
+    }
+})
+
+app.get('/result/students/all/:id', checkAuth, async (req, res) => {
+    try {
+        let data = await Result.aggregate([
+            {
+                '$match': {
+                    '_id': new mongoose.Types.ObjectId(req.params.id)
+                }
+            }, {
+                '$project': {
+                    'title': 1,
+                    'result.userId': 1
+                }
+            }, {
+                '$lookup': {
+                    'from': 'users',
+                    'localField': 'result.userId',
+                    'foreignField': '_id',
+                    'as': 'result'
+                }
+            }, {
+                '$project': {
+                    'title': 1,
+                    'result.username': 1,
+                    'result.rollno': 1,
+                    'result._id': 1,
+                    'result.profile': 1
+                }
+            }, {
+                '$unwind': {
+                    'path': '$result'
+                }
+            }, {
+                '$sort': {
+                    'result.rollno': 1
+                }
+            }, {
+                '$group': {
+                    '_id': '$_id',
+                    'title': {
+                        '$first': '$title'
+                    },
+                    'result': {
+                        '$push': '$result'
+                    }
+                }
+            }
+        ])
+        res.json({ success: true, data });
+    } catch (err) {
+        console.log(err);
+        res.json({ success: false });
+    }
+})
+
+app.get('/result/students/single/:sid/:rid', checkAuth, async (req, res) => {
+    try {
+        let data = await Result.aggregate(
+            [
+                {
+                    '$match': {
+                        '_id': new mongoose.Types.ObjectId(req.params.rid)
+                    }
+                }, {
+                    '$unwind': {
+                        'path': '$result'
+                    }
+                }, {
+                    '$match': {
+                        'result.userId': new mongoose.Types.ObjectId(req.params.sid)
+                    }
+                }, {
+                    '$lookup': {
+                        'from': 'users',
+                        'localField': 'result.userId',
+                        'foreignField': '_id',
+                        'as': 'result.userId'
+                    }
+                }, {
+                    '$unwind': {
+                        'path': '$result.userId'
+                    }
+                }, {
+                    '$project': {
+                        'title': 1,
+                        'createdAt': 1,
+                        'result.userId.username': 1,
+                        'result.userId.profile': 1,
+                        'result.userId._id': 1
+                    }
+                }
+            ]
+        )
+
+        if (data.length) {
+            data = data[0];
+            data.createdAt = formatTime(data.createdAt);
+            console.log(data);
+            res.render('result', { data, isPrinciple: req.user.role == 'Principle' });
+        }
+        else {
+            res.render("404")
+        }
+    } catch (err) {
+        res.render("500")
+    }
+})
+
+app.get('/result/single/:rid/:sid', checkAuth, async (req, res) => {
+    try {
+        let data = await Result.aggregate([
+            {
+                '$match': {
+                    '_id': new mongoose.Types.ObjectId(req.params.rid)
+                }
+            }, {
+                '$unwind': {
+                    'path': '$result'
+                }
+            }, {
+                '$match': {
+                    'result.userId': new mongoose.Types.ObjectId(req.params.sid)
+                }
+            }, {
+                '$project': {
+                    'result.desc': 1
+                }
+            }
+        ])
+        if (data.length) {
+            data = JSON.parse(data[0].result.desc);
+            res.json({ success: true, data });
+        }
+    } catch (err) {
+        res.json({ success: false });
+    }
+})
+
+
+
+
+app.get('/result/all/student/:cid', checkAuth, async (req, res) => {
+    try {
+        let data = await Result.aggregate([
+            {
+                $match: {
+                    classId: new mongoose.Types.ObjectId(req.params.cid),
+                    'result.userId': new mongoose.Types.ObjectId(req.user._id),
+                }
+            },
+            {
+                $project: {
+                    title: 1,
+                    createdAt: 1,
+                }
+            },
+            {
+                $sort: {
+                    createdAt: -1
+                }
+            }
+        ])
+        res.json({ success: true, data });
+    } catch (err) {
+        res.json({ success: false });
+    }
+})
+
+app.post('/result/update/resultName/:id', checkAuth, async (req, res) => {
+    try {
+        await Result.findByIdAndUpdate(req.params.id, { title: req.body.title });
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false });
+    }
+})
+
+
+app.post('/result/updatemarks/:uid/:rid', checkAuth, async (req, res) => {
+    try {
+        await Result.updateOne({ "_id": new mongoose.Types.ObjectId(req.params.rid), "result.userId": new mongoose.Types.ObjectId(req.params.uid) },
+            { $set: { "result.$.desc": req.body.result } },)
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false });
+    }
+})
+
+
+app.get('/result/remove/:id', checkAuth, async (req, res) => {
+    try {
+        await Result.findByIdAndDelete(req.params.id);
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false });
+    }
+})
 
 
 export default app;
