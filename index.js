@@ -63,7 +63,7 @@ app.use(function (req, res, next) {
 app.use(routes);
 
 //port setup
-let port = process.env.PORT || 9090;
+let port = process.env.PORT || 8080;
 app.listen(port, () => {
     console.log("connected to backend");
 })

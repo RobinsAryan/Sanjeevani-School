@@ -10,6 +10,7 @@
     "scope": "/",
     "lang": "en",
     "dir": "ltr",
+    "id":"/",
     "icons": [
         {
             "src": "../img/logo.png",
@@ -55,6 +56,20 @@
             "type": "image/webp",
             "form_factor": "narrow",
             "label": "Login of Sanjeevani School App"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Announcements of School?",
+            "short_name": "Announcement",
+            "description": "View Announcement within School",
+            "url": "/classWork",
+            "icons": [
+                {
+                    "src": "/img/ss1.png",
+                    "sizes": "192x192"
+                }
+            ]
         }
     ],
     "prefer_related_applications": false,

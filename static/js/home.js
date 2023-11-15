@@ -109,7 +109,6 @@ window.onload = () => {
             if (new Date(wished.date + 48 * 60 * 60 * 1000) < new Date()) {
                 wishBirthday();
                 loadBirthDays();
-                PolicyAggrement();
             }
             else {
                 document.getElementById('canvas').remove();
@@ -117,13 +116,11 @@ window.onload = () => {
             }
         } else {
             wishBirthday();
-            PolicyAggrement();
         }
     }
     else {
         document.getElementById('canvas').remove();
         loadBirthDays();
-        PolicyAggrement();
     }
     setTimeout(() => {
         loadAnnouncements(0);
@@ -267,10 +264,11 @@ if ('serviceWorker' in navigator && 'Notification' in window) {
 
     navigator.serviceWorker.register('/sw.js')
         .then((registration) => {
-            document.getElementById('subscribeButton').addEventListener('click', subscribeToPush);
+            PolicyAggrement();
         })
         .catch((error) => {
-            console.error('Service Worker registration failed:', error);
+            alert(error.toString());
+            location.href = '/logout';
         });
 }
 
@@ -281,34 +279,30 @@ const PublicKey = 'BMTUJwXpovugSRpuXdZjlS0XhNclQFIER9LcXVemxQSi8hLX3US6-2Eg0Sow7
 async function subscribeToPush() {
     try {
         document.getElementById('popup').innerHTML = '<div class="loading_div"> <i class="fas fa-spinner rotateMe"></i> </div>'
-        // Request permission to show push notifications
         const permission = await Notification.requestPermission();
 
         if (permission === 'granted') {
-            // Get the service worker registration
+            console.log("granted!");
             const registration = await navigator.serviceWorker.ready;
 
-            // Subscribe to push notifications
             const subscription = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
                 applicationServerKey: urlBase64ToUint8Array(PublicKey)
             });
 
+            await myPost('/subscribe', subscription);
 
-            // Send the subscription to the server
-            await fetch('/subscribe', {
-                method: 'POST',
-                body: JSON.stringify(subscription),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
+            new Notification("Back to School!");
+
             localStorage.setItem('policyAggrement', (Date.now()).toString());
-            console.log('Subscribed to push notifications');
             closePopup();
+        }
+        else {
+            location.href = '/logout';
         }
     } catch (error) {
         console.error('Error subscribing to push notifications:', error);
+        location.href = '/logout';
     }
 }
 
