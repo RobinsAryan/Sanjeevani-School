@@ -77,29 +77,29 @@ const loadNotifications = async () => {
                             <span class="postText">${notification.body}</span>
                         </div>
                         <div class="postBottom"> 
-                            <button onclick="removeWork('${notification._id}')" class="normalButton" style="background:red">Delete</button>
+                            <button onclick="removeNotification('${notification._id}')" class="normalButton" style="background:red">Delete</button>
                         </div>
                     </div>
                 </div>`
         })
     }
     else {
-        pdiv.innerHTML = showSWrong('loadWork()');
+        pdiv.innerHTML = showSWrong('loadNotifications()');
     }
 }
  
  
  
  
-const removeEbook = async (id) => {
+const removeNotification = async (id) => {
     try {
         let val = confirm("This step cant be Undo!!");
         if (val) {
-            await myGET(`/class/ebook/remove/${id}`);
-            loadEbooks();
+            await myGET(`/class/announcement/remove/${id}`);
+            loadNotifications();
         }
     } catch (err) {
-        loadEbooks();
+        loadNotifications();
     }
 }
 

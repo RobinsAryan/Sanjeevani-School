@@ -1070,6 +1070,7 @@ app.post('/result/upload/:id', checkAuth, async (req, res) => {
                     classId: req.params.id,
                     result: JSONResult
                 })).save();
+                
             } else {
                 console.log(JSONResult);
                 console.log(errorData);
