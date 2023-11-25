@@ -20,6 +20,9 @@ const notification = new mongoose.Schema({
     },
     scope: {
         type: String,
+    },
+    event: {
+        type: String,
     }
 }, { timestamps: true });
 

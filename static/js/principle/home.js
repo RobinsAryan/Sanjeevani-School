@@ -131,8 +131,15 @@ const openPage = async (num, toggle = 1) => {
         createBtn.style.display = 'none';
         page.innerHTML = ` <div class="mainHome">
                     <div class="searchData">
-                        <input type="text" name="search" id="search" placeholder="Search">
-                        <button>Search</button>
+                        <div class="mainSearchDiv">
+                            <input onfocus="displaySuggestion(1)" onblur="displaySuggestion(0)" onkeyUp="startSearch(this)" type="text" name="search" id="search" placeholder="Search">
+                            <div class="searchSuggestion">
+                                <p class="searchSpeed"><span id="totalSearches">000</span> results in <span id='searchTime'>000</span> sec<p>
+                                <ul id='mainSuggestion'>
+                                    <div class="beforeResult"><p>Start Write Something!</p></div>
+                                </ul>
+                            </div>
+                        </div> 
                     </div>
                     <div class="homeHead">
                         <i class="fas fa-graduation-cap"></i>
@@ -472,11 +479,15 @@ window.onload = () => {
 const toggleImages = (e) => {
     let imageValue = e.getAttribute('value');
     let frameNo = imageValue.split('-').pop();
-    document.getElementById(`f-${frameNo}`).src = e.src;
+    document.getElementById(`f-${frameNo}`).src = e.src.split('/compressed').join('');
+}
+
+const openFrameImage = (img) => {
+    location.href = img.src;
 }
 
 
-let gallaryPage = 0, showMoreGallaryPage = false;
+let gallaryPage = 0, showMoreGallaryPage = false, frameCount = 0;
 
 const showGallary = async (pageNum) => {
     showMoreGallaryPage = false;
@@ -489,8 +500,9 @@ const showGallary = async (pageNum) => {
             return;
         }
         data.forEach((frame, index) => {
-            page.innerHTML += genrateFrame(frame, index);
+            page.innerHTML += genrateFrame(frame, frameCount + index);
         });
+        frameCount += data.length;
         showMoreGallaryPage = true;
     }
     else {
@@ -498,18 +510,18 @@ const showGallary = async (pageNum) => {
     }
 }
 
+
 const genrateFrame = (data, index) => {
-    // console.log(data);
     let value = `<div class="gallaryFrame">
                     <div class="text">${data.title}</div>
                     <div class="mainPhoto">
-                        <img id='f-${index}' src="${data.images[0]}" alt="">
+                        <img onclick='openFrameImage(this)' id='f-${index}' src="${data.images[0]}" alt="">
                     </div>
                     <div class="imagesScroller">
                         `
     data.images.map(val => {
         value += `<div>
-                            <img onclick="toggleImages(this)" value='i-${index}' src="${val}" alt="">
+                            <img onclick="toggleImages(this)" value='i-${index}' src="/compressed${val}" alt="">
                         </div>`
     })
     value += `
@@ -527,10 +539,11 @@ const deleteFrame = async (id) => {
         console.log(val);
         if (val) {
             await myGET(`/user/gallary/remove/${id}`);
-            showGallary(0);
+            location.reload();
         }
     } catch (err) {
-        showGallary(0);
+        alert(err);
+        location.reload();
     }
 }
 
@@ -645,7 +658,7 @@ const textAreaBlur = (e) => {
 
 
 const createGraph = (data) => {
-    const ctx = document.getElementById("studentChart1").getContext("2d"); 
+    const ctx = document.getElementById("studentChart1").getContext("2d");
     new Chart(ctx, {
         type: "bar",
         data: data,
@@ -692,12 +705,71 @@ const loadHome = async () => {
                     borderColor,
                     borderWidth: 1
                 }]
-            }; 
+            };
             createGraph(data);
         } else {
 
         }
     } catch (err) {
         console.log(err)
+    }
+}
+
+const displaySuggestion = (val) => {
+    if (val) { document.getElementsByClassName('searchSuggestion')[0].style.display = "block"; }
+    else {
+        setTimeout(() => {
+            document.getElementsByClassName('searchSuggestion')[0].style.display = "none";
+        }, 500);
+    }
+}
+
+let timerVal = -1;
+const startSearch = (ele) => {
+    if (ele.value.trim().length == 0) {
+        document.getElementById('totalSearches').innerHTML = '000';
+        document.getElementById('searchTime').innerHTML = '000';
+        document.getElementById('mainSuggestion').innerHTML = '<div class="beforeResult"><p>Start Write Something!</p></div>'
+        return;
+    }
+    clearTimeout(timerVal);
+    document.getElementById('mainSuggestion').innerHTML = '<div class="beforeResult"> <i class="fas fa-spinner rotateMe"></i>  </div>'
+    timerVal = setTimeout(() => {
+        if (ele.value.trim().length)
+            loadSearch(ele.value);
+        else {
+            document.getElementById('searchTime').innerHTML = '000';
+            document.getElementById('totalSearches').innerHTML = '000'; document.getElementById('mainSuggestion').innerHTML = '<div class="beforeResult"><p>Start Write Something!</p></div>'
+        }
+    }, 1000);
+}
+
+const loadSearch = async (val) => {
+    let resData = await myGET(`/search?q=${val}`);
+    if (resData.success) {
+        if (resData.data.length) {
+            data = resData.data[0];
+            document.getElementById('searchTime').innerHTML = (Math.random() * 0.1).toFixed(5);
+            document.getElementById('totalSearches').innerHTML = data._id;
+            document.getElementById('mainSuggestion').innerHTML = ''
+            data.users.map(user => {
+                if (user.role != 'Principle') {
+                    document.getElementById('mainSuggestion').innerHTML += `<div class="searchItem" onclick="location.href='/user/profile/${user._id}'">
+                    <p>${user.username}</p>
+                    <span>${user.role}</span>
+                    </div> `
+                }
+
+            })
+        }
+        else {
+            document.getElementById('searchTime').innerHTML = (Math.random() * 0.1).toFixed(5);
+            document.getElementById('totalSearches').innerHTML = '000';
+            document.getElementById('mainSuggestion').innerHTML = '<div class="beforeResult"><p>Nothing Here to Show!</p></div>'
+        }
+    } else {
+        document.getElementById('searchTime').innerHTML = '000';
+        document.getElementById('totalSearches').innerHTML = '000';
+        document.getElementById('mainSuggestion').innerHTML = showSWrong(`loadSearch('${val}')`)
     }
 }

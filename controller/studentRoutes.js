@@ -9,6 +9,7 @@ import mongoose from 'mongoose';
 import { userClass } from './userRoutes.js';
 import Attendance from '../models/Attendance.js';
 import Ebook from '../models/Ebook.js';
+import Notification from '../models/Notification.js';
 
 app.get('/attandanceJson/:id', checkAuth, async (req, res) => {
     try {
@@ -189,6 +190,43 @@ app.get('/result', checkAuth, async (req, res) => {
         data.classId = classData._id;
         data.className = classData.className;
         res.render('selectResult', { data })
+    } catch (err) {
+        res.json({ success: false });
+    }
+})
+
+
+app.get('/notifications', checkAuth, async (req, res) => {
+    try {
+        const data = { ...req.user }
+        let classData = await userClass(data._id);
+        data.classId = classData._id;
+        data.className = classData.className;
+        res.render('notifications', { data })
+    } catch (err) {
+        res.json({ success: false });
+    }
+})
+app.get('/notifications/all/:cid', checkAuth, async (req, res) => {
+    try {
+        let data = await Notification.aggregate([
+            {
+                '$match': {
+                    '$or': [
+                        {
+                            'scope': 'School'
+                        }, {
+                            'class': new mongoose.Types.ObjectId(req.params.cid)
+                        }
+                    ]
+                }
+            }, {
+                '$sort': {
+                    'createdAt': -1
+                }
+            }
+        ])
+        res.json({ success: true, data });
     } catch (err) {
         res.json({ success: false });
     }

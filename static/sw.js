@@ -3,7 +3,7 @@ const CACHE_NAME = 'v1';
 const staticAssets = [
 
     '/img/noData.gif',
-    '/img/swrong.jpg'
+    '/img/swrong.png'
 ];
 
 self.addEventListener('install', (event) => {

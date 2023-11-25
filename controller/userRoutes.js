@@ -23,7 +23,7 @@ export const userClass = async (id) => {
     ])
     if (data.length)
         return data[0];
-    else return [];
+    else return null;
 }
 
 const inChargeofClass = async (id) => {
@@ -215,13 +215,14 @@ app.get('/gallary/all', checkAuth, async (req, res) => {
 app.get('/gallary/remove/:id', checkAuth, async (req, res) => {
     try {
         let frame = await Gallary.findByIdAndDelete(req.params.id);
-        res.json({ success: true });
+        res.json({ success: true }); 
         if (frame.images.length) {
             frame.images.map(async img => {
                 await deleteFile(`./static${img}`);
+                await deleteFile(`./static/compressed${img}`);
             })
         } 
-    } catch (err) {
+    } catch (err) { 
         res.json({ success: false });
     }
 })

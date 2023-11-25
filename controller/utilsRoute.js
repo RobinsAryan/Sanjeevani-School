@@ -3,6 +3,7 @@ import multer from 'multer';
 import User from '../models/User.js';
 import Class from '../models/Class.js';
 import { checkAuth, checkPrinciple } from '../utils/middleware.js';
+import { compressAndOverwrite } from '../utils/fileOperation.js';
 const app = express();
 app.use(express.static('static'));
 const storage = multer.diskStorage({
@@ -25,12 +26,14 @@ export const upload = multer({ storage: storage });
 export const uploadDownloads = multer({ storage: storage2 });
 
 
-app.post('/uploadImage', checkAuth, upload.single('image'), (req, res) => {
+app.post('/uploadImage', checkAuth, upload.single('image'), async (req, res) => {
     try {
+        const filePath = `/uploads/${req.file.filename}`;
         res.json({
             success: true,
-            path: `/uploads/${req.file.filename}`
+            path: filePath
         })
+        await compressAndOverwrite(filePath);
     }
     catch (err) {
         res.json({
@@ -157,6 +160,53 @@ app.get('/studentsInfo', checkAuth, checkPrinciple, async (req, res) => {
         res.send({ success: true, ...reqData, perClass: newClassData })
     } catch (err) {
         console.log(err)
+        res.json({ success: false });
+    }
+})
+
+
+app.get('/search', checkAuth, async (req, res) => {
+
+    try {
+        let data = await User.aggregate([
+            {
+                '$match': {
+                    'username': {
+                        '$regex': req.query.q,
+                        '$options': 'i'
+                    }
+                }
+            }, {
+                '$group': {
+                    '_id': '',
+                    'users': {
+                        '$push': {
+                            'username': '$username',
+                            '_id': '$_id',
+                            'role': '$role'
+                        }
+                    },
+                    'count': {
+                        '$sum': 1
+                    }
+                }
+            }, {
+                '$unwind': {
+                    'path': '$users'
+                }
+            }, {
+                '$limit': 5
+            }, {
+                '$group': {
+                    '_id': '$count',
+                    'users': {
+                        '$push': '$users'
+                    }
+                }
+            }
+        ])
+        res.json({ success: true, data });
+    } catch (err) {
         res.json({ success: false });
     }
 })

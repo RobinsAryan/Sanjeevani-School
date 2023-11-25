@@ -125,6 +125,7 @@ window.onload = () => {
     setTimeout(() => {
         loadAnnouncements(0);
     }, 2000);
+    PolicyAggrement();
 }
 
 
@@ -243,19 +244,7 @@ const handleScroll = () => {
 };
 
 
-const PolicyAggrement = () => {
-    if (!localStorage.getItem('policyAggrement')) {
-        document.getElementById('popup').style.display = 'block';
-        document.getElementById('popup').innerHTML = `
-        <div class="popup-form"> 
-        <h2 style="font-size:15px;margin-bottom:20px">Terms of Use App!</h2>
-        <p style="font-size:12px">Notifications must be allowed to continue with App!</p>
-        <button onclick="location.href='/logout'" class="normalButton" style="background:red;margin-top:10px">Deny</button>
-        <button onclick="subscribeToPush()" class="normalButton" style="margin-top:10px">Allow</button>
-        </div>
-        `
-    }
-}
+
 
 
 
@@ -264,7 +253,6 @@ if ('serviceWorker' in navigator && 'Notification' in window) {
 
     navigator.serviceWorker.register('/sw.js')
         .then((registration) => {
-            PolicyAggrement();
         })
         .catch((error) => {
             alert(error.toString());
@@ -290,9 +278,7 @@ async function subscribeToPush() {
                 applicationServerKey: urlBase64ToUint8Array(PublicKey)
             });
 
-            await myPost('/subscribe', subscription);
-
-            new Notification("Back to School!");
+            await myPost('/subscribe', subscription); 
 
             localStorage.setItem('policyAggrement', (Date.now()).toString());
             closePopup();
@@ -300,8 +286,7 @@ async function subscribeToPush() {
         else {
             location.href = '/logout';
         }
-    } catch (error) {
-        console.error('Error subscribing to push notifications:', error);
+    } catch (error) { 
         location.href = '/logout';
     }
 }
@@ -321,3 +306,16 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 
+const PolicyAggrement = () => {
+    if (!localStorage.getItem('policyAggrement')) {
+        document.getElementById('popup').style.display = 'block';
+        document.getElementById('popup').innerHTML = `
+        <div class="popup-form"> 
+        <h2 style="font-size:15px;margin-bottom:20px">Terms of Use App!</h2>
+        <p style="font-size:12px">Notifications must be allowed to continue with App!</p>
+        <button onclick="location.href='/logout'" class="normalButton" style="background:red;margin-top:10px">Deny</button>
+        <button onclick="subscribeToPush()" class="normalButton" style="margin-top:10px">Allow</button>
+        </div>
+        `
+    }
+}

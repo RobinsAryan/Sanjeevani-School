@@ -5,6 +5,7 @@ const result = new mongoose.Schema({
         type: mongoose.Schema.ObjectId,
         ref: 'class'
     },
+    MM: Number,
     result: [{
         userId: {
             type: mongoose.Schema.ObjectId,

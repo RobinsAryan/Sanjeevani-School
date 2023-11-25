@@ -14,6 +14,8 @@ const showUploadResult = () => {
                 <input onchange = "handleFile(this)" type="file" id="file" name="file" hidden ><br><br> 
                 <input type="text" id="title" name="title" placeholder="Exam Name" required><br>
                 <br>
+                <input type="number" min="1" max="100" id="password" name="MM" placeholder="Maximum Marks" required><br>
+                <br>
                 <div>
                     <button style="background:#ff4646;" type="reset">Reset</button>
                     <button type="submit">Submit</button>
@@ -56,6 +58,7 @@ const handleSubmit = async (e) => {
     document.getElementById('popup').innerHTML = '<div class="loading_div"> <i class="fas fa-spinner rotateMe"></i> </div>'
     let data = {
         title: e.target.title.value,
+        MM: e.target.MM.value,
         url: 'nothing',
     }
     if (e.target.file.files.length) {

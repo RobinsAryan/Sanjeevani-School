@@ -19,7 +19,7 @@ import Result from '../models/Result.js';
 app.get('/single/:id', checkAuth, async (req, res) => {
     let data = await Class.findById(req.params.id);
     if (data) {
-        if (req.user.role == 'Principle') {
+        if (req.user.role != 'Student') {
             res.render('principle_class', { className: data.className, classId: req.params.id });
         }
     }
@@ -441,6 +441,7 @@ app.post('/announcement/add', checkAuth, checkPrinciple, async (req, res) => {
             title: req.body.title,
             body: req.body.body,
             icon: req.body.icon,
+            event: 'Genral',
             scope: "School"
         });
         await newNotification.save();
@@ -530,6 +531,14 @@ app.post('/ebook/add/:id', checkAuth, async (req, res) => {
         })
         await ebook.save();
         res.json({ success: true });
+        let newNotification = new Notification({
+            title: 'New Ebook Added',
+            body: `${req.body.title} is added to Ebooks`,
+            event: 'Ebook',
+            scope: "Class",
+            class: req.params.id,
+        });
+        await newNotification.save();
         sendNotificationToClass(req.params.id, "Ebooks", `Book ${req.body.title} is Added in Classroom`)
     } catch (err) {
         res.json({ success: false });
@@ -617,6 +626,14 @@ app.post('/classWork/add/:id', checkAuth, async (req, res) => {
         })
         await work.save();
         res.json({ success: true });
+        let newNotification = new Notification({
+            title: 'New Class Work',
+            body: 'A new class work is added in classroom',
+            event: 'ClassWork',
+            scope: "Class",
+            class: req.params.id,
+        });
+        await newNotification.save();
     } catch (err) {
         res.json({ success: false });
     }
@@ -890,7 +907,8 @@ app.post('/announcement/add/:id', checkAuth, async (req, res) => {
                 body: req.body.body,
                 class: req.params.id,
                 author: req.user._id,
-                scope: "Class"
+                scope: "Class",
+                event:'Genral'
             })).save();
             res.json({ success: true });
             sendNotificationToClass(req.params.id, req.body.title, req.body.body)
@@ -1036,6 +1054,7 @@ app.post('/result/upload/:id', checkAuth, async (req, res) => {
                 let student = await User.findOne({ rid: item['Reg. ID'] });
                 if (student && student.role === 'Student') {
                     let classData = await userClass(student._id);
+                    console.log(classData);
                     if (classData && classData._id.toString() === req.params.id) {
                         let result = resultBuilder(item);
                         JSONResult.push({
@@ -1068,9 +1087,10 @@ app.post('/result/upload/:id', checkAuth, async (req, res) => {
                 await (new Result({
                     title: req.body.title,
                     classId: req.params.id,
+                    MM: req.body.MM,
                     result: JSONResult
                 })).save();
-                
+
             } else {
                 console.log(JSONResult);
                 console.log(errorData);
@@ -1155,6 +1175,7 @@ app.get('/result/single/:id', checkAuth, async (req, res) => {
             }, {
                 '$project': {
                     'title': 1,
+                    'MM': 1,
                     'result': 1,
                     'createdAt': 1,
                     'class.className': 1,
@@ -1190,6 +1211,9 @@ app.get('/result/students/:id', checkAuth, async (req, res) => {
                         'title': {
                             '$first': '$title'
                         },
+                        'MM': {
+                            '$first': '$MM'
+                        },
                         'students': {
                             '$sum': 1
                         }
@@ -1223,6 +1247,9 @@ app.get('/result/students/:id', checkAuth, async (req, res) => {
                         },
                         'title': {
                             '$first': '$title'
+                        },
+                        'MM': {
+                            '$first': '$MM'
                         }
                     }
                 }
@@ -1250,6 +1277,7 @@ app.get('/result/students/all/:id', checkAuth, async (req, res) => {
             }, {
                 '$project': {
                     'title': 1,
+                    'MM': 1,
                     'result.userId': 1
                 }
             }, {
@@ -1262,6 +1290,7 @@ app.get('/result/students/all/:id', checkAuth, async (req, res) => {
             }, {
                 '$project': {
                     'title': 1,
+                    'MM': 1,
                     'result.username': 1,
                     'result.rollno': 1,
                     'result._id': 1,
@@ -1280,6 +1309,9 @@ app.get('/result/students/all/:id', checkAuth, async (req, res) => {
                     '_id': '$_id',
                     'title': {
                         '$first': '$title'
+                    },
+                    'MM': {
+                        '$first': '$MM'
                     },
                     'result': {
                         '$push': '$result'
@@ -1324,6 +1356,7 @@ app.get('/result/students/single/:sid/:rid', checkAuth, async (req, res) => {
                 }, {
                     '$project': {
                         'title': 1,
+                        'MM': 1,
                         'createdAt': 1,
                         'result.userId.username': 1,
                         'result.userId.profile': 1,

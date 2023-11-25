@@ -1,8 +1,9 @@
-let userId = null, resultId = null, originalMarks = {};
+let userId = null, resultId = null, MM = 0, originalMarks = {};
 
 window.onload = () => {
     userId = document.getElementById('userId').value;
     resultId = document.getElementById('resultId').value;
+    MM = document.getElementById('MM').value;
     if (!userId) {
         alert("User Not Exist!!");
         location.replace('/');
@@ -41,7 +42,8 @@ const createTable = (data) => {
                     <thead>
                         <tr>
                             <th>Subject</th>
-                            <th>Marks</th>
+                            <th>Marks</th> 
+                            <th>M.M.</th> 
                         </tr>
                     </thead>
                     <tbody id="tableContent">`
@@ -50,12 +52,14 @@ const createTable = (data) => {
         if (typeof (data[subject]) == "number") { total += data[subject] }
         val += `<tr>
                             <td>${subject}</td>
-                            <td ${marksColor(data[subject])}>${data[subject]}</td>
+                            <td ${marksColor(data[subject])}>${data[subject]}</td> 
+                            <td>${MM}</td> 
                         </tr>`
     }
     val += `<tr style="font-weight:bold">
                                         <td>Total</td>
                                         <td>${total}</td>
+                                        <td>${MM * Object.keys(data).length}</td>
                                     </tr>`
     val += `
                     </tbody>

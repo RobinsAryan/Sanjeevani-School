@@ -2,6 +2,7 @@ import moment from "moment";
 import Class from "../models/Class.js";
 import mongoose from "mongoose";
 import { putNotification } from "./webPush.js";
+import User from "../models/User.js";
 
 export function checkAuth(req, res, next) {
     if (req.isAuthenticated()) {
@@ -82,6 +83,25 @@ export const sendNotificationToClass = async (classId, title, body) => {
     if (allStudents.length) {
         allStudents.map(student => {
             putNotification(student, title, body);
+        })
+    }
+}
+export const sendNotificationToSchool = async (title, body) => {
+    let allStudents = await User.aggregate([
+        {
+            $match: {
+                role: 'Student'
+            }
+
+        }, {
+            $project: {
+                _id: 1,
+            }
+        }
+    ])  
+    if (allStudents.length) {
+        allStudents.map(student => {
+            putNotification(student._id, title, body);
         })
     }
 }
