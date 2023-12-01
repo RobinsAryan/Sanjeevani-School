@@ -9,6 +9,7 @@ import userRoute, { userClass } from './userRoutes.js'
 import studentRoute from './studentRoutes.js'
 import { checkAuth } from '../utils/middleware.js';
 import webPush from '../utils/webPush.js'
+import webRTC from './RTC/liveClass.js' 
 passportLocal(passport);
 
 
@@ -90,6 +91,7 @@ app.use('/class', classRoute);
 app.use('/teacher', teacherRoute);
 app.use('/user', userRoute);
 app.use('/student', studentRoute);
+app.use('/RTC', webRTC); 
 app.use(webPush);
 
 export default app;

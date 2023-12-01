@@ -750,7 +750,7 @@ app.get('/attandance/download/:id', checkAuth, async (req, res) => {
                     'status.user.username': 1,
                     'status.isPresent': 1,
                     'status.user.rollno': 1,
-                    'status.user.studentId': 1,
+                    'status.user.rid': 1,
                     'date': 1
                 }
             }
@@ -760,7 +760,7 @@ app.get('/attandance/download/:id', checkAuth, async (req, res) => {
                 'Roll No': obj.user.rollno,
                 'Name': obj.user.username,
                 'Attandance': `${obj.isPresent ? 'Present' : 'Absent'}`,
-                'Student Id': obj.user.studentId,
+                'Reg. ID': obj.user.rid,
 
             }
         });
@@ -878,7 +878,102 @@ app.post('/attandance/update/:sheetId', checkAuth, async (req, res) => {
     }
 })
 
+app.get('/attandance/download/all/:classId', checkAuth, async (req, res) => {
+    try {
+        let attandanceSheet = await Attendance.aggregate(
+            [
+                {
+                    $match: {
+                        'class': new mongoose.Types.ObjectId(req.params.classId)
+                    }
+                },
+                {
+                    '$project': {
+                        'status.userId': 1,
+                        'status.attendance': 1,
+                        'createdAt': 1
+                    }
+                }, {
+                    '$sort': {
+                        'createdAt': 1
+                    }
+                }, {
+                    '$unwind': {
+                        'path': '$status'
+                    }
+                }, {
+                    '$group': {
+                        '_id': '$status.userId',
+                        'status': {
+                            '$push': {
+                                'date': '$createdAt',
+                                'status': '$status.attendance'
+                            }
+                        }
+                    }
+                }, {
+                    '$lookup': {
+                        'from': 'users',
+                        'localField': '_id',
+                        'foreignField': '_id',
+                        'as': 'user'
+                    }
+                }, {
+                    '$project': {
+                        'status': 1,
+                        'user.username': 1,
+                        'user.rid': 1,
+                        'user.rollno': 1
+                    }
+                }, {
+                    '$unwind': {
+                        'path': '$user'
+                    }
+                }, {
+                    '$sort': {
+                        'user.rollno': 1
+                    }
+                }
 
+            ]);
+        let jsonSheet = attandanceSheet.map(obj => {
+            return {
+                'Reg. ID': obj.user.rid,
+                'Roll No': obj.user.rollno,
+                'Name': obj.user.username,
+                'attandance': obj.status,
+            }
+        });
+        jsonSheet.map(obj => {
+            let attandance = obj.attandance;
+            delete obj.attandance;
+            attandance.map(obj2 => {
+                let date = new Date(obj2.date);
+                obj[`${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`] = obj2.status ? 'P' : 'A';
+            })
+        })
+        const workSheet = XLSX.utils.json_to_sheet(jsonSheet);
+        const workBook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workBook, workSheet, `students`);
+        const fileName = `WorkBook_attandance.xlsx`
+        const outputPath = `static/downloads/${fileName}`;
+        XLSX.writeFile(workBook, outputPath);
+        res.json({ success: true, fileName });
+
+    } catch (err) {
+        res.json({ success: false });
+    }
+})
+
+app.get('/attandance/remove/all/:cid', checkAuth, async (req, res) => {
+    try {
+        let data = await Attendance.deleteMany({ class: req.params.cid });
+        console.log(data);
+        res.json({ success: true, data });
+    } catch (err) {
+        res.json({ success: false });
+    }
+})
 
 
 
@@ -908,7 +1003,7 @@ app.post('/announcement/add/:id', checkAuth, async (req, res) => {
                 class: req.params.id,
                 author: req.user._id,
                 scope: "Class",
-                event:'Genral'
+                event: 'Genral'
             })).save();
             res.json({ success: true });
             sendNotificationToClass(req.params.id, req.body.title, req.body.body)

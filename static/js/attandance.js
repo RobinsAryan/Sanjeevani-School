@@ -332,3 +332,106 @@ window.onload = () => {
         location.replace('/');
     }
 }
+
+
+const downloadAll = async () => {
+    document.getElementById('popup').style.display = 'block';
+    document.getElementById('popup').innerHTML =
+        `<div class="loading_div">
+        <div>Preparing File....</div>
+        <i class="fas fa-spinner rotateMe" ></i> 
+        </div >
+    `
+    try {
+        let resData = await myGET(`/class/attandance/download/all/${classId}`)
+        if (resData.success) {
+            document.getElementById('popup').innerHTML = `
+    <div class="popup-form"> 
+            <p style="margin-bottom: 15px;">File Created!!</p>
+           <div>
+           <p style="font-size:12px;padding-bottom: 10px;">File Will be deleted in 5 mins</p>
+           </div>
+           <div>
+           <button class="normalButton" style="background-color: red;" onclick="closePopup()" >Cancel</button>
+            <a class="normalButton" href='/download/${resData.fileName}' target='__blank' >Download</a>
+           </div>
+        </div>
+    `
+        } else {
+            document.getElementById('popup').innerHTML = `
+                <div class="popup-form">
+                ${showSWrong('downloadAll()')}
+                </div>
+            `
+        }
+    } catch (err) {
+        document.getElementById('popup').innerHTML = `
+                <div class="popup-form">
+                ${showSWrong('downloadAll()')}
+                </div>
+            `
+    }
+}
+
+
+const showCnf = () => {
+    document.getElementById('popup').style.display = 'block';
+    document.getElementById('popup').innerHTML = `
+        <div class="popup-form">
+        <div class="hidePopUp"><i onClick="closePopup()" class="fa-solid fa-xmark"></i></div>
+            <h2 style="font-size:15px;margin-bottom:20px">This Step cant be Undo</h2>
+            <p style="font-size:12px">Removing Attandance, remove all its Nested Data and visuals.</p>
+            <h1 style="margin:10px 0" id="h1val">${1000 + Math.floor(Math.random() * 8999)}</h1>
+            <input type="number" id="username" placeholder="Enter Number">
+            <button onclick="checkCnf()" style="background:#f07979">Remove</button>
+        </div>
+    `
+}
+
+const checkCnf = async () => {
+    let val = document.getElementById('username').value;
+    let val2 = document.getElementById('h1val').innerHTML;
+    if (val == val2) {
+        document.getElementById('popup').style.display = 'block';
+        document.getElementById('popup').innerHTML =
+            `<div class="loading_div">
+        <div>Requesting Server....</div>
+            <i class="fas fa-spinner rotateMe" ></i> 
+        </div >
+    `
+        try {
+            let resData = await myGET(`/class/attandance/remove/all/${classId}`)
+            if (resData.success) {
+                document.getElementById('popup').innerHTML = `
+                        <div class="popup-form">
+                        <div class="hidePopUp"><i onClick="location.reload()" class="fa-solid fa-xmark"></i></div>
+                            <h2 style="font-size:15px;margin-bottom:20px">Attandance of ${resData.data.deletedCount} days Deleted.</h2>
+                            <button onclick="location.reload()" style="background:#f07979">Close</button>
+                        </div>
+                    ` 
+            } else {
+                document.getElementById('popup').innerHTML = `
+                <div class="popup-form">
+                ${showSWrong('showCnf()')}
+                </div>
+            `
+            }
+        } catch (err) {
+            document.getElementById('popup').innerHTML = `
+                <div class="popup-form">
+                ${showSWrong('showCnf()')}
+                </div>
+            `
+        }
+    }
+    else {
+        document.getElementById('popup').style.display = 'block';
+        document.getElementById('popup').innerHTML = `
+        <div class="popup-form">
+        <div class="hidePopUp"><i onClick="closePopup()" class="fa-solid fa-xmark"></i></div>
+            <h2 style="font-size:15px;margin-bottom:20px">Action Failed</h2>
+            <button onclick="closePopup()" style="background:#f07979">Close</button>
+        </div>
+    `
+    }
+}

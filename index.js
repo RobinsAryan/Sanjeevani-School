@@ -11,8 +11,15 @@ import MemoryStore from 'memorystore';
 import path from 'path'
 import connectMongoDBSession from 'connect-mongodb-session';
 import routes from './controller/routes.js';
+import room from './models/Room.js'
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import ioFunction from './controller/RTC/io.js';
 
 const app = express();
+const httpServer = createServer(app);
+
+
 dotenv.config({ path: ".env" });
 const MemorystoreSession = MemoryStore(expressSession);
 const MongoDBSession = connectMongoDBSession(expressSession);
@@ -60,10 +67,24 @@ app.use(function (req, res, next) {
 });
 
 
+
+// socket io
+const io = new Server(httpServer);
+ioFunction(io);
+
+//peerjs
+import { ExpressPeerServer } from 'peer';
+const peerServer = ExpressPeerServer(httpServer, {
+    debug: true,
+});
+app.use("/peerjs", peerServer);
+
+
+
 app.use(routes);
 
 //port setup
-let port = process.env.PORT || 8080;
-app.listen(port, () => {
+let port = 8080;
+httpServer.listen(port, () => {
     console.log("connected to backend");
 })

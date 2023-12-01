@@ -113,3 +113,8 @@ a {
 #showoff img {
     width: 100%;
 }
+
+.advanceAction{
+    margin-top: 100vh;
+    padding: 20px 0;
+}
