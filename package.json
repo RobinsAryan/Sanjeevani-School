@@ -14,9 +14,11 @@
   "author": "deepaksuthar",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.6.2",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "canvas": "^2.11.2",
+    "compression": "^1.7.4",
     "connect-flash": "^0.1.1",
     "connect-mongodb-session": "^3.1.1",
     "cookie-parser": "^1.4.6",
@@ -37,6 +39,7 @@
     "socket.io": "^4.7.2",
     "uuid": "^9.0.1",
     "web-push": "^3.6.6",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "xss": "^1.0.14"
   }
 }

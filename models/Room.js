@@ -10,7 +10,10 @@ const rooms = new mongoose.Schema({
     },
     class: {
         type: String,
-    }, 
+    },
+    title: {
+        type: String,
+    }
 }, { timestamps: true });
 
 export default mongoose.model("rooms", rooms);

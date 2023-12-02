@@ -1,4 +1,5 @@
 //Imports 
+console.log("Jai Shree Ram!!");
 import express from 'express';
 import passport from 'passport';
 import cookieParser from 'cookie-parser';
@@ -10,14 +11,23 @@ import dotenv from 'dotenv';
 import MemoryStore from 'memorystore';
 import path from 'path'
 import connectMongoDBSession from 'connect-mongodb-session';
-import routes from './controller/routes.js';
-import room from './models/Room.js'
+import routes from './controller/routes.js'; 
+import http from 'http';
+import https from 'https';
+import compression from 'compression';
+import cors from 'cors';
+import fs from 'fs';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import ioFunction from './controller/RTC/io.js';
 
-const app = express();
-const httpServer = createServer(app);
+
+
+const domain = process.env.HOST || 'localhost';
+const isHttps = process.env.isHTTPS == 'true';
+const host = `http${isHttps ? 's' : ''}://${domain}`;
+
+const app = express(); 
 
 
 dotenv.config({ path: ".env" });
@@ -40,6 +50,8 @@ const MongoDBSession = connectMongoDBSession(expressSession);
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(cookieParser('random'));
+app.use(compression());
+app.use(cors());
 const store = new MongoDBSession({
     uri: process.env.MONGO_URL,
     collection: "mySessions",
@@ -68,16 +80,25 @@ app.use(function (req, res, next) {
 
 
 
-// socket io
-const io = new Server(httpServer);
-ioFunction(io);
+// socket io 
+let server;
+if (isHttps) {
+    const options = {
+        key: fs.readFileSync(path.join(path.resolve(), '/ssl/key.pem'), 'utf-8'),
+        cert: fs.readFileSync(path.join(path.resolve(), '/ssl/cert.pem'), 'utf-8'),
+    };
+    server = https.createServer(options, app);
+} else {
+    server = http.createServer(app);
+}
 
-//peerjs
-import { ExpressPeerServer } from 'peer';
-const peerServer = ExpressPeerServer(httpServer, {
-    debug: true,
-});
-app.use("/peerjs", peerServer);
+let io = new Server({
+    maxHttpBufferSize: 1e7,
+    transports: ['websocket'],
+}).listen(server);
+
+ioFunction(io);
+ 
 
 
 
@@ -85,6 +106,6 @@ app.use(routes);
 
 //port setup
 let port = 8080;
-httpServer.listen(port, () => {
+server.listen(port, () => {
     console.log("connected to backend");
 })
