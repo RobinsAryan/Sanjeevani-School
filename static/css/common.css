@@ -102,8 +102,12 @@ body {
     color: white;
     background: #00aa00;
     border-radius: 5px;
+    cursor: pointer;
 }
  
+.normalButton:active{
+    opacity: 0.8;
+}
 
 .rotateMe {
     animation: rotate 1s linear infinite;

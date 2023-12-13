@@ -40,48 +40,13 @@ app.get('/attandanceJson/:id', checkAuth, async (req, res) => {
     }
 })
 
-app.get('/idCard/download/:id', checkAuth, async (req, res) => {
-    try {
-        let user = await User.findById(req.params.id);
-        if (user && user.role === 'Student') {
-            let classData = await userClass(req.params.id);
-            const canvas = createCanvas(700, 400);
-            const ctx = canvas.getContext('2d');
-            loadImage('./static/img/idCard.jpg').then(async (image) => {
-                ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-                let image2 = await loadImage(`./static${user.profile ? user.profile : '/img/nouser.png'}`);
-                ctx.drawImage(image2, 535, 135, 120, 135);
-                let image4 = await loadImage('./static/img/sign.jpg');
-                ctx.drawImage(image4, 525, 288, 120, 40);
-                ctx.font = '20px Arial';
-                ctx.fillStyle = 'Black';
-                ctx.fillText(user.username, 240, 188);
-                ctx.fillText(`Sh.${user.fname}`, 240, 235);
-                ctx.fillText(classData.className, 147, 278);
-                ctx.fillText(user.rollno, 349, 276);
-                const fileName = `${user.rid}_id_card.png`;
-                const output = fs.createWriteStream(`./static/downloads/${fileName}`);
-                const stream = canvas.createPNGStream();
-                stream.pipe(output);
-                res.json({ success: true, fileName });
-            });
-        }
-        else {
-            res.json({ success: false });
-        }
-    } catch (err) {
-        res.json({ success: false });
-    }
-
-})
-
 
 app.get('/ebooks', checkAuth, async (req, res) => {
     try {
         const data = { ...req.user }
         let classData = await userClass(data._id);
         data.classId = classData._id;
-        res.render('ebook', { data })
+        res.render('students/ebook.ejs', { data })
     } catch (err) {
         res.json({ success: false });
     }
@@ -92,7 +57,7 @@ app.get('/classWork', checkAuth, async (req, res) => {
         const data = { ...req.user }
         let classData = await userClass(data._id);
         data.classId = classData._id;
-        res.render('classWork', { data })
+        res.render('students/classWork.ejs', { data })
     } catch (err) {
         res.json({ success: false });
     }
@@ -104,7 +69,7 @@ app.get('/classMates', checkAuth, async (req, res) => {
         const data = { ...req.user }
         let classData = await userClass(data._id);
         data.classId = classData._id;
-        res.render('classMates', { data })
+        res.render('students/classMates.ejs', { data })
     } catch (err) {
         res.json({ success: false });
     }
@@ -121,6 +86,19 @@ app.post('/updateProfile/:id', checkAuth, async (req, res) => {
             }
             else {
                 res.json({ success: true, update: false, msz: "Wrong Admin Password!" });
+            }
+        } catch (err) {
+            res.json({ success: false });
+        }
+    } else if (req.user.role === 'Teacher') {
+        try {
+            let user = await User.findById(req.user._id);
+            if (req.body.password === user.password) {
+                let updatedUser = await User.findByIdAndUpdate(req.params.id, { profile: req.body.icon || '/img/nouser.jpg' }, { new: true });
+                res.json({ success: true, update: true, by: 'p', id: updatedUser._id });
+            }
+            else {
+                res.json({ success: true, update: false, msz: "Wrong Teacher Password!" });
             }
         } catch (err) {
             res.json({ success: false });
@@ -162,6 +140,20 @@ app.post('/updatePassword/:id', checkAuth, async (req, res) => {
             res.json({ success: false });
         }
     }
+    else if (req.user.role === 'Teacher') {
+        try {
+            let user = await User.findById(req.user._id);
+            if (req.body.password === user.password) {
+                let updatedUser = await User.findByIdAndUpdate(req.params.id, { password: req.body.newPassword }, { new: true });
+                res.json({ success: true, update: true, by: 'p', id: updatedUser._id });
+            }
+            else {
+                res.json({ success: true, update: false, msz: "Wrong Teacher Password!" });
+            }
+        } catch (err) {
+            res.json({ success: false });
+        }
+    }
     else {
         try {
             let user = await User.findById(req.user._id);
@@ -189,7 +181,7 @@ app.get('/result', checkAuth, async (req, res) => {
         let classData = await userClass(data._id);
         data.classId = classData._id;
         data.className = classData.className;
-        res.render('selectResult', { data })
+        res.render('students/selectResult.ejs', { data })
     } catch (err) {
         res.json({ success: false });
     }
@@ -202,7 +194,7 @@ app.get('/notifications', checkAuth, async (req, res) => {
         let classData = await userClass(data._id);
         data.classId = classData._id;
         data.className = classData.className;
-        res.render('notifications', { data })
+        res.render('students/notifications.ejs', { data })
     } catch (err) {
         res.json({ success: false });
     }
@@ -229,6 +221,24 @@ app.get('/notifications/all/:cid', checkAuth, async (req, res) => {
         res.json({ success: true, data });
     } catch (err) {
         res.json({ success: false });
+    }
+})
+
+
+app.get('/liveClasses', checkAuth, async (req, res) => {
+    try {
+        if (req.user.role == 'Student') {
+            const data = { ...req.user }
+            let classData = await userClass(data._id);
+            data.classId = classData._id;
+            data.className = classData.className;
+            res.render('students/liveClasses.ejs', { data});
+        }
+        else {
+            res.render('400');
+        }
+    } catch (err) {
+        res.render('500');
     }
 })
 export default app;

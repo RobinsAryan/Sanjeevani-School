@@ -59,6 +59,10 @@ body {
     cursor: pointer;
 }
 
+.class:active {
+    background: rgb(177, 177, 177);
+}
+
 .teacherClass {
     width: 90%;
 }

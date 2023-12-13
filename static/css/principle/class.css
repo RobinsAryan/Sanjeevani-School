@@ -47,6 +47,10 @@ body {
     cursor: pointer;
 }
 
+.class:active {
+    background: rgb(177, 177, 177);
+}
+
 .classImg {
     height: 80%;
     padding: 10px 0;

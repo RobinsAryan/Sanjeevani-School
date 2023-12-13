@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import { v4 as uuidV4 } from 'uuid';
 import Room from '../../models/Room.js';
+import { checkAuth } from '../../utils/middleware.js';
 
 const app = express();
 dotenv.config();
@@ -47,11 +48,11 @@ app.get('/newCall', (req, res) => {
 
 
 
-app.get('/join/:roomId/:cid', async function (req, res) {
+app.get('/join/:roomId/:cid', checkAuth, async function (req, res) {
     if (hostCfg.authenticated) {
         let RoomData = await Room.findOne({ roomId: req.params.roomId });
         console.log(RoomData);
-        if (!RoomData&&req.params.roomId&&req.params.roomId.length==36) {
+        if (!RoomData && req.params.roomId && req.params.roomId.length == 36) {
             await (new Room({
                 roomId: req.params.roomId,
                 class: req.params.cid,
@@ -59,16 +60,16 @@ app.get('/join/:roomId/:cid', async function (req, res) {
                 title: `Meet No. ${Math.floor(Math.random() * 1000)}`
             })).save();
         }
-        res.render('room.ejs', { username: req.user.username, rid: req.user.rid ? req.user.rid : (Math.floor(Math.random() * 8999 + 1000)), profile: req.user.profile ? req.user.profile : false });
+        res.render('common/room.ejs', { username: req.user.username, rid: req.user.rid ? req.user.rid : (Math.floor(Math.random() * 8999 + 1000)), profile: req.user.profile ? req.user.profile : false });
     } else {
         if (hostCfg.protected) {
             return res.sendFile(views.login);
         }
-        res.redirect('/'); 
+        res.redirect('/');
     }
 });
-  
-app.post('/meetingURL', (req, res) => { 
+
+app.post('/meetingURL', (req, res) => {
     const meetingURL = getMeetingURL(host);
     res.end(JSON.stringify({ meeting: meetingURL }));
 });

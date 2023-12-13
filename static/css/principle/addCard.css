@@ -1,0 +1,27 @@
+.card {
+    width: 80%;
+    padding: 10px;
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0 0 2px 1px #d4d4d4;
+    margin: 10px 0;
+}
+
+.cardImg div {
+    text-align: center;
+}
+
+.cardImg div img {
+    max-height: 200px;
+    max-width: 100%;
+}
+
+.card p {
+    text-align: center;
+}
+
+.cardBtn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Card</title>
+    <link rel="stylesheet" href="/css/utils/card.css">
+    <script rel=preconnect src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+</head>
+
+<body>
+    <input type="text" name="cardData" id="cardData" value="<%=card%>" hidden>
+    <input type="text" name="studentData" id="studentData" value="<%=studentData%>" hidden>
+    <div class="main">
+        <div class="left">
+            <div class="preview">
+                <div class="imageContainer">
+                    <canvas class="p1" id="p1"></canvas>
+                </div>
+                <hr>
+                <div class="previewIdcard">
+                    <h2>Preview</h2>
+                    <canvas class="p2" id="p2"></canvas>
+                </div>
+            </div>
+            <div class="left_info">
+            </div>
+        </div>
+        <div class="right">
+            <div class="sampleInfo">
+                <!-- <li value="profile">Profile <span><img src="/img/me.jpg" alt=""></span> </li> -->
+            </div>
+            <!--<script>
+                const openNewField = () => {
+                    let popUp = document.getElementById('popUp');
+                    popUp.classList.toggle('show');
+                }
+            </script> -->
+            <hr>
+            <div class="mapInfo">
+                <!-- <script>
+
+                    let undo;
+                </script> -->
+                <!-- <div class="addBtn"> <button onclick="undo()">Undo</button> </div> -->
+                <div class="shapes">
+                    <li value="r" class="active">Rectangle</li>
+                    <li value="c">Circle</li>
+                </div>
+                <hr>
+                <div class="tools">
+                    <li>
+                        <select name="fontSize" id="fontSize" onchange="handleFontSizeChange(this)">
+                            <option value="none">Choose Font Size</option>
+                            <option value="10">10</option>
+                            <option value="12">12</option>
+                            <option value="15">15</option>
+                            <option value="18">18</option>
+                            <option value="20">20</option>
+                            <option value="25">25</option>
+                            <option value="30">30</option>
+                            <option value="35">35</option>
+                            <option value="40">40</option>
+                            <option value="45">45</option>
+                            <option value="auto">Auto</option>
+                        </select>
+                    </li>
+                    <li>
+                        <select name="fontType" id="fontType" onchange="handleFontTypeChange(this)">
+                            <option value="none">Choose Font Type</option>
+                            <option value="Arial">Arial</option>
+                            <option value="Verdana">Verdana</option>
+                            <option value="Times New Roman">Times New Roman</option>
+                            <option value="Courier New">Courier New</option>
+                            <option value="serif">serif</option>
+                            <option value="sans-serif">sans-serif</option>
+                        </select>
+                    </li>
+                    <script>
+                        let handleFontSizeChange, handleFontTypeChange;
+                    </script>
+                </div>
+                <hr>
+                <div style="text-align: center;" id="textSample">
+                    Sanjeevani School
+                </div>
+                <hr>
+                <div class="addBtn" style="text-align: end;"> <button onclick="submit()">Submit</button> </div>
+            </div>
+        </div>
+    </div>
+    <!-- <div id="popUp">
+        <div class="mainPopUp">
+            <div class="close" onclick="openNewField()">X</div>
+            <div class="form">
+                <h2>New Field</h2>
+                <p style="color: red;">These field will remain same in all Card from this Response.</p>
+                <input type="text" name="title" id="title" placeholder="Title">
+                <select name="fieldType" id="fieldType" onchange="handleFieldTypeChange(this)">
+                    <option value="none">Choose Field Type</option>
+                    <option value="img">image</option>
+                    <option value="text">Text</option>
+                </select>
+                <script>
+                    const handleFieldTypeChange = (ele) => {
+                        let newField = document.getElementById('newInputField');
+                        let val = ele.value;
+                        if (val == 'text') {
+                            newField.innerHTML = `<input type="text" name="titleValue" id="titleValue" placeholder="Enter Value"><br><button class="submitBtn">ADD</button>`
+                        }
+                        else if (val == 'img') {
+                            newField.innerHTML = ` <input type="file" name="file" id="file" required><br><button class="submitBtn">ADD</button>`
+                        }
+                        else {
+                            newField.innerHTML = '';
+                        }
+                    }
+                </script>
+                <div id="newInputField"></div>
+            </div>
+        </div>
+    </div> -->
+    <script src="/js/common.js"></script>
+    <script src="/js/utils/card.js"></script>
+    <script src="/js/utils/canvas.js"></script>
+</body>
+
+</html>

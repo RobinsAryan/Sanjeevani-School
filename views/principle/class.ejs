@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%=className %>
+    </title>
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/principle/class.css">
+    <link rel="stylesheet" href="/css/popup.css">
+    <script src="https://kit.fontawesome.com/c538c9717e.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+</head>
+
+<body>
+    <input type="text" id="classID" hidden value="<%=classId%>">
+    <div class="header">
+        <i style="font-size: 20px; color: grey;" onclick="history.back()" class="fas fa-arrow-left"></i>
+        <p id="headerTitle">
+            <%=className %>
+        </p>
+        <i style="font-size: 20px; color: grey;" onclick="editClass()" class="far fa-edit"></i> 
+    </div>
+    <div class="main">
+        <div class="view">
+            <div class="classes">
+                <div class="class" onclick="location.href = '/class/student/<%=classId%>'">
+                    <div class="classImg">
+                        <div>
+                            <img src="/img/students.jpg" alt="">
+                        </div>
+                    </div>
+                    <p>Students</p>
+                </div>
+                <div class="class" onclick="location.href = '/class/classWork/<%=classId%>'">
+                    <div class="classImg">
+                        <div>
+                            <img src="/img/subjects.jpg" alt="">
+                        </div>
+                    </div>
+                    <p>Class Work</p>
+                </div>
+                <%if(isPrinciple){%>
+                    <div onclick="loadIncharge()" class="class">
+                        <div class="classImg">
+                            <div>
+                                <img src="/img/teacher.jpg" alt="">
+                            </div>
+                        </div>
+                        <p>Incharge</p>
+                    </div>
+                <%}%>
+                <div class="class" onclick="location.href = '/class/Ebooks/<%=classId%>'">
+                    <div class="classImg">
+                        <div>
+                            <img src="/img/ebook.jpg" alt="">
+                        </div>
+                    </div>
+                    <p>Ebook</p>
+                </div>
+                <%if(isInCharge){%>
+                <div class="class" onclick="location.href = '/class/attandance/<%=classId%>'">
+                    <div class="classImg">
+                        <div>
+                            <img src="/img/calender.jpg" alt="">
+                        </div>
+                    </div>
+                    <p>Attandance</p>
+                </div>
+                <%}%>
+                <div class="class" onclick="location.href = '/class/announcement/<%=classId%>'">
+                    <div class="classImg">
+                        <div>
+                            <img src="/img/announcement.jpg" alt="">
+                        </div>
+                    </div>
+                    <p>Announcment</p>
+                </div>
+                <div class="class" onclick="location.href = '/class/syllabus/<%=classId%>'">
+                    <div class="classImg">
+                        <div>
+                            <img src="/img/principleSyllabus.jpg" alt="">
+                        </div>
+                    </div>
+                    <p>Syllabus</p>
+                </div>
+                <div class="class" onclick="location.href = '/class/schedule/<%=classId%>'">
+                    <div class="classImg">
+                        <div>
+                            <img src="/img/principleSchedule.jpg" alt="">
+                        </div>
+                    </div>
+                    <p>Schedule</p>
+                </div>
+                <div class="class" onclick="location.href = '/class/principleResult/<%=classId%>'">
+                    <div class="classImg">
+                        <div>
+                            <img src="/img/principleResult.jpg" alt="">
+                        </div>
+                    </div>
+                    <p>Result</p>
+                </div>
+                <div class="class" onclick="location.href = '/RTC/class/<%=classId%>'">
+                    <div class="classImg">
+                        <div>
+                            <img src="/img/liveClass.jpg" alt="">
+                        </div>
+                    </div>
+                    <p>Live Class</p>
+                </div>
+            </div>
+            <%if(isPrinciple){%>
+            <div class="standardBtn">
+                <button onclick="removeClassPopup()">Remove Class</button>
+            </div>
+            <%}%>
+        </div>
+    </div>
+    <div id="popup" class="popup">
+        
+    </div>
+    <script src="/js/common.js"></script>
+    <script src="/js/principle/class.js"></script>
+</body>
+
+</html>

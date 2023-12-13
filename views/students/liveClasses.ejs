@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Classes | <%=data.className%>
+    </title>
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="/css/student/attandance.css">
+    <link rel="stylesheet" href="/css/principle/student.css"> 
+    <link rel="stylesheet" href="/css/popup.css">
+    <script src="https://kit.fontawesome.com/c538c9717e.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <style>
+        .student{
+            margin: 10px auto;
+        }
+    </style>
+</head>
+
+<body>
+    <input type="text" id="classID" hidden value="<%=data.classId%>">
+    <div class="main">
+        <div class="view">
+            <div class="header">
+                <span class="pageTitle">Smart Classes</span>
+                <div class="rightHeader">
+                    <span>
+                        <i onclick="history.back()" class="fas fa-arrow-left"></i>
+                    </span>
+                </div>
+                <div class="leftHeader">
+                    <div onclick="openUserProfile()">
+                        <%if(data.profile){%>
+                            <img src="<%=data.profile%>" alt="">
+                            <%}else{%>
+                                <img src="/img/nouser.png" alt="">
+                                <%}%>
+                    </div>
+                    </p>
+                </div>
+            </div>
+            <div id="selectResult">
+
+            </div>
+        </div>
+    </div>
+    <div id="popup" class="popup">
+
+    </div>
+    <script src="/js/common.js"></script>
+    <script src="/js/student/liveClasses.js"></script>
+</body>
+
+</html>

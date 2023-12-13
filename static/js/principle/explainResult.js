@@ -12,8 +12,7 @@ const loadResult = async () => {
                 <p>Exam: ${data.title}</p>
                 <span>Uploaded On: ${formatTime(data.createdAt)}</span>
                 <span> (Maximum Marks: ${data.MM})</span>
-                <i onclick="openEditName()" style="position: absolute;color: gray;" class="fas fa-edit"></i>
-                `
+                ${isInCharge?'<i onclick="openEditName()" style="position: absolute;color: gray;" class="fas fa-edit"></i>':''}`
                 let data2 = {};
                 data.result.map(item => {
                     let result = item.desc;

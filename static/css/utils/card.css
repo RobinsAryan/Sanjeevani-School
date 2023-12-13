@@ -1,0 +1,183 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.main {
+    width: 100%;
+    display: flex;
+}
+
+.left {
+    flex: 6;
+    border: 1px solid black;
+}
+
+.right {
+    border: 1px solid black;
+    flex: 4;
+}
+
+.preview canvas {
+    /* max-height: 300px; */
+    margin: 20px;
+}
+
+.imageContainer,
+.previewIdcard {
+    margin: auto;
+    width: max-content;
+
+}
+
+.p1 {
+    cursor: crosshair;
+}
+
+.sampleInfo li {
+    list-style: none;
+    /* width: 400px; */
+    width: 70%;
+    background-color: rgb(189, 189, 189);
+    margin: 10px;
+    border-radius: 5px;
+    padding: 2px 0px 0 0;
+    overflow: hidden;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    cursor: pointer;
+}
+
+.sampleInfo li span {
+    padding: 10px 5px;
+    box-sizing: border-box;
+    background-color: rgb(226, 226, 226);
+    display: inline-block;
+    width: 100%;
+}
+
+.sampleInfo li span img {
+    max-height: 100px;
+}
+
+.sampleInfo li.active {
+    border: 1px solid red;
+}
+
+.addBtn {
+    text-align: center;
+    padding: 10px;
+}
+
+.addBtn button {
+    padding: 10px 20px;
+    border: none;
+    outline: none;
+    background-color: green;
+    color: white;
+    width: max-content;
+    font-size: 15px;
+    border-radius: 5px;
+    border: 2px solid rgb(248, 248, 248);
+    cursor: pointer;
+}
+
+.addBtn button:active {
+    background-color: white;
+    color: green;
+    border: 2px solid green;
+}
+
+.tools,
+.shapes {
+    display: flex;
+    list-style: none;
+    width: 100%;
+    /* background: #e7e7e7; */
+    justify-content: space-evenly;
+}
+
+.tools li,
+.shapes li {
+    /* background-color: rgb(210 210 210); */
+    box-shadow: 0 0 2px 2px rgb(213, 213, 213), inset 0 0 2px 2px rgb(239, 239, 239);
+    padding: 10px 21px;
+    border-radius: 5px;
+    margin: 10px 0;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.tools li:active {
+    box-shadow: 0 0 2px 2px rgb(240, 240, 240), inset 0 0 2px 2px rgb(239, 239, 239);
+}
+
+.shapes li.active {
+    box-shadow: 0 0 2px 2px rgb(240, 240, 240), inset 0 0 2px 2px rgb(239, 239, 239);
+}
+
+#popUp {
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.378);
+}
+
+.show {
+    display: block !important;
+}
+
+.mainPopUp {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 400px;
+    background: white;
+    border-radius: 5px;
+    padding: 20px;
+}
+
+.close {
+    position: absolute;
+    right: 10px;
+    top: 5px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.form {
+    text-align: center;
+}
+
+#title,
+#fontType,
+#alignType,
+#fontSize,
+#file {
+    width: 100%;
+    font-size: 15px;
+    border: none;
+    background: #efefef;
+    padding: 10px;
+    outline: none;
+    border-radius: 5px;
+    margin: 5px 0;
+}
+
+.submitBtn {
+    padding: 5px 10px;
+    background: #3cd73c;
+    color: white;
+    border: none;
+    outline: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+}

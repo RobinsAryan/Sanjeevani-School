@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="/css/popup.css">
+    <script src="https://kit.fontawesome.com/c538c9717e.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+</head>
+
+<body>
+    <input type="text" id="userId" hidden value="<%=data._id%>">
+    <%if(data.userBirthday){%>
+        <input type="text" id="userBirthday" hidden value="<%=data.userBirthday%>">
+        <%}%>
+            <canvas id="canvas"></canvas>
+            <div class="main">
+                <div class="view">
+                    <div class="header">
+                        <div class="leftHeader">
+                            <div>
+                                <%if(data.profile){%>
+                                    <img src="<%=data.profile%>" alt="">
+                                    <%}else{%>
+                                        <img src="/img/logo.png" alt="">
+                                        <%}%>
+                            </div>
+                            <p>Hi, <%=data.username%>
+                            </p>
+                        </div>
+                        <div class="rightHeader">
+                            <div id="fancyDiv" onclick="openUserProfile()">
+                                <i class="far fa-user"></i>
+                            </div>
+                        </div>
+                        <div class="menu hide">
+                            <div class="fsdfsfsd"></div>
+                            <ul class="menu-list">
+                                <li class="menu-item">
+                                    <button onclick="redirectProfile()" class="menu-button">
+                                        <i class="far fa-user"></i>
+
+                                        <span>Profile</span>
+
+                                    </button>
+                                </li>
+                            </ul>
+
+
+                            <ul class="menu-list">
+                                <li class="menu-item"><button onclick="location.href='/student/notifications'" class="menu-button">
+                                        <i class="fas fa-bell"></i>
+
+                                        <span>Notifications</span>
+                                    </button></li>
+
+                                <!-- <li class="menu-item"><button class="menu-button">
+                                        <i class="far fa-user"></i>
+
+                                        <span>Updates</span>
+
+                                    </button></li>-->
+                            </ul>
+                            <ul class="menu-list">
+                                <li class="menu-item"><button onclick="location.href='/student/liveClasses'" class="menu-button">
+                                        <i class="fa-solid fa-tv"></i>
+                                        <span>Live Classes </span>
+                                    </button></li> 
+
+                            </ul>
+                            <ul class="menu-list">
+                                <!-- <li class="menu-item"><button class="menu-button">
+                                        <i class="far fa-user"></i>
+
+                                        <span>Exit</span> 
+                                    </button></li> -->
+                                <li class="menu-item">
+                                    <button onclick="location.href='/logout'" class="menu-button">
+                                        <i class="fas fa-sign-out-alt"></i>
+
+                                        <span>LogOut</span>
+                                    </button>
+                                </li>
+
+
+                            </ul>
+
+                        </div>
+                    </div>
+                    <div class="upperBody">
+                        <div class="upperRow">
+                            <div onclick="buttonLinks(1)" class="smallCard c1">
+                                <p>Attandance</p>
+                            </div>
+                            <div onclick="location.href='/student/classWork'" class="smallCard c2">
+                                <p>Class Work</p>
+                            </div>
+                        </div>
+                        <div class="upperRow">
+                            <div onclick="location.href='/student/ebooks'" class="smallCard c3">
+                                <p>Ebooks</p>
+                            </div>
+                            <div onclick="location.href='/student/classMates'" class="smallCard c4">
+                                <p>Classmates</p>
+                            </div>
+                        </div>
+                        <div class="upperRow">
+                            <div onclick="location.href='/user/gallary'" class="smallCard c5">
+                                <p>Gallery</p>
+                            </div>
+                            <div onclick="location.href='/student/result'" class="smallCard c6">
+                                <p>Result</p>
+                            </div>
+                        </div>
+                        <div class="upperRow">
+                            <%if(classData.syllabus){%>
+                            <div onclick="location.href='/downloads/<%=classData.syllabus%>'" class="smallCard c7">
+                                <p>Syllabus</p>
+                            </div>
+                            <%}%>
+                            <%if(classData.schedule){%>
+                            <div onclick="location.href='/downloads/<%=classData.schedule%>'" class="smallCard c8">
+                                <p>Schedule</p>
+                            </div>
+                            <%}%>
+                        </div>
+                    </div>
+
+                    <!-- <div class="messages">Kindly Change Your Password
+                        <span onclick="document.getElementsByclass('messages')[0].remove()">X</span>
+                    </div> -->
+                    <div class="birthDays">
+                        <div class="birthDayHeading">
+                            <p>Today BirthDay</p>
+                            <span id="moreBirthday" onclick="birthdayUser.scroll(birthdayUser.scrollLeft+120,0)">more<i
+                                    class="fas fa-chevron-circle-right"></i></span>
+                        </div>
+                        <div class="mainBirthday">
+                            <div class="users" id="birthdayUser">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="birthDays mainPosts">
+                        <div class="birthDayHeading">
+                            <p>Announcements</p>
+                            <span onclick="birthdayUser.scrollIntoView()">more<i
+                                    class="fas fa-chevron-circle-right"></i></span>
+                        </div>
+                        <div class="posts" id="announcements">
+
+                        </div>
+                        <div id="loadingPost" class="post">
+                            <div class="postWrapper">
+                                <div class="postTop">
+                                    <div class="postTopLeft">
+                                        <span class="animated-background" style="border-radius: 50%;">
+                                            <div style="height: 40px;width: 40px;"
+                                                class="background-masker btn-divide-left"></div>
+                                        </span>
+                                        <div class="div_post_left">
+                                            <span style="margin-bottom: 5px;" class="postUsername animated-background">
+                                                <div style="height: 10px; width: 50px;"
+                                                    class="background-masker btn-divide-left"></div>
+                                            </span>
+                                            <span style="margin-top: 5px;" class="animated-background">
+                                                <div style="height: 10px; width: 50px;"
+                                                    class="background-masker btn-divide-left"></div>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="postCenter">
+                                    <span class="postText animated-background">
+                                        <div class="background-masker btn-divide-left"></div>
+                                    </span>
+                                    <span style="height: 220px;display: block;" class="animated-background">
+                                        <div class="background-masker btn-divide-left"></div>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="popup" class="popup">
+
+            </div>
+            <script src="/js/celebration.js"></script>
+            <script src="/js/common.js"></script>
+            <script src="/js/home.js"></script>
+</body>
+
+</html>

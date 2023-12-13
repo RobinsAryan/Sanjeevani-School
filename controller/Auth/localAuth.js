@@ -17,6 +17,7 @@ export default function (passport) {
                 }
             }
             else {
+                email = parseInt((email).split('-').pop());
                 let data = await user.findOne({ phone: email, role: "Teacher" });
                 if (!data) {
                     return done(null, false, { message: "User Not Exits" });

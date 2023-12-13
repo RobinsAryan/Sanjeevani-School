@@ -1,44 +1,6 @@
 let userId = null, userData = null;
 let originalImage = '';
-let userProfile = document.getElementById('userProfile');
-const downloadIdcard = async () => {
-    document.getElementById('popup').style.display = 'block';
-    document.getElementById('popup').innerHTML =
-        `<div class="loading_div">
-        <div>Preparing File....</div>
-        <i class="fas fa-spinner rotateMe" ></i> 
-        </div >
-    `
-    try {
-        let resData = await myGET(`/student/idCard/download/${userId}`)
-        if (resData.success) {
-            document.getElementById('popup').innerHTML = `
-    <div class="popup-form"> 
-            <p style="margin-bottom: 15px;">File Created!!</p>
-           <div>
-           <p style="font-size:12px;padding-bottom: 10px;">File Will be deleted in 5 mins</p>
-           </div>
-           <div>
-           <button class="normalButton" style="background-color: red;" onclick="closePopup()" >Cancel</button>
-            <a class="normalButton" href='/download/${resData.fileName}' target='__blank' >Download</a>
-           </div>
-        </div>
-    `
-        } else {
-            document.getElementById('popup').innerHTML = `
-                <div class="popup-form">
-                ${showSWrong('downloadIdcard()')}
-                </div>
-            `
-        }
-    } catch (err) {
-        document.getElementById('popup').innerHTML = `
-                <div class="popup-form">
-                ${showSWrong('downloadIdcard()')}
-                </div>
-            `
-    }
-}
+let userProfile = document.getElementById('userProfile'); 
 
 window.onload = () => {
     userId = document.getElementById('userId').value;

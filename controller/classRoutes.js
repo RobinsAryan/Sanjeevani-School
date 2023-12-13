@@ -17,18 +17,30 @@ import Result from '../models/Result.js';
 
 //class routes
 app.get('/single/:id', checkAuth, async (req, res) => {
-    let data = await Class.findById(req.params.id);
-    if (data) {
+    try {
         if (req.user.role != 'Student') {
-            res.render('principle_class', { className: data.className, classId: req.params.id });
+            let data = await Class.findById(req.params.id);
+            if (data) {
+                res.render('principle/class.ejs', { className: data.className, classId: req.params.id, isPrinciple: req.user.role === 'Principle', isInCharge: (req.user.role === 'Principle') || (data.inCharge && data.inCharge.toString() === req.user._id.toString()) });
+            }
         }
+        else {
+            res.render('400');
+        }
+    } catch (err) {
+        res.render('500');
     }
 })
 
 app.get('/all', checkAuth, async (req, res) => {
     try {
-        let data = await Class.find();
-        res.json({ success: true, data });
+        if (req.user.role !== 'Student') {
+            let data = await Class.find();
+            res.json({ success: true, data });
+        }
+        else {
+            res.json({ success: false });
+        }
     } catch (err) {
         res.json({ success: false });
     }
@@ -48,7 +60,7 @@ app.post('/add', checkAuth, checkPrinciple, async (req, res) => {
 })
 
 
-app.post('/update/className/:id', checkAuth, async (req, res) => {
+app.post('/update/className/:id', checkAuth, checkPrinciple, async (req, res) => {
     try {
         await Class.findByIdAndUpdate(req.params.id, { className: req.body.className });
         res.json({ success: true });
@@ -75,7 +87,7 @@ app.get('/remove/:id', checkAuth, checkPrinciple, async (req, res) => {
 
 
 //Incharge routes
-app.get('/inCharge/:id', checkAuth, async (req, res) => {
+app.get('/inCharge/:id', checkAuth, checkPrinciple, async (req, res) => {
     try {
         let inCharge = '';
         let data = await Class.findById(req.params.id);
@@ -123,12 +135,14 @@ app.get('/setInCharge/:classID/:id', checkAuth, checkPrinciple, async (req, res)
 
 
 //students routes
-app.get('/student/:id', checkAuth, async (req, res) => {
-    let data = await Class.findById(req.params.id);
-    if (data) {
-        if (req.user.role == 'Principle') {
-            res.render('principle_student', { className: data.className, classId: req.params.id });
+app.get('/student/:cid', checkAuth, async (req, res) => {
+    if (req.user.role != 'Student') {
+        let data = await Class.findById(req.params.cid);
+        if (data) {
+            res.render('principle/student.ejs', { className: data.className, classId: req.params.cid,isPrinciple:req.user.role==='Principle' });
         }
+    } else {
+        res.render('404');
     }
 })
 
@@ -491,12 +505,19 @@ app.get('/announcement/remove/:id', checkAuth, checkPrinciple, async (req, res) 
 
 
 // Ebooks
-app.get('/Ebooks/:id', checkAuth, checkPrinciple, async (req, res) => {
-    let data = await Class.findById(req.params.id);
-    if (data) {
-        if (req.user.role == 'Principle') {
-            res.render('principle_ebook', { className: data.className, classId: req.params.id, canAdd: true });
+app.get('/Ebooks/:id', checkAuth, async (req, res) => {
+    try {
+        if (req.user.role != 'Student') {
+            let data = await Class.findById(req.params.id);
+            if (data) {
+                res.render('principle/ebook.ejs', { className: data.className, classId: req.params.id, canAdd: true });
+            }
         }
+        else {
+            res.render('400');
+        }
+    } catch (err) {
+        res.render('500');
     }
 })
 
@@ -523,23 +544,27 @@ app.get('/ebooks/all/:id', checkAuth, async (req, res) => {
 
 app.post('/ebook/add/:id', checkAuth, async (req, res) => {
     try {
-        let ebook = new Ebook({
-            url: req.body.url,
-            title: req.body.title,
-            size: parseInt(req.body.size),
-            class: req.params.id
-        })
-        await ebook.save();
-        res.json({ success: true });
-        let newNotification = new Notification({
-            title: 'New Ebook Added',
-            body: `${req.body.title} is added to Ebooks`,
-            event: 'Ebook',
-            scope: "Class",
-            class: req.params.id,
-        });
-        await newNotification.save();
-        sendNotificationToClass(req.params.id, "Ebooks", `Book ${req.body.title} is Added in Classroom`)
+        if (req.user != 'Student') {
+            let ebook = new Ebook({
+                url: req.body.url,
+                title: req.body.title,
+                size: parseInt(req.body.size),
+                class: req.params.id
+            })
+            await ebook.save();
+            res.json({ success: true });
+            let newNotification = new Notification({
+                title: 'New Ebook Added',
+                body: `${req.body.title} is added to Ebooks`,
+                event: 'Ebook',
+                scope: "Class",
+                class: req.params.id,
+            });
+            await newNotification.save();
+            sendNotificationToClass(req.params.id, "Ebooks", `Book ${req.body.title} is Added in Classroom`)
+        } else {
+            res.json({ success: false });
+        }
     } catch (err) {
         res.json({ success: false });
     }
@@ -547,9 +572,13 @@ app.post('/ebook/add/:id', checkAuth, async (req, res) => {
 
 app.get('/ebook/remove/:id', checkAuth, async (req, res) => {
     try {
-        let ebook = await Ebook.findByIdAndDelete(req.params.id);
-        await deleteFile(`./static/downloads/${ebook.url}`);
-        res.json({ success: true });
+        if (req.user != 'Student') {
+            let ebook = await Ebook.findByIdAndDelete(req.params.id);
+            await deleteFile(`./static/downloads/${ebook.url}`);
+            res.json({ success: true });
+        } else {
+            res.json({ success: false });
+        }
     } catch (err) {
         res.json({ success: false });
     }
@@ -561,12 +590,19 @@ app.get('/ebook/remove/:id', checkAuth, async (req, res) => {
 
 
 //class Work
-app.get('/classWork/:id', checkAuth, checkPrinciple, async (req, res) => {
-    let data = await Class.findById(req.params.id);
-    if (data) {
-        if (req.user.role == 'Principle') {
-            res.render('principle_classWork', { className: data.className, classId: req.params.id, canAdd: true });
+app.get('/classWork/:id', checkAuth, async (req, res) => {
+    try {
+        if (req.user.role != 'Student') {
+            let data = await Class.findById(req.params.id);
+            if (data) {
+                res.render('principle/classWork.ejs', { className: data.className, classId: req.params.id, canAdd: true });
+            }
         }
+        else {
+            res.render('400');
+        }
+    } catch (err) {
+        res.render('500');
     }
 })
 
@@ -617,23 +653,28 @@ app.get('/classWork/all/:id', checkAuth, async (req, res) => {
 
 app.post('/classWork/add/:id', checkAuth, async (req, res) => {
     try {
-        let work = new classWork({
-            file: req.body.file,
-            text: req.body.text,
-            size: parseInt(req.body.size),
-            class: req.params.id,
-            author: req.user._id
-        })
-        await work.save();
-        res.json({ success: true });
-        let newNotification = new Notification({
-            title: 'New Class Work',
-            body: 'A new class work is added in classroom',
-            event: 'ClassWork',
-            scope: "Class",
-            class: req.params.id,
-        });
-        await newNotification.save();
+        if (req.user.role !== 'Student') {
+            let work = new classWork({
+                file: req.body.file,
+                text: req.body.text,
+                size: parseInt(req.body.size),
+                class: req.params.id,
+                author: req.user._id
+            })
+            await work.save();
+            res.json({ success: true });
+            let newNotification = new Notification({
+                title: 'New Class Work',
+                body: 'A new class work is added in classroom',
+                event: 'ClassWork',
+                scope: "Class",
+                class: req.params.id,
+            });
+            await newNotification.save();
+        }
+        else {
+            res.json({ success: false });
+        }
     } catch (err) {
         res.json({ success: false });
     }
@@ -642,10 +683,14 @@ app.post('/classWork/add/:id', checkAuth, async (req, res) => {
 
 app.get('/classWork/remove/:id', checkAuth, async (req, res) => {
     try {
-        let work = await classWork.findByIdAndDelete(req.params.id);
-        res.json({ success: true });
-        if (work.file.length) {
-            await deleteFile(`./static/downloads/${work.file}`);
+        if (req.user.role !== 'Student') {
+            let work = await classWork.findByIdAndDelete(req.params.id);
+            res.json({ success: true });
+            if (work.file.length) {
+                await deleteFile(`./static/downloads/${work.file}`);
+            }
+        } else {
+            res.json({ success: false });
         }
     } catch (err) {
         res.json({ success: false });
@@ -656,46 +701,55 @@ app.get('/classWork/remove/:id', checkAuth, async (req, res) => {
 
 
 //Attandance
-app.get('/attandance/:id', checkAuth, checkPrinciple, async (req, res) => {
-    let data = await Class.findById(req.params.id);
-    let startDate = new Date();
-    startDate.setHours(0, 0, 0, 0);
-    let endDate = new Date();
-    endDate.setHours(23, 59, 59, 999);
-    let attandanceData = await Attendance.aggregate([
-        {
-            '$match': {
-                'class': new mongoose.Types.ObjectId(req.params.id),
-                'createdAt': {
-                    '$gte': startDate,
-                    '$lte': endDate
-                }
+app.get('/attandance/:id', checkAuth, async (req, res) => {
+    try {
+        if (req.user.role != 'Student') {
+            let data = await Class.findById(req.params.id);
+            let startDate = new Date();
+            startDate.setHours(0, 0, 0, 0);
+            let endDate = new Date();
+            endDate.setHours(23, 59, 59, 999);
+            let attandanceData = await Attendance.aggregate([
+                {
+                    '$match': {
+                        'class': new mongoose.Types.ObjectId(req.params.id),
+                        'createdAt': {
+                            '$gte': startDate,
+                            '$lte': endDate
+                        }
+                    }
+                }]);
+            let todayAttandance = attandanceData.length ? true : false;
+            if (data) {
+                res.render('principle/attandance.ejs', { className: data.className, classId: req.params.id, isPrinciple: req.user.role === 'Principle', todayAttandance });
             }
-        }]);
-    let todayAttandance = attandanceData.length ? true : false;
-    if (data) {
-        if (req.user.role == 'Principle') {
-            res.render('attandance', { className: data.className, classId: req.params.id, canAdd: true, todayAttandance });
         }
+        else {
+            res.render('400');
+        }
+    } catch (err) {
+        res.render('500');
     }
 })
 
 app.post('/attandance/upload/:id', checkAuth, async (req, res) => {
     try {
-        let attandanceJson = req.body.data;
-        let attandanceSheet = Object.entries(attandanceJson).map(data => {
-            return {
-                userId: data[0],
-                attendance: data[1],
-            }
-        })
-        let attandance = new Attendance({
-            class: req.params.id,
-            author: req.user._id,
-            status: attandanceSheet
-        })
-        await attandance.save();
-        res.json({ success: true });
+        if (req.user.role != 'Student') {
+            let attandanceJson = req.body.data;
+            let attandanceSheet = Object.entries(attandanceJson).map(data => {
+                return {
+                    userId: data[0],
+                    attendance: data[1],
+                }
+            })
+            let attandance = new Attendance({
+                class: req.params.id,
+                author: req.user._id,
+                status: attandanceSheet
+            })
+            await attandance.save();
+            res.json({ success: true });
+        }
     } catch (err) {
         res.json({ success: false });
     }
@@ -703,79 +757,83 @@ app.post('/attandance/upload/:id', checkAuth, async (req, res) => {
 
 app.get('/attandance/download/:id', checkAuth, async (req, res) => {
     try {
-        let attandanceSheet = await Attendance.aggregate([
-            {
-                '$match': {
-                    '_id': new mongoose.Types.ObjectId(req.params.id)
-                }
-            }, {
-                '$project': {
-                    'status': 1,
-                    'createdAt': 1
-                }
-            }, {
-                '$unwind': {
-                    'path': '$status'
-                }
-            }, {
-                '$lookup': {
-                    'from': 'users',
-                    'localField': 'status.userId',
-                    'foreignField': '_id',
-                    'as': 'status.userId'
-                }
-            }, {
-                '$unwind': {
-                    'path': '$status.userId'
-                }
-            }, {
-                '$sort': {
-                    'status.userId.rollno': 1
-                }
-            }, {
-                '$group': {
-                    '_id': '$_id',
-                    'date': {
-                        '$first': '$createdAt'
-                    },
-                    'status': {
-                        '$push': {
-                            'user': '$status.userId',
-                            'isPresent': '$status.attendance'
+        if (req.user.role != 'Student') {
+            let attandanceSheet = await Attendance.aggregate([
+                {
+                    '$match': {
+                        '_id': new mongoose.Types.ObjectId(req.params.id)
+                    }
+                }, {
+                    '$project': {
+                        'status': 1,
+                        'createdAt': 1
+                    }
+                }, {
+                    '$unwind': {
+                        'path': '$status'
+                    }
+                }, {
+                    '$lookup': {
+                        'from': 'users',
+                        'localField': 'status.userId',
+                        'foreignField': '_id',
+                        'as': 'status.userId'
+                    }
+                }, {
+                    '$unwind': {
+                        'path': '$status.userId'
+                    }
+                }, {
+                    '$sort': {
+                        'status.userId.rollno': 1
+                    }
+                }, {
+                    '$group': {
+                        '_id': '$_id',
+                        'date': {
+                            '$first': '$createdAt'
+                        },
+                        'status': {
+                            '$push': {
+                                'user': '$status.userId',
+                                'isPresent': '$status.attendance'
+                            }
                         }
                     }
+                }, {
+                    '$project': {
+                        'status.user.username': 1,
+                        'status.isPresent': 1,
+                        'status.user.rollno': 1,
+                        'status.user.rid': 1,
+                        'date': 1
+                    }
                 }
-            }, {
-                '$project': {
-                    'status.user.username': 1,
-                    'status.isPresent': 1,
-                    'status.user.rollno': 1,
-                    'status.user.rid': 1,
-                    'date': 1
-                }
-            }
-        ]);
-        let jsonSheet = attandanceSheet[0].status.map(obj => {
-            return {
-                'Roll No': obj.user.rollno,
-                'Name': obj.user.username,
-                'Attandance': `${obj.isPresent ? 'Present' : 'Absent'}`,
-                'Reg. ID': obj.user.rid,
+            ]);
+            let jsonSheet = attandanceSheet[0].status.map(obj => {
+                return {
+                    'Roll No': obj.user.rollno,
+                    'Name': obj.user.username,
+                    'Attandance': `${obj.isPresent ? 'Present' : 'Absent'}`,
+                    'Reg. ID': obj.user.rid,
 
-            }
-        });
-        const istDate = new Date(attandanceSheet[0].date);
-        const istYear = istDate.getFullYear();
-        const istMonth = istDate.toLocaleString('default', { month: 'short' });
-        const istDay = istDate.getDate();
-        const formattedDateString = `${istDay}_${istMonth}_${istYear}`;
-        const workSheet = XLSX.utils.json_to_sheet(jsonSheet);
-        const workBook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workBook, workSheet, `students`);
-        const fileName = `${formattedDateString}-WorkBook-${formattedDateString}_attandance.xlsx`
-        const outputPath = `static/downloads/${fileName}`;
-        XLSX.writeFile(workBook, outputPath);
-        res.json({ success: true, fileName });
+                }
+            });
+            const istDate = new Date(attandanceSheet[0].date);
+            const istYear = istDate.getFullYear();
+            const istMonth = istDate.toLocaleString('default', { month: 'short' });
+            const istDay = istDate.getDate();
+            const formattedDateString = `${istDay}_${istMonth}_${istYear}`;
+            const workSheet = XLSX.utils.json_to_sheet(jsonSheet);
+            const workBook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workBook, workSheet, `students`);
+            const fileName = `${formattedDateString}-WorkBook-${formattedDateString}_attandance.xlsx`
+            const outputPath = `static/downloads/${fileName}`;
+            XLSX.writeFile(workBook, outputPath);
+            res.json({ success: true, fileName });
+        } else {
+            res.json({ success: false });
+        }
     } catch (err) {
         res.json({ success: false });
     }
@@ -783,83 +841,88 @@ app.get('/attandance/download/:id', checkAuth, async (req, res) => {
 
 app.get('/attandance/prev/:classID/:date', checkAuth, async (req, res) => {
     try {
-        const searchDate = new Date(req.params.date);
-        const startDate = new Date(searchDate);
-        startDate.setHours(0, 0, 0, 0);
-        const endDate = new Date(searchDate);
-        endDate.setHours(23, 59, 59, 999);
-        let data = await Attendance.aggregate([
-            {
-                '$match': {
-                    'class': new mongoose.Types.ObjectId(req.params.classID),
-                    'createdAt': {
-                        '$gte': startDate,
-                        '$lte': endDate
-                    }
-                }
-            }, {
-                '$lookup': {
-                    'from': 'users',
-                    'localField': 'author',
-                    'foreignField': '_id',
-                    'as': 'author'
-                }
-            }, {
-                '$unwind': {
-                    'path': '$status'
-                }
-            }, {
-                '$lookup': {
-                    'from': 'users',
-                    'localField': 'status.userId',
-                    'foreignField': '_id',
-                    'as': 'status.user'
-                }
-            }, {
-                '$unwind': {
-                    'path': '$status.user'
-                }
-            }, {
-                '$group': {
-                    '_id': '$_id',
-                    'class': {
-                        '$first': '$class'
-                    },
-                    'author': {
-                        '$first': '$author'
-                    },
-                    'createdAt': {
-                        '$first': '$createdAt'
-                    },
-                    'status': {
-                        '$push': {
-                            'user': '$status.user',
-                            'attendance': '$status.attendance'
+        if (req.user.role != 'Student') {
+
+            const searchDate = new Date(req.params.date);
+            const startDate = new Date(searchDate);
+            startDate.setHours(0, 0, 0, 0);
+            const endDate = new Date(searchDate);
+            endDate.setHours(23, 59, 59, 999);
+            let data = await Attendance.aggregate([
+                {
+                    '$match': {
+                        'class': new mongoose.Types.ObjectId(req.params.classID),
+                        'createdAt': {
+                            '$gte': startDate,
+                            '$lte': endDate
                         }
                     }
+                }, {
+                    '$lookup': {
+                        'from': 'users',
+                        'localField': 'author',
+                        'foreignField': '_id',
+                        'as': 'author'
+                    }
+                }, {
+                    '$unwind': {
+                        'path': '$status'
+                    }
+                }, {
+                    '$lookup': {
+                        'from': 'users',
+                        'localField': 'status.userId',
+                        'foreignField': '_id',
+                        'as': 'status.user'
+                    }
+                }, {
+                    '$unwind': {
+                        'path': '$status.user'
+                    }
+                }, {
+                    '$group': {
+                        '_id': '$_id',
+                        'class': {
+                            '$first': '$class'
+                        },
+                        'author': {
+                            '$first': '$author'
+                        },
+                        'createdAt': {
+                            '$first': '$createdAt'
+                        },
+                        'status': {
+                            '$push': {
+                                'user': '$status.user',
+                                'attendance': '$status.attendance'
+                            }
+                        }
+                    }
+                }, {
+                    '$project': {
+                        'author': 1,
+                        'createdAt': 1,
+                        'status.attendance': 1,
+                        'status.user.username': 1,
+                        'status.user._id': 1,
+                        'status.user.rollno': 1,
+                        'status.user.profile': 1
+                    }
+                }, {
+                    '$project': {
+                        'author.password': 0,
+                        'author.role': 0
+                    }
+                }, {
+                    '$unwind': {
+                        'path': '$author'
+                    }
                 }
-            }, {
-                '$project': {
-                    'author': 1,
-                    'createdAt': 1,
-                    'status.attendance': 1,
-                    'status.user.username': 1,
-                    'status.user._id': 1,
-                    'status.user.rollno': 1,
-                    'status.user.profile': 1
-                }
-            }, {
-                '$project': {
-                    'author.password': 0,
-                    'author.role': 0
-                }
-            }, {
-                '$unwind': {
-                    'path': '$author'
-                }
-            }
-        ])
-        res.json({ success: true, data });
+            ])
+            res.json({ success: true, data });
+        } else {
+            res.json({ success: false });
+        }
     } catch (err) {
         res.json({ success: false });
     }
@@ -868,17 +931,21 @@ app.get('/attandance/prev/:classID/:date', checkAuth, async (req, res) => {
 
 app.post('/attandance/update/:sheetId', checkAuth, async (req, res) => {
     try {
-        let attandanceSheet = req.body.data;
-        await Attendance.findByIdAndUpdate(req.params.sheetId, {
-            status: attandanceSheet
-        })
-        res.json({ success: true });
+        if (req.user.role != 'Student') {
+            let attandanceSheet = req.body.data;
+            await Attendance.findByIdAndUpdate(req.params.sheetId, {
+                status: attandanceSheet
+            })
+            res.json({ success: true });
+        } else {
+            res.json({ success: false });
+        }
     } catch (err) {
         res.json({ success: false });
     }
 })
 
-app.get('/attandance/download/all/:classId', checkAuth, async (req, res) => {
+app.get('/attandance/download/all/:classId', checkAuth, checkPrinciple, async (req, res) => {
     try {
         let attandanceSheet = await Attendance.aggregate(
             [
@@ -965,7 +1032,7 @@ app.get('/attandance/download/all/:classId', checkAuth, async (req, res) => {
     }
 })
 
-app.get('/attandance/remove/all/:cid', checkAuth, async (req, res) => {
+app.get('/attandance/remove/all/:cid', checkAuth, checkPrinciple, async (req, res) => {
     try {
         let data = await Attendance.deleteMany({ class: req.params.cid });
         console.log(data);
@@ -982,31 +1049,40 @@ app.get('/attandance/remove/all/:cid', checkAuth, async (req, res) => {
 
 app.get('/announcement/:id', checkAuth, async (req, res) => {
     try {
-        let data = await Class.findById(req.params.id);
-        if (data) {
-            res.render('principle_announcement', { className: data.className, classId: req.params.id });
-        }
-        else {
-            res.render("404")
+        if (req.user.role != 'Student') {
+            let data = await Class.findById(req.params.id);
+            if (data) {
+                res.render('principle/announcement.ejs', { className: data.className, classId: req.params.id });
+            }
+            else {
+                res.render("404");
+            }
+        } else {
+            res.render("404");
         }
     } catch (err) {
-        res.render("500")
+        res.render("500");
     }
 })
 app.post('/announcement/add/:id', checkAuth, async (req, res) => {
     try {
-        let data = await Class.findById(req.params.id);
-        if (data) {
-            await (new Notification({
-                title: req.body.title,
-                body: req.body.body,
-                class: req.params.id,
-                author: req.user._id,
-                scope: "Class",
-                event: 'Genral'
-            })).save();
-            res.json({ success: true });
-            sendNotificationToClass(req.params.id, req.body.title, req.body.body)
+        if (req.user.role != 'Student') {
+            let data = await Class.findById(req.params.id);
+            if (data) {
+                await (new Notification({
+                    title: req.body.title,
+                    body: req.body.body,
+                    class: req.params.id,
+                    author: req.user._id,
+                    scope: "Class",
+                    event: 'Genral'
+                })).save();
+                res.json({ success: true });
+                sendNotificationToClass(req.params.id, req.body.title, req.body.body)
+            }
+            else {
+                res.json({ success: false });
+            }
         }
         else {
             res.json({ success: false });
@@ -1065,12 +1141,16 @@ app.get('/announcement/all/:id', checkAuth, async (req, res) => {
 //Syllabus
 app.get('/syllabus/:id', checkAuth, async (req, res) => {
     try {
-        let data = await Class.findById(req.params.id);
-        if (data) {
-            res.render('syllabus', { className: data.className, classId: req.params.id, syllabus: data.syllabus || false });
-        }
-        else {
-            res.render("404")
+        if (req.user.role != 'Student') {
+            let data = await Class.findById(req.params.id);
+            if (data) {
+                res.render('principle/syllabus.ejs', { className: data.className, classId: req.params.id, syllabus: data.syllabus || false });
+            }
+            else {
+                res.render("404");
+            }
+        } else {
+            res.render("404");
         }
     } catch (err) {
         res.render("500")
@@ -1080,10 +1160,14 @@ app.get('/syllabus/:id', checkAuth, async (req, res) => {
 
 app.post('/syllabus/add/:id', checkAuth, async (req, res) => {
     try {
-        await Class.findByIdAndUpdate(req.params.id, {
-            syllabus: req.body.url,
-        })
-        res.json({ success: true });
+        if (req.user.role != 'Student') {
+            await Class.findByIdAndUpdate(req.params.id, {
+                syllabus: req.body.url,
+            })
+            res.json({ success: true });
+        } else {
+            res.json({ success: false });
+        }
     } catch (err) {
         res.json({ success: false });
     }
@@ -1094,9 +1178,14 @@ app.post('/syllabus/add/:id', checkAuth, async (req, res) => {
 //Schedule
 app.get('/schedule/:id', checkAuth, async (req, res) => {
     try {
-        let data = await Class.findById(req.params.id);
-        if (data) {
-            res.render('schedule', { className: data.className, classId: req.params.id, schedule: data.schedule || false });
+        if (req.user.role != 'Student') {
+            let data = await Class.findById(req.params.id);
+            if (data) {
+                res.render('principle/schedule.ejs', { className: data.className, classId: req.params.id, schedule: data.schedule || false });
+            }
+            else {
+                res.render("404")
+            }
         }
         else {
             res.render("404")
@@ -1109,10 +1198,14 @@ app.get('/schedule/:id', checkAuth, async (req, res) => {
 
 app.post('/schedule/add/:id', checkAuth, async (req, res) => {
     try {
-        await Class.findByIdAndUpdate(req.params.id, {
-            schedule: req.body.url,
-        })
-        res.json({ success: true });
+        if (req.user.role != 'Student') {
+            await Class.findByIdAndUpdate(req.params.id, {
+                schedule: req.body.url,
+            })
+            res.json({ success: true });
+        } else {
+            res.json({ success: false });
+        }
     } catch (err) {
         res.json({ success: false });
     }
@@ -1123,9 +1216,14 @@ app.post('/schedule/add/:id', checkAuth, async (req, res) => {
 //Result
 app.get('/principleResult/:id', checkAuth, async (req, res) => {
     try {
-        let data = await Class.findById(req.params.id);
-        if (data) {
-            res.render('principle_result', { className: data.className, classId: req.params.id });
+        if (req.user.role != 'Student') {
+            let data = await Class.findById(req.params.id);
+            if (data) {
+                res.render('principle/result.ejs', { className: data.className, classId: req.params.id, isInCharge: (req.user.role === 'Principle') || (data.inCharge && data.inCharge.toString() === req.user._id.toString()) });
+            }
+            else {
+                res.render("404")
+            }
         }
         else {
             res.render("404")
@@ -1138,61 +1236,65 @@ app.get('/principleResult/:id', checkAuth, async (req, res) => {
 
 app.post('/result/upload/:id', checkAuth, async (req, res) => {
     try {
-        let filePath = `./static/downloads/${req.body.url}`;
-        fs.readFile(filePath, async (err, data) => {
-            await deleteFile(filePath);
-            const workbook = XLSX.read(data);
-            const sheet_name_list = workbook.SheetNames;
-            let resultData = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
-            let JSONResult = [], errorData = [];
-            await Promise.all(resultData.map(async item => {
-                let student = await User.findOne({ rid: item['Reg. ID'] });
-                if (student && student.role === 'Student') {
-                    let classData = await userClass(student._id);
-                    console.log(classData);
-                    if (classData && classData._id.toString() === req.params.id) {
-                        let result = resultBuilder(item);
-                        JSONResult.push({
-                            userId: student._id,
-                            desc: result
-                        })
-                    }
-                    else if (classData) {
+        if (req.user.role != 'Student') {
+            let filePath = `./static/downloads/${req.body.url}`;
+            fs.readFile(filePath, async (err, data) => {
+                await deleteFile(filePath);
+                const workbook = XLSX.read(data);
+                const sheet_name_list = workbook.SheetNames;
+                let resultData = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
+                let JSONResult = [], errorData = [];
+                await Promise.all(resultData.map(async item => {
+                    let student = await User.findOne({ rid: item['Reg. ID'] });
+                    if (student && student.role === 'Student') {
+                        let classData = await userClass(student._id);
+                        console.log(classData);
+                        if (classData && classData._id.toString() === req.params.id) {
+                            let result = resultBuilder(item);
+                            JSONResult.push({
+                                userId: student._id,
+                                desc: result
+                            })
+                        }
+                        else if (classData) {
+                            errorData.push({
+                                rid: item['Reg. ID'],
+                                reasone: `Student of ${classData.className} Class`,
+                            })
+                        }
+                        else {
+                            errorData.push({
+                                rid: item['Reg. ID'],
+                                reasone: `Student of Unknown Class`,
+                            })
+                        }
+                    } else {
                         errorData.push({
                             rid: item['Reg. ID'],
-                            reasone: `Student of ${classData.className} Class`,
+                            reasone: "Not a Valid Reg. ID",
                         })
                     }
-                    else {
-                        errorData.push({
-                            rid: item['Reg. ID'],
-                            reasone: `Student of Unknown Class`,
-                        })
-                    }
-                } else {
-                    errorData.push({
-                        rid: item['Reg. ID'],
-                        reasone: "Not a Valid Reg. ID",
-                    })
-                }
-            }))
-            if (resultData.length === JSONResult.length) {
-                console.log(JSONResult);
-                console.log(errorData);
-                await (new Result({
-                    title: req.body.title,
-                    classId: req.params.id,
-                    MM: req.body.MM,
-                    result: JSONResult
-                })).save();
+                }))
+                if (resultData.length === JSONResult.length) {
+                    console.log(JSONResult);
+                    console.log(errorData);
+                    await (new Result({
+                        title: req.body.title,
+                        classId: req.params.id,
+                        MM: req.body.MM,
+                        result: JSONResult
+                    })).save();
 
-            } else {
-                console.log(JSONResult);
-                console.log(errorData);
-                return res.json({ success: true, uploaded: false, data: errorData });
-            }
-            res.json({ success: true, uploaded: true });
-        })
+                } else {
+                    console.log(JSONResult);
+                    console.log(errorData);
+                    return res.json({ success: true, uploaded: false, data: errorData });
+                }
+                res.json({ success: true, uploaded: true });
+            })
+        } else {
+            res.json({ success: false });
+        }
     } catch (err) {
         console.log(err);
         res.json({ success: false });
@@ -1207,7 +1309,6 @@ const resultBuilder = (data) => {
 
 app.get('/result/all/:id', checkAuth, async (req, res) => {
     try {
-        console.log(req.params.id)
         let data = await Result.aggregate([
             {
                 $match: {
@@ -1236,11 +1337,15 @@ app.get('/result/all/:id', checkAuth, async (req, res) => {
 
 app.get('/explainResult/:id/:classId', checkAuth, async (req, res) => {
     try {
-        let data = await Class.findById(req.params.classId);
-        if (data) {
-            res.render('principle_explain_result', { className: data.className, classId: req.params.id, resultId: req.params.id });
-        }
-        else {
+        if (req.user.role != 'Student') {
+            let data = await Class.findById(req.params.classId);
+            if (data) {
+                res.render('principle/explain_result.ejs', { className: data.className, classId: req.params.id, resultId: req.params.id, isInCharge: (req.user.role === 'Principle') || (data.inCharge && data.inCharge.toString() === req.user._id.toString()) });
+            }
+            else {
+                res.render("404")
+            }
+        } else {
             res.render("404")
         }
     } catch (err) {
@@ -1251,72 +1356,16 @@ app.get('/explainResult/:id/:classId', checkAuth, async (req, res) => {
 
 app.get('/result/single/:id', checkAuth, async (req, res) => {
     try {
-        let data = await Result.aggregate([
-            {
-                '$match': {
-                    '_id': new mongoose.Types.ObjectId(req.params.id)
-                }
-            }, {
-                '$lookup': {
-                    'from': 'classes',
-                    'localField': 'classId',
-                    'foreignField': '_id',
-                    'as': 'class'
-                }
-            }, {
-                '$unwind': {
-                    'path': '$class'
-                }
-            }, {
-                '$project': {
-                    'title': 1,
-                    'MM': 1,
-                    'result': 1,
-                    'createdAt': 1,
-                    'class.className': 1,
-                    'class.icon': 1
-                }
-            }
-        ])
-        res.json({ success: true, data });
-    } catch (err) {
-        console.log(err);
-        res.json({ success: false });
-    }
-})
-
-app.get('/result/students/:id', checkAuth, async (req, res) => {
-    try {
-        let data = await Result.aggregate(
-            [
+        if (req.user.role != 'Student') {
+            let data = await Result.aggregate([
                 {
                     '$match': {
                         '_id': new mongoose.Types.ObjectId(req.params.id)
                     }
                 }, {
-                    '$unwind': {
-                        'path': '$result'
-                    }
-                }, {
-                    '$group': {
-                        '_id': '$_id',
-                        'class': {
-                            '$first': '$classId'
-                        },
-                        'title': {
-                            '$first': '$title'
-                        },
-                        'MM': {
-                            '$first': '$MM'
-                        },
-                        'students': {
-                            '$sum': 1
-                        }
-                    }
-                }, {
                     '$lookup': {
                         'from': 'classes',
-                        'localField': 'class',
+                        'localField': 'classId',
                         'foreignField': '_id',
                         'as': 'class'
                     }
@@ -1325,36 +1374,100 @@ app.get('/result/students/:id', checkAuth, async (req, res) => {
                         'path': '$class'
                     }
                 }, {
-                    '$unwind': {
-                        'path': '$class.students'
-                    }
-                }, {
-                    '$group': {
-                        '_id': '$_id',
-                        'className': {
-                            '$first': '$class.className'
-                        },
-                        'totalStudents': {
-                            '$sum': 1
-                        },
-                        'resultedStudents': {
-                            '$first': '$students'
-                        },
-                        'title': {
-                            '$first': '$title'
-                        },
-                        'MM': {
-                            '$first': '$MM'
-                        }
+                    '$project': {
+                        'title': 1,
+                        'MM': 1,
+                        'result': 1,
+                        'createdAt': 1,
+                        'class.className': 1,
+                        'class.icon': 1
                     }
                 }
-            ]
-        )
-
-        if (data.length) {
-            res.render('principle_result_students', { data: data[0] });
+            ])
+            res.json({ success: true, data });
+        } else {
+            res.json({ success: false });
         }
-        else {
+    } catch (err) {
+        console.log(err);
+        res.json({ success: false });
+    }
+})
+
+app.get('/result/students/:id', checkAuth, async (req, res) => {
+    try {
+        if (req.user.role != 'Student') {
+            let data = await Result.aggregate(
+                [
+                    {
+                        '$match': {
+                            '_id': new mongoose.Types.ObjectId(req.params.id)
+                        }
+                    }, {
+                        '$unwind': {
+                            'path': '$result'
+                        }
+                    }, {
+                        '$group': {
+                            '_id': '$_id',
+                            'class': {
+                                '$first': '$classId'
+                            },
+                            'title': {
+                                '$first': '$title'
+                            },
+                            'MM': {
+                                '$first': '$MM'
+                            },
+                            'students': {
+                                '$sum': 1
+                            }
+                        }
+                    }, {
+                        '$lookup': {
+                            'from': 'classes',
+                            'localField': 'class',
+                            'foreignField': '_id',
+                            'as': 'class'
+                        }
+                    }, {
+                        '$unwind': {
+                            'path': '$class'
+                        }
+                    }, {
+                        '$unwind': {
+                            'path': '$class.students'
+                        }
+                    }, {
+                        '$group': {
+                            '_id': '$_id',
+                            'className': {
+                                '$first': '$class.className'
+                            },
+                            'totalStudents': {
+                                '$sum': 1
+                            },
+                            'resultedStudents': {
+                                '$first': '$students'
+                            },
+                            'title': {
+                                '$first': '$title'
+                            },
+                            'MM': {
+                                '$first': '$MM'
+                            }
+                        }
+                    }
+                ]
+            )
+
+            if (data.length) {
+                res.render('principle/result_students.ejs', { data: data[0] });
+            }
+            else {
+                res.render("404")
+            }
+        } else {
             res.render("404")
         }
     } catch (err) {
@@ -1364,59 +1477,62 @@ app.get('/result/students/:id', checkAuth, async (req, res) => {
 
 app.get('/result/students/all/:id', checkAuth, async (req, res) => {
     try {
-        let data = await Result.aggregate([
-            {
-                '$match': {
-                    '_id': new mongoose.Types.ObjectId(req.params.id)
-                }
-            }, {
-                '$project': {
-                    'title': 1,
-                    'MM': 1,
-                    'result.userId': 1
-                }
-            }, {
-                '$lookup': {
-                    'from': 'users',
-                    'localField': 'result.userId',
-                    'foreignField': '_id',
-                    'as': 'result'
-                }
-            }, {
-                '$project': {
-                    'title': 1,
-                    'MM': 1,
-                    'result.username': 1,
-                    'result.rollno': 1,
-                    'result._id': 1,
-                    'result.profile': 1
-                }
-            }, {
-                '$unwind': {
-                    'path': '$result'
-                }
-            }, {
-                '$sort': {
-                    'result.rollno': 1
-                }
-            }, {
-                '$group': {
-                    '_id': '$_id',
-                    'title': {
-                        '$first': '$title'
-                    },
-                    'MM': {
-                        '$first': '$MM'
-                    },
-                    'result': {
-                        '$push': '$result'
+        if (req.user.role != 'Student') {
+            let data = await Result.aggregate([
+                {
+                    '$match': {
+                        '_id': new mongoose.Types.ObjectId(req.params.id)
+                    }
+                }, {
+                    '$project': {
+                        'title': 1,
+                        'MM': 1,
+                        'result.userId': 1
+                    }
+                }, {
+                    '$lookup': {
+                        'from': 'users',
+                        'localField': 'result.userId',
+                        'foreignField': '_id',
+                        'as': 'result'
+                    }
+                }, {
+                    '$project': {
+                        'title': 1,
+                        'MM': 1,
+                        'result.username': 1,
+                        'result.rollno': 1,
+                        'result._id': 1,
+                        'result.profile': 1
+                    }
+                }, {
+                    '$unwind': {
+                        'path': '$result'
+                    }
+                }, {
+                    '$sort': {
+                        'result.rollno': 1
+                    }
+                }, {
+                    '$group': {
+                        '_id': '$_id',
+                        'title': {
+                            '$first': '$title'
+                        },
+                        'MM': {
+                            '$first': '$MM'
+                        },
+                        'result': {
+                            '$push': '$result'
+                        }
                     }
                 }
-            }
-        ])
-        res.json({ success: true, data });
+            ])
+            res.json({ success: true, data });
+        } else {
+            res.json({ success: false });
+        }
     } catch (err) {
-        console.log(err);
         res.json({ success: false });
     }
 })
@@ -1455,17 +1571,42 @@ app.get('/result/students/single/:sid/:rid', checkAuth, async (req, res) => {
                         'createdAt': 1,
                         'result.userId.username': 1,
                         'result.userId.profile': 1,
-                        'result.userId._id': 1
+                        'result.userId._id': 1,
+                        'classId': 1
+                    }
+                },
+                {
+                    $lookup: {
+                        'from': 'classes',
+                        'localField': 'classId',
+                        'foreignField': '_id',
+                        'as': 'class'
+                    }
+                },
+                {
+                    $project: {
+                        'title': 1,
+                        'MM': 1,
+                        'createdAt': 1,
+                        'result.userId.username': 1,
+                        'result.userId.profile': 1,
+                        'result.userId._id': 1,
+                        'class.inCharge': 1
+                    }
+                },
+                {
+                    $unwind: {
+                        'path': '$class',
+                        preserveNullAndEmptyArrays: true,
                     }
                 }
             ]
         )
-
         if (data.length) {
             data = data[0];
             data.createdAt = formatTime(data.createdAt);
             console.log(data);
-            res.render('result', { data, isPrinciple: req.user.role == 'Principle' });
+            res.render('common/result.ejs', { data, isPrinciple: (req.user.role === 'Principle') || (data.class.inCharge && data.class.inCharge.toString() === req.user._id.toString()) });
         }
         else {
             res.render("404")
@@ -1507,7 +1648,7 @@ app.get('/result/single/:rid/:sid', checkAuth, async (req, res) => {
 
 
 
-
+//student accessing all result of a class
 app.get('/result/all/student/:cid', checkAuth, async (req, res) => {
     try {
         let data = await Result.aggregate([
@@ -1537,8 +1678,12 @@ app.get('/result/all/student/:cid', checkAuth, async (req, res) => {
 
 app.post('/result/update/resultName/:id', checkAuth, async (req, res) => {
     try {
-        await Result.findByIdAndUpdate(req.params.id, { title: req.body.title });
-        res.json({ success: true });
+        if (req.user.role != 'Student') {
+            await Result.findByIdAndUpdate(req.params.id, { title: req.body.title });
+            res.json({ success: true });
+        } else {
+            res.json({ success: false });
+        }
     } catch (err) {
         res.json({ success: false });
     }
@@ -1547,9 +1692,13 @@ app.post('/result/update/resultName/:id', checkAuth, async (req, res) => {
 
 app.post('/result/updatemarks/:uid/:rid', checkAuth, async (req, res) => {
     try {
-        await Result.updateOne({ "_id": new mongoose.Types.ObjectId(req.params.rid), "result.userId": new mongoose.Types.ObjectId(req.params.uid) },
-            { $set: { "result.$.desc": req.body.result } },)
-        res.json({ success: true });
+        if (req.user.role != 'Student') {
+            await Result.updateOne({ "_id": new mongoose.Types.ObjectId(req.params.rid), "result.userId": new mongoose.Types.ObjectId(req.params.uid) },
+                { $set: { "result.$.desc": req.body.result } },)
+            res.json({ success: true });
+        } else {
+            res.json({ success: false });
+        }
     } catch (err) {
         res.json({ success: false });
     }
@@ -1558,8 +1707,12 @@ app.post('/result/updatemarks/:uid/:rid', checkAuth, async (req, res) => {
 
 app.get('/result/remove/:id', checkAuth, async (req, res) => {
     try {
-        await Result.findByIdAndDelete(req.params.id);
-        res.json({ success: true });
+        if (req.user.role != 'Student') {
+            await Result.findByIdAndDelete(req.params.id);
+            res.json({ success: true });
+        } else {
+            res.json({ success: false });
+        }
     } catch (err) {
         res.json({ success: false });
     }

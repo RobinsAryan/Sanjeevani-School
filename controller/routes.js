@@ -9,17 +9,18 @@ import userRoute, { userClass } from './userRoutes.js'
 import studentRoute from './studentRoutes.js'
 import { checkAuth } from '../utils/middleware.js';
 import webPush from '../utils/webPush.js'
-import webRTC from './RTC/liveClass.js' 
-import rtcServer from './RTC/rtcServer.js' 
+import webRTC from './RTC/liveClass.js'
+import rtcServer from './RTC/rtcServer.js'
+import cardRoute from './cards.js';
 passportLocal(passport);
 
 
 app.get('/', async (req, res) => {
     if (req.isAuthenticated()) {
         if (req.user.role === 'Principle') {
-            res.render('principle_home', { profile: req.user.profile, username: req.user.username });
+            res.render('principle/home.ejs', { profile: req.user.profile, username: req.user.username});
         } else if (req.user.role === 'Teacher') {
-            res.render('teacher_home');
+            res.render('teachers/home.ejs', { profile: req.user.profile, username: req.user.username, userId: req.user._id });
         }
         else {
             let data = {
@@ -32,10 +33,10 @@ app.get('/', async (req, res) => {
             }
             else data["userBirthday"] = 0;
             let classData = await userClass(req.user._id)
-            res.render('home', { data, classData });
+            res.render('students/home.ejs', { data, classData });
         }
     } else {
-        res.render("base");
+        res.render("common/base.ejs");
     }
 })
 
@@ -44,7 +45,7 @@ app.get('/login', (req, res) => {
         res.redirect('/');
     }
     else {
-        res.render("login");
+        res.render("common/login.ejs");
     }
 })
 
@@ -79,7 +80,7 @@ app.get('/logout', (req, res) => {
 });
 
 app.get('/home', checkAuth, async (req, res) => {
-    res.render('home', { username: req.user.username, amount: (await roomPrice()).amount });
+    res.render('common/home.ejs', { username: req.user.username, amount: (await roomPrice()).amount });
 })
 
 app.get('/help', (req, res) => {
@@ -92,8 +93,9 @@ app.use('/class', classRoute);
 app.use('/teacher', teacherRoute);
 app.use('/user', userRoute);
 app.use('/student', studentRoute);
-app.use('/RTC', webRTC); 
-app.use('/rtcServer', rtcServer); 
+app.use('/RTC', webRTC);
+app.use('/rtcServer', rtcServer);
+app.use('/cards', cardRoute);
 app.use(webPush);
 
 export default app;

@@ -66,7 +66,7 @@ app.get('/profile/:id', checkAuth, async (req, res) => {
                     access: (user._id.toString() === req.user._id.toString()) || req.user.role === 'Principle',
                     isPrinciple: (req.user.role === 'Principle')
                 }
-                res.render('profile', { data, userData: JSON.stringify(data) })
+                res.render('common/profile.ejs', { data, userData: JSON.stringify(data) })
             }
             else if (user.role === 'Student') {
                 let classData = await userClass(req.params.id);
@@ -86,7 +86,7 @@ app.get('/profile/:id', checkAuth, async (req, res) => {
                     access: (user._id.toString() === req.user._id.toString()) || req.user.role !== 'Student',
                     isPrinciple: (req.user.role === 'Principle')
                 }
-                res.render('profile', { data, userData: JSON.stringify(data) })
+                res.render('common/profile.ejs', { data, userData: JSON.stringify(data) })
             }
             else {
                 res.send("Unknown Pearson may be Principle of None!");
@@ -159,7 +159,7 @@ app.get('/attandance/:id', checkAuth, async (req, res) => {
                 fname: user.fname,
                 studentId: user.rid
             }
-            res.render('student_attandance', { data })
+            res.render('students/attandance.ejs', { data })
         }
         else res.render("404");
     } catch (err) {
@@ -171,7 +171,7 @@ app.get('/attandance/:id', checkAuth, async (req, res) => {
 app.get('/gallary', checkAuth, async (req, res) => {
     try {
         const data = { ...req.user }
-        res.render('gallary', { data });
+        res.render('common/gallary.ejs', { data });
     } catch (err) {
 
     }

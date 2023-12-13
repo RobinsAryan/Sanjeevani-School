@@ -284,10 +284,10 @@ async function subscribeToPush() {
             closePopup();
         }
         else {
-            location.href = '/logout';
+            // location.href = '/logout';
         }
     } catch (error) { 
-        location.href = '/logout';
+        // location.href = '/logout';
     }
 }
 

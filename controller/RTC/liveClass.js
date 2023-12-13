@@ -11,7 +11,7 @@ app.get('/class/:cid', checkAuth, async (req, res) => {
     try {
         let data = await Class.findById(req.params.cid);
         if (data) {
-            res.render('principle_liveClass', { className: data.className, classId: req.params.cid });
+            res.render('principle/liveClass.ejs', { className: data.className, classId: req.params.cid });
         }
         else {
             res.render("404")

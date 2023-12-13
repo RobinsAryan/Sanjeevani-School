@@ -3,7 +3,7 @@ import multer from 'multer';
 import User from '../models/User.js';
 import Class from '../models/Class.js';
 import { checkAuth, checkPrinciple } from '../utils/middleware.js';
-import { compressAndOverwrite } from '../utils/fileOperation.js';
+import { compressAndOverwrite, resizeImages } from '../utils/fileOperation.js';
 const app = express();
 app.use(express.static('static'));
 const storage = multer.diskStorage({
@@ -55,7 +55,7 @@ app.get('/download/:fname', (req, res) => {
     });
 });
 
-app.post('/saveFile', checkAuth, checkPrinciple, uploadDownloads.single('file'), (req, res) => {
+app.post('/saveFile', checkAuth, uploadDownloads.single('file'), (req, res) => {
     try {
         res.json({
             success: true,
@@ -208,6 +208,26 @@ app.get('/search', checkAuth, async (req, res) => {
         res.json({ success: true, data });
     } catch (err) {
         res.json({ success: false });
+    }
+})
+
+app.get('/resizeCards', checkAuth, checkPrinciple, async (req, res) => {
+    try {
+        let { url, height, width } = req.query;
+        height = parseInt(height);
+        width = parseInt(width);
+        let newHeight = 0, newWidth = 0;
+        if (height > width) {
+            newHeight = 500;
+            newWidth = Math.ceil(500 * (width / height));
+        } else {
+            newWidth = 500;
+            newHeight = Math.ceil(500 * (height / width));
+        } 
+        await resizeImages(url, newHeight, newWidth, 100);
+        res.json({ success: true, url: `/compressed${url}` });
+    } catch (err) {
+        console.log(err);
     }
 })
 

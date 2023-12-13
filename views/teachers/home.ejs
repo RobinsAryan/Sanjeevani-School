@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher | <%=username%>
+    </title>
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/gallary.css">
+    <link rel="stylesheet" href="/css/principle/home.css">
+    <link rel="stylesheet" href="/css/principle/classWork.css">
+    <link rel="stylesheet" href="/css/popup.css">
+    <script src="https://kit.fontawesome.com/c538c9717e.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="header">
+        <div class="topbar-right">
+            <div class="line-container">
+                <div class="line line-1"></div>
+                <div class="line line-2"></div>
+                <div class="line line-3"></div>
+            </div>
+        </div>
+        <p id="headerTitle">Classes</p>
+        <button onclick="location.href='/logout'">Logout</button>
+    </div>
+    <div class="menu">
+        <div class="menu-top">
+            <div class="menu-search">
+                <p>Welcome!</p>
+            </div>
+        </div>
+        <div class="menu-center">
+            <div onclick="openPage(0)" class="menu-item">
+                <i class="fa-solid fa-users-line"></i>
+                <span>Classes</span>
+            </div>
+            <div onclick="openPage(1)" class="menu-item">
+                <i class="fa-solid fa-user"></i>
+                <span>Other Teachers</span>
+            </div>
+            <div onclick="openPage(2)" class="menu-item">
+                <i class="fa-solid fa-bullhorn"></i>
+                <span>Announcements</span>
+            </div>
+            <div onclick="openPage(3)" class="menu-item">
+                <i class="fas fa-images"></i>
+                <span>Gallary</span>
+            </div>
+        </div>
+        <div class="menu-bottom">
+            <div class="menu-bottom-user" onclick="location.href ='/user/profile/<%=userId%>'">
+                <img src="<%=profile%>" alt="">
+                <span>
+                    <%=username%>
+                </span>
+            </div>
+            <i onclick="about()" class="far fa-question-circle"></i>
+        </div>
+    </div>
+    <div class="main">
+        <div class="view">
+            <div class="classes">
+            </div>
+            <div id="refrence">
+                <i class="fas fa-spinner rotateMe"></i>
+            </div>
+        </div>
+    </div>
+    <div id="popup" class="popup">
+    </div>
+    <script src="/js/common.js"></script>
+    <script src="/js/teachers/home.js"></script>
+</body>
+
+</html>

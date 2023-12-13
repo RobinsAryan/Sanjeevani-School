@@ -11,6 +11,10 @@
     cursor: pointer;
 }
 
+.student:active {
+    background: rgb(177, 177, 177);
+}
+
 .student .profile {
     height: 60px;
     width: 60px;
