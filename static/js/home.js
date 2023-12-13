@@ -249,61 +249,6 @@ const handleScroll = () => {
 
 
 
-if ('serviceWorker' in navigator && 'Notification' in window) {
-
-    navigator.serviceWorker.register('/sw.js')
-        .then((registration) => {
-        })
-        .catch((error) => {
-            alert(error.toString());
-            location.href = '/logout';
-        });
-}
-
-
-const PublicKey = 'BMTUJwXpovugSRpuXdZjlS0XhNclQFIER9LcXVemxQSi8hLX3US6-2Eg0Sow74qtHnH_x3FS8yUl3NmCsdlosx8'
-
-
-async function subscribeToPush() {
-    try {
-        document.getElementById('popup').innerHTML = '<div class="loading_div"> <i class="fas fa-spinner rotateMe"></i> </div>'
-        const permission = await Notification.requestPermission();
-
-        if (permission === 'granted') {
-            console.log("granted!");
-            const registration = await navigator.serviceWorker.ready;
-
-            const subscription = await registration.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(PublicKey)
-            });
-
-            await myPost('/subscribe', subscription); 
-
-            localStorage.setItem('policyAggrement', (Date.now()).toString());
-            closePopup();
-        }
-        else {
-            // location.href = '/logout';
-        }
-    } catch (error) { 
-        // location.href = '/logout';
-    }
-}
-
-function urlBase64ToUint8Array(base64String) {
-    const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding)
-        .replace(/-/g, '+')
-        .replace(/_/g, '/');
-    const rawData = window.atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
-
-    for (let i = 0; i < rawData.length; i++) {
-        outputArray[i] = rawData.charCodeAt(i);
-    }
-    return outputArray;
-}
 
 
 const PolicyAggrement = () => {
