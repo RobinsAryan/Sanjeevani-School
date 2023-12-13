@@ -313,7 +313,7 @@ const PolicyAggrement = () => {
         <div class="popup-form"> 
         <h2 style="font-size:15px;margin-bottom:20px">Terms of Use App!</h2>
         <p style="font-size:12px">Notifications must be allowed to continue with App!</p>
-        <button onclick="location.href='/logout'" class="normalButton" style="background:red;margin-top:10px">Deny</button>
+        <button class="normalButton" style="background:red;margin-top:10px">Deny</button>
         <button onclick="subscribeToPush()" class="normalButton" style="margin-top:10px">Allow</button>
         </div>
         `
