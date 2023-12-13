@@ -11,7 +11,7 @@ import dotenv from 'dotenv';
 import MemoryStore from 'memorystore';
 import path from 'path'
 import connectMongoDBSession from 'connect-mongodb-session';
-import routes from './controller/routes.js'; 
+import routes from './controller/routes.js';
 import http from 'http';
 import https from 'https';
 import compression from 'compression';
@@ -22,12 +22,7 @@ import { Server } from 'socket.io';
 import ioFunction from './controller/RTC/io.js';
 
 
-
-const domain = process.env.HOST || 'localhost';
-const isHttps = process.env.isHTTPS == 'true';
-const host = `http${isHttps ? 's' : ''}://${domain}`;
-
-const app = express(); 
+const app = express();
 
 
 dotenv.config({ path: ".env" });
@@ -81,16 +76,7 @@ app.use(function (req, res, next) {
 
 
 // socket io 
-let server;
-if (isHttps) {
-    const options = {
-        key: fs.readFileSync(path.join(path.resolve(), '/ssl/key.pem'), 'utf-8'),
-        cert: fs.readFileSync(path.join(path.resolve(), '/ssl/cert.pem'), 'utf-8'),
-    };
-    server = https.createServer(options, app);
-} else {
-    server = http.createServer(app);
-}
+let server = http.createServer(app);
 
 let io = new Server({
     maxHttpBufferSize: 1e7,
@@ -98,7 +84,7 @@ let io = new Server({
 }).listen(server);
 
 ioFunction(io);
- 
+
 
 
 

@@ -8819,15 +8819,15 @@ function msgPopup(icon, message, position, timer = 1000) {
  * @param {string} name audio to play
  * @param {boolean} force audio
  */
-async function playSound(name, force = false) {
+async function playSound(name, force = false) { 
     if (!notifyBySound && !force) return;
-    const sound = '../sounds/' + name + '.mp3';
+    const sound = '/vc/sounds/' + name + '.mp3';
     const audioToPlay = new Audio(sound);
     try {
         audioToPlay.volume = 0.5;
         await audioToPlay.play();
     } catch (err) {
-        // console.error("Cannot play sound", err);
+        console.error("Cannot play sound", err);
         // Automatic playback failed. (safari)
         return;
     }

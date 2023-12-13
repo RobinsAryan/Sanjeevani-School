@@ -6,7 +6,7 @@ const roomPresentersString = process.env.PRESENTERS || '["Sanjeevani School"]';
 const roomPresenters = JSON.parse(roomPresentersString);
 
 const surveyEnabled = getEnvBoolean(process.env.SURVEY_ENABLED);
-const surveyURL = process.env.SURVEY_URL || 'https://app.thesanjeevanischool.in';
+const surveyURL =  'https://app.thesanjeevanischool.in';
 
 // IP Lookup
 const IPLookupEnabled = getEnvBoolean(process.env.IP_LOOKUP_ENABLED);

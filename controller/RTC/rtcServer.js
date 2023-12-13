@@ -11,7 +11,7 @@ dotenv.config();
 // Host protection (disabled by default)
 const hostProtected = getEnvBoolean(process.env.HOST_PROTECTED);
 const userAuth = getEnvBoolean(process.env.HOST_USER_AUTH);
-const hostUsersString = process.env.HOST_USERS || '[{"username": "Sanjeevani School", "password": "admin"}]';
+const hostUsersString = '[{"username": "Sanjeevani School", "password": "admin"}]';
 const hostUsers = JSON.parse(hostUsersString);
 export const hostCfg = {
     protected: hostProtected,
