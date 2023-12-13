@@ -13,6 +13,7 @@
     "lang": "en",
     "dir": "ltr",
     "id":"/",
+    "iarc_rating_id": "baea39ae-b239-415a-a993-a633cd66e659",
     "icons": [
         {
             "src": "../img/manifestImages/icons/icon-72x72.png",
@@ -108,5 +109,12 @@
             "url": "/",
             "label": "Return to Sanjeevani School"
         }
-    }
+    },"launch_handler": {
+        "client_mode": "auto"
+    },
+    "scope_extensions": [
+        {
+            "origin": "*https://thesanjeevanischool.in"
+        }
+    ]
 }
