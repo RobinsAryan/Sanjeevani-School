@@ -139,7 +139,7 @@ app.get('/student/:cid', checkAuth, async (req, res) => {
     if (req.user.role != 'Student') {
         let data = await Class.findById(req.params.cid);
         if (data) {
-            res.render('principle/student.ejs', { className: data.className, classId: req.params.cid,isPrinciple:req.user.role==='Principle' });
+            res.render('principle/student.ejs', { className: data.className, classId: req.params.cid, isPrinciple: req.user.role === 'Principle' });
         }
     } else {
         res.render('404');
@@ -174,7 +174,13 @@ app.get('/students/all/:classID', checkAuth, async (req, res) => {
                 }
             }, {
                 '$project': {
-                    'student': 1,
+                    'student.rollno': 1,
+                    'student.username': 1,
+                    'student.rid': 1,
+                    'student.phone': 1,
+                    'student.fname': 1,
+                    'student.profile': 1,
+                    'student._id': 1,
                     '_id': 0
                 }
             }, {

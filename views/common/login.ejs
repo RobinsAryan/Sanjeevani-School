@@ -7,6 +7,7 @@
     <title>Login</title>
     <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="css/popup.css">
     <script src="https://kit.fontawesome.com/c538c9717e.js" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <link rel="manifest" href="manifest/manifest.json">
@@ -34,10 +35,13 @@
                     <!-- <i class="fas fa-eye-slash"></i> -->
                 </span>
                 <br>
-                <div class="forgot-password">Forgot Password?</div>
+                <div class="forgot-password" onclick="forgotPassword()">Forgot Password?</div>
                 <div class="btn"><button id="btn1" type="submit">Login</button></div>
             </form> 
         </div>
+    </div>
+    <div id="popup" class="popup">
+    
     </div>
     <script src="js/common.js"></script>
     <script src="js/login.js"></script>

@@ -170,6 +170,7 @@ const formatTime = (time) => {
 
     return formattedDateString;
 }
+
 let isVibrationAvalible = ('vibrate' in navigator);
 const vibrate = {
     warning: () => {

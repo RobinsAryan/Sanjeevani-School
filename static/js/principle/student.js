@@ -70,15 +70,18 @@ const handleSubmit = async (event, id) => {
             let res = await myPost(`/class/addSingleStudent/${classId}`, data);
             if (res.success) {
                 if (res.added) {
+                    vibrate.success();
                     closePopup();
                     loadStudents();
                 }
                 else {
+                    vibrate.warning();
                     alert(res.msz);
                     addOne();
                 }
             }
             else {
+                vibrate.failure();
                 document.getElementById('popup').innerHTML = `
                 <div class="popup-form">
                 ${showSWrong('addStudent()')}
@@ -92,7 +95,7 @@ const handleSubmit = async (event, id) => {
             let data = await uploadFile(file, `/class/addMultipleStudents/${classId}`);
             if (data.success) {
                 if (!data.allInserted) {
-                    console.log(data);
+                    vibrate.success();
                     document.getElementById('popup').innerHTML =
                         `
             <div class="popup-form">
@@ -105,10 +108,12 @@ const handleSubmit = async (event, id) => {
         `
                 }
                 else {
+                    vibrate.warning();
                     closePopup();
                     loadStudents();
                 }
             } else {
+                vibrate.failure();
                 document.getElementById('popup').innerHTML = `
                 <div class="popup-form">
                 ${showSWrong('addStudent()')}
@@ -117,6 +122,7 @@ const handleSubmit = async (event, id) => {
             }
         }
     } catch (err) {
+        vibrate.failure();
         document.getElementById('popup').innerHTML = `
                 <div class="popup-form">
                 ${showSWrong('addStudent()')}
@@ -153,11 +159,15 @@ const loadStudents = async () => {
                     <div class="Info">
                         <p>${student.student.username}</p>
                         <p style="font-size: 12px; color: gray;">Roll No. ${student.student.rollno}</p>
+                        <p style="font-size: 12px; color: gray;">Phone No. ${student.student.phone}</p>
+                        <p style="font-size: 12px; color: gray;">Reg. Id ${student.student.rid}</p>
                         </div> 
+                        <a class="phone" href="tel:${student.phone}"><i class="fas fa-phone-alt"></i></a>
                         </div>`
         })
     }
     else {
+        vibrate.touch();
         pdiv.innerHTML = showSWrong('loadStudents()');
     }
 }

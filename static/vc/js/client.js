@@ -117,7 +117,7 @@ const showDocumentPipBtn = !isMobileDevice && !isEmbedded && 'documentPictureInP
  * captionBtn, showSwapCameraBtn, showScreenShareBtn, showFullScreenBtn, showVideoPipBtn, showDocumentPipBtn -> (auto-detected).
  */
 const buttons = {
-    main: { 
+    main: {
         showHideMeBtn: true,
         showAudioBtn: true,
         showVideoBtn: true,
@@ -195,7 +195,7 @@ const initMicrophoneSelect = getId('initMicrophoneSelect');
 const initSpeakerSelect = getId('initSpeakerSelect');
 
 // Buttons bar
-const buttonsBar = getId('buttonsBar'); 
+const buttonsBar = getId('buttonsBar');
 const hideMeBtn = getId('hideMeBtn');
 const videoBtn = getId('videoBtn');
 const swapCameraBtn = getId('swapCameraBtn');
@@ -605,7 +605,7 @@ let surveyURL = 'https://www.questionpro.com/t/AUs7VZq00L';
 
 // Redirect on leave room
 let redirectActive = false;
-let redirectURL = '/newcall';
+let redirectURL = '/';
 
 /**
  * Load all Html elements by Id
@@ -668,7 +668,7 @@ function setButtonsToolTip() {
     setTippy(speechRecognitionStart, 'Start', 'top');
     setTippy(speechRecognitionStop, 'Stop', 'top');
     // Settings
-    setTippy(mySettingsCloseBtn, 'Close', 'bottom'); 
+    setTippy(mySettingsCloseBtn, 'Close', 'bottom');
     setTippy(
         switchPushToTalk,
         'If Active, When SpaceBar keydown the microphone will be activated, on keyup will be deactivated, like a walkie-talkie',
@@ -3629,7 +3629,7 @@ function refreshMyAudioStatus(localAudioMediaStream) {
 /**
  * Handle WebRTC left buttons
  */
-function manageLeftButtons() { 
+function manageLeftButtons() {
     setHideMeButton();
     setAudioBtn();
     setVideoBtn();
@@ -3648,7 +3648,7 @@ function manageLeftButtons() {
     setLeaveRoomBtn();
 }
 
- 
+
 
 /**
  * Hide myself from room view
@@ -8819,7 +8819,7 @@ function msgPopup(icon, message, position, timer = 1000) {
  * @param {string} name audio to play
  * @param {boolean} force audio
  */
-async function playSound(name, force = false) { 
+async function playSound(name, force = false) {
     if (!notifyBySound && !force) return;
     const sound = '/vc/sounds/' + name + '.mp3';
     const audioToPlay = new Audio(sound);

@@ -70,6 +70,18 @@ passwordVisiblity.addEventListener('click', (e) => {
 })
 
 
+const forgotPassword = () => {
+    document.getElementById('popup').style.display = 'block';
+    document.getElementById('popup').innerHTML = `
+        <div class="popup-form">
+        <div class="hidePopUp"><i onClick="closePopup()" class="fa-solid fa-xmark"></i></div>
+            <h2 style="font-size:15px;margin-bottom:20px">Forgot Password?</h2>
+            <p style="font-size:12px">Don't worry contact your Principle and tell tham to change it.</p>
+            <button class="normalButton" onclick="document.location.href='tel:7027513016'" style="margin-top:20px">Contact</button>
+        </div>
+    `
+}
+
 
 
 // let installPrompt = null;

@@ -124,20 +124,28 @@
                         </div>
                         <div class="upperRow">
                             <%if(classData.syllabus){%>
-                            <div onclick="location.href='/downloads/<%=classData.syllabus%>'" class="smallCard c7">
-                                <p>Syllabus</p>
+                                <div onclick="location.href='/downloads/<%=classData.syllabus%>'" class="smallCard c7">
+                                    <p>Syllabus</p>
+                                </div>
+                                <%}%>
+                                <%if(classData.schedule){%>
+                                    <div onclick="location.href='/downloads/<%=classData.schedule%>'" class="smallCard c8">
+                                        <p>Schedule</p>
+                                    </div>
+                                    <%}%>
+                                </div>
+                                
+                                <div class="upperRow">
+                                    <div onclick="location.href='/student/liveClasses'" class="smallCard c9">
+                                        <p>Smart Class</p>
+                                    </div>
+                                    <div class="smallCard c1">
+                                        <p>Fee</p>
+                                    </div>
+                                </div>
                             </div>
-                            <%}%>
-                            <%if(classData.schedule){%>
-                            <div onclick="location.href='/downloads/<%=classData.schedule%>'" class="smallCard c8">
-                                <p>Schedule</p>
-                            </div>
-                            <%}%>
-                        </div>
-                    </div>
-
-                    <!-- <div class="messages">Kindly Change Your Password
-                        <span onclick="document.getElementsByclass('messages')[0].remove()">X</span>
+                            <!-- <div class="messages">Kindly Change Your Password
+                                <span onclick="document.getElementsByclass('messages')[0].remove()">X</span>
                     </div> -->
                     <div class="birthDays">
                         <div class="birthDayHeading">

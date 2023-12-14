@@ -28,24 +28,10 @@ const turnServerUsername = process.env.TURN_SERVER_USERNAME;
 const turnServerCredential = process.env.TURN_SERVER_CREDENTIAL;
 const stunServerEnabled = getEnvBoolean(process.env.STUN_SERVER_ENABLED);
 const turnServerEnabled = getEnvBoolean(process.env.TURN_SERVER_ENABLED);
-// Stun is mandatory for not internal network
 if (stunServerEnabled && stunServerUrl) iceServers.push({ urls: stunServerUrl });
-// Turn is recommended if direct peer to peer connection is not possible
 if (turnServerEnabled && turnServerUrl && turnServerUsername && turnServerCredential) {
     iceServers.push({ urls: turnServerUrl, username: turnServerUsername, credential: turnServerCredential });
 }
-
-// Test Stun and Turn connection with query params
-// const testStunTurn = host + '/test?iceServers=' + JSON.stringify(iceServers);
-
-
-// set new room name and join
-app.get('/newCall', (req, res) => {
-    res.render('vc/newCall.ejs')
-});
-
-
-
 
 
 app.get('/join/:roomId/:cid', checkAuth, async function (req, res) {
@@ -69,7 +55,7 @@ app.get('/join/:roomId/:cid', checkAuth, async function (req, res) {
     }
 });
 
-app.post('/meetingURL', (req, res) => {
+app.post('/meetingURL', checkAuth, (req, res) => {
     const meetingURL = getMeetingURL(host);
     res.end(JSON.stringify({ meeting: meetingURL }));
 });

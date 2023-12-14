@@ -34,6 +34,7 @@ const slideData = [
     },
 ]
 const nextSlide = () => {
+    vibrate.touch();
     if (slideNumber == 3) {
         document.getElementsByClassName('page_load_slider')[0].style.right = '0';
         setTimeout(() => {
@@ -43,6 +44,7 @@ const nextSlide = () => {
     loadSlide(++slideNumber, 1);
 }
 const backSlide = () => {
+    vibrate.touch();
     loadSlide(--slideNumber, -1);
 }
 
@@ -228,7 +230,7 @@ slide.addEventListener('touchmove', (event) => {
 // const PublicKey = 'BMTUJwXpovugSRpuXdZjlS0XhNclQFIER9LcXVemxQSi8hLX3US6-2Eg0Sow74qtHnH_x3FS8yUl3NmCsdlosx8'
 
 
- 
+
 
 // async function subscribeToPush() {
 //     try {
@@ -244,7 +246,7 @@ slide.addEventListener('touchmove', (event) => {
 //                 userVisibleOnly: true,
 //                 applicationServerKey: urlBase64ToUint8Array(PublicKey)
 //             });
-            
+
 
 //             // Send the subscription to the server
 //             await fetch('/subscribe', {
@@ -276,7 +278,7 @@ slide.addEventListener('touchmove', (event) => {
 //     return outputArray;
 // }
 
- 
+
 
 
 if ('serviceWorker' in navigator && 'Notification' in window) {

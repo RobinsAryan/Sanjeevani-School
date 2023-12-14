@@ -11,6 +11,7 @@ let attandanceData = {}, prevAttandanceData = [], originalPrevAttandanceData = [
 let totalStudents = 0;
 
 dateInput.addEventListener('change', (e) => {
+    vibrate.touch();
     searchAttandanceBtn.innerHTML = '<i class="fas fa-spinner rotateMe"></i>';
     subInfos[0].innerHTML = formatTime(e.target.value).split('of')[1];
     loadPrevAttandance(e.target.value);
@@ -52,6 +53,7 @@ const loadPrevAttandance = async (date) => {
             subInfos[3].innerHTML = `${prevTotalPresent}/${prevTotalStudent}`
         }
         else {
+            vibrate.failure();
             document.getElementById('popup').style.display = 'block';
             document.getElementById('popup').innerHTML = `
     <div class="popup-form"> 
@@ -67,6 +69,7 @@ const loadPrevAttandance = async (date) => {
     `
         }
     } else {
+        vibrate.failure();
         document.getElementById('popup').style.display = 'block';
         document.getElementById('popup').innerHTML = `
                 <div class="popup-form">
@@ -109,6 +112,7 @@ const processPrevUpdates = () => {
         }
     }
     if (ct) {
+        vibrate.warning();
         document.getElementById('popup').style.display = 'block';
         document.getElementById('popup').innerHTML = `
     <div class="popup-form"> 
@@ -152,8 +156,10 @@ const updatePrevData = async () => {
         })
         let resData = await myPost(`/class/attandance/update/${prevAttandanceId}`, { data: newJsonData });
         if (resData.success) {
+            vibrate.success();
             location.reload();
         } else {
+            vibrate.failure();
             document.getElementById('popup').innerHTML = `
                 <div class="popup-form">
                 ${showSWrong('processPrevUpdates()')}
@@ -161,6 +167,7 @@ const updatePrevData = async () => {
             `
         }
     } catch (err) {
+        vibrate.failure();
         document.getElementById('popup').innerHTML = `
                 <div class="popup-form">
                 ${showSWrong('processPrevUpdates()')}
@@ -180,6 +187,7 @@ const downloadAttandance = async () => {
     try {
         let resData = await myGET(`/class/attandance/download/${prevAttandanceId}`)
         if (resData.success) {
+            vibrate.success();
             document.getElementById('popup').innerHTML = `
     <div class="popup-form"> 
             <p style="margin-bottom: 15px;">File Created!!</p>
@@ -193,6 +201,7 @@ const downloadAttandance = async () => {
         </div>
     `
         } else {
+            vibrate.failure();
             document.getElementById('popup').innerHTML = `
                 <div class="popup-form">
                 ${showSWrong('downloadAttandance()')}
@@ -200,6 +209,7 @@ const downloadAttandance = async () => {
             `
         }
     } catch (err) {
+        vibrate.failure();
         document.getElementById('popup').innerHTML = `
                 <div class="popup-form">
                 ${showSWrong('downloadAttandance()')}
@@ -284,6 +294,7 @@ const uploadAttandance = () => {
         else absentStudent++;
     })
     if (presentStudent + absentStudent !== totalStudents) {
+        vibrate.warning();
         alert("Some Students Remains Unmarked!");
         return;
     }
@@ -308,8 +319,10 @@ const uploadJSON = async () => {
         document.getElementById('popup').innerHTML = '<div class="loading_div"> <i class="fas fa-spinner rotateMe"></i> </div>'
         let resData = await myPost(`/class/attandance/upload/${classId}`, { data: attandanceData });
         if (resData.success) {
+            vibrate.success();
             location.reload();
         } else {
+            vibrate.failure();
             document.getElementById('popup').innerHTML = `
                 <div class="popup-form">
                 ${showSWrong('uploadAttandance()')}
@@ -317,6 +330,7 @@ const uploadJSON = async () => {
             `
         }
     } catch (err) {
+        vibrate.failure();
         document.getElementById('popup').innerHTML = `
                 <div class="popup-form">
                 ${showSWrong('uploadAttandance()')}
@@ -375,6 +389,7 @@ const downloadAll = async () => {
 
 
 const showCnf = () => {
+    vibrate.confirm();
     document.getElementById('popup').style.display = 'block';
     document.getElementById('popup').innerHTML = `
         <div class="popup-form">
@@ -408,7 +423,7 @@ const checkCnf = async () => {
                             <h2 style="font-size:15px;margin-bottom:20px">Attandance of ${resData.data.deletedCount} days Deleted.</h2>
                             <button onclick="location.reload()" style="background:#f07979">Close</button>
                         </div>
-                    ` 
+                    `
             } else {
                 document.getElementById('popup').innerHTML = `
                 <div class="popup-form">
