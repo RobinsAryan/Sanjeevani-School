@@ -125,7 +125,6 @@ window.onload = () => {
     setTimeout(() => {
         loadAnnouncements(0);
     }, 2000);
-    PolicyAggrement();
 }
 
 
@@ -247,17 +246,58 @@ const handleScroll = () => {
 
 
 
+const PublicKey = 'BMTUJwXpovugSRpuXdZjlS0XhNclQFIER9LcXVemxQSi8hLX3US6-2Eg0Sow74qtHnH_x3FS8yUl3NmCsdlosx8'
 
 
+async function subscribeToPush() {
+    try {
+        document.getElementById('popup').innerHTML = '<div class="loading_div"> <i class="fas fa-spinner rotateMe"></i> </div>'
+        const permission = await Notification.requestPermission();
 
+        if (permission === 'granted') {
+            console.log("granted!");
+            const registration = await navigator.serviceWorker.ready;
+
+            const subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(PublicKey)
+            });
+
+            await myPost('/subscribe', subscription);
+            localStorage.setItem('policyAggrement', (Date.now()).toString());
+            alert("All set to go with Notifications!");
+            closePopup();
+        }
+        else {
+            alert("Failed To Register with notifications")
+        }
+    } catch (error) {
+        console.log(error);
+        alert("Failed To Register with notifications")
+    }
+}
+
+function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; i++) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+}
 
 const PolicyAggrement = () => {
     if (!localStorage.getItem('policyAggrement')) {
         document.getElementById('popup').style.display = 'block';
         document.getElementById('popup').innerHTML = `
         <div class="popup-form"> 
-        <h2 style="font-size:15px;margin-bottom:20px">Terms of Use App!</h2>
-        <p style="font-size:12px">Notifications must be allowed to continue with App!</p>
+        <h2 style="font-size:15px;margin-bottom:20px">Notifications to Use App!</h2>
+        <p style="font-size:12px">Allow Notifications to stay update with App!</p>
         <button onclick="closePopup()" class="normalButton" style="background:red;margin-top:10px">Deny</button>
         <button onclick="subscribeToPush()" class="normalButton" style="margin-top:10px">Allow</button>
         </div>

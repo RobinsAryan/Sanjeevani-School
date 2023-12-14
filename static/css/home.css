@@ -105,6 +105,7 @@
 .c4 {
     background: url('../img/bg_book.jpg');
 }
+
 .c5 {
     background: url('../img/bg_gallery.jpg');
 }
@@ -112,6 +113,7 @@
 .c6 {
     background: url('../img/bg_result.jpg');
 }
+
 .c7 {
     background: url('../img/syllabus.jpg');
 }
@@ -388,7 +390,7 @@ a {
 
 
 .menu {
-        font-size: 15px;
+    font-size: 15px;
     display: flex;
     position: absolute;
     flex-direction: column;
@@ -398,7 +400,7 @@ a {
     top: 10;
     left: 10;
     border-radius: 10px 0 10px 10px;
-    width: 165px;
+    width: max-content;
     background: #fffffff0;
     right: 6.5%;
     top: 53px;
@@ -417,7 +419,7 @@ a {
     right: 3px;
     background: #ffffffe3;
 }
- 
+
 
 .menu-list {
     margin: 0;
@@ -434,7 +436,7 @@ ul {
 .menu-list+.menu-list {
     border-top: 1px solid #ddd;
 }
- 
+
 
 .menu-item {
     position: relative;
@@ -447,7 +449,7 @@ ul {
     border: 0;
     padding: 8px 8px;
     width: 100%;
-
+    cursor: pointer;
     border-radius: 8px;
     display: flex;
     align-items: center;
@@ -455,7 +457,7 @@ ul {
     background-color: var(--color-bg-secondary);
 }
 
- 
+
 
 .menu-button i {
     width: 20px;
@@ -470,6 +472,3 @@ ul {
     margin-right: 10px;
     color: var(--color-text-primary-offset);
 }
- 
-
- 

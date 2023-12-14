@@ -170,3 +170,29 @@ const formatTime = (time) => {
 
     return formattedDateString;
 }
+
+const vibrate = {
+    warning: () => {
+        const pattern = [200, 100, 200];
+        navigator.vibrate(pattern);
+    },
+    success: () => {
+        const pattern = [100, 100, 100];
+        navigator.vibrate(pattern);
+    },
+    failure: () => {
+        const pattern = [400, 200, 400];
+        navigator.vibrate(pattern);
+    },
+    confirm: () => {
+        const pattern = [100, 300, 100, 300];
+        navigator.vibrate(pattern);
+    },
+    info: () => {
+        const pattern = [100, 200, 100, 200];
+        navigator.vibrate(pattern);
+    },
+    custom: (pattern) => {
+        navigator.vibrate(pattern);
+    },
+};

@@ -42,11 +42,13 @@ myform.addEventListener('submit', async (e) => {
 })
 
 const showError = (err) => {
+    vibrate.failure();
     document.getElementsByClassName('error')[0].style.display = 'block';
     document.getElementsByClassName('error')[0].style.backgroundColor = 'rgb(222, 101, 77)';
     document.getElementById('statusMsz').innerText = err;
 }
 const showSuccess = (msz) => {
+    vibrate.success();
     document.getElementsByClassName('error')[0].style.display = 'block';
     document.getElementsByClassName('error')[0].style.backgroundColor = 'rgb(75, 204, 70)';
     document.getElementById('statusMsz').innerText = msz;
