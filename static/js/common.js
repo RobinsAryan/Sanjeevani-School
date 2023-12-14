@@ -170,29 +170,47 @@ const formatTime = (time) => {
 
     return formattedDateString;
 }
-
+let isVibrationAvalible = ('vibrate' in navigator);
 const vibrate = {
     warning: () => {
-        const pattern = [200, 100, 200];
-        navigator.vibrate(pattern);
+        if (isVibrationAvalible) {
+            const pattern = [200, 100, 200];
+            navigator.vibrate(pattern);
+        }
     },
     success: () => {
-        const pattern = [100, 100, 100];
-        navigator.vibrate(pattern);
+        if (isVibrationAvalible) {
+            const pattern = [100, 100, 100];
+            navigator.vibrate(pattern);
+        }
     },
     failure: () => {
-        const pattern = [400, 200, 400];
-        navigator.vibrate(pattern);
+        if (isVibrationAvalible) {
+            const pattern = [400, 200, 400];
+            navigator.vibrate(pattern);
+        }
     },
     confirm: () => {
-        const pattern = [100, 300, 100, 300];
-        navigator.vibrate(pattern);
+        if (isVibrationAvalible) {
+            const pattern = [100, 300, 100, 300];
+            navigator.vibrate(pattern);
+        }
     },
     info: () => {
-        const pattern = [100, 200, 100, 200];
-        navigator.vibrate(pattern);
+        if (isVibrationAvalible) {
+            const pattern = [100, 200, 100, 200];
+            navigator.vibrate(pattern);
+        }
+    },
+    touch: () => {
+        if (isVibrationAvalible) {
+            const pattern = [100];
+            navigator.vibrate(pattern);
+        }
     },
     custom: (pattern) => {
-        navigator.vibrate(pattern);
-    },
+        if (isVibrationAvalible) {
+            navigator.vibrate(pattern);
+        }
+    }
 };

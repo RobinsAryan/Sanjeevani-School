@@ -10,6 +10,7 @@ setInterval(() => {
 
 const openUserProfile = () => {
     menu.classList.toggle('hide');
+    vibrate.touch();
 }
 
 const redirectProfile = () => {
@@ -264,15 +265,17 @@ async function subscribeToPush() {
             });
 
             await myPost('/subscribe', subscription);
-            localStorage.setItem('policyAggrement', (Date.now()).toString());
+            vibrate.success();
             alert("All set to go with Notifications!");
             closePopup();
         }
         else {
+            vibrate.failure();
             alert("Failed To Register with notifications")
         }
     } catch (error) {
         console.log(error);
+        vibrate.failure();
         alert("Failed To Register with notifications")
     }
 }
@@ -292,9 +295,9 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 const PolicyAggrement = () => {
-    if (!localStorage.getItem('policyAggrement')) {
-        document.getElementById('popup').style.display = 'block';
-        document.getElementById('popup').innerHTML = `
+    vibrate.warning();
+    document.getElementById('popup').style.display = 'block';
+    document.getElementById('popup').innerHTML = `
         <div class="popup-form"> 
         <h2 style="font-size:15px;margin-bottom:20px">Notifications to Use App!</h2>
         <p style="font-size:12px">Allow Notifications to stay update with App!</p>
@@ -302,5 +305,4 @@ const PolicyAggrement = () => {
         <button onclick="subscribeToPush()" class="normalButton" style="margin-top:10px">Allow</button>
         </div>
         `
-    }
 }

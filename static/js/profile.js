@@ -1,6 +1,6 @@
 let userId = null, userData = null;
 let originalImage = '';
-let userProfile = document.getElementById('userProfile'); 
+let userProfile = document.getElementById('userProfile');
 
 window.onload = () => {
     userId = document.getElementById('userId').value;
@@ -61,6 +61,7 @@ const resetForm = (HTMLFormInput) => {
 
 const handleSubmit = async (e, num) => {
     e.preventDefault();
+    vibrate.custom([50, 50, 100, 50, 150, 50, 200, 50, 250]);
     if (num == 1) {
         document.getElementById('popup').innerHTML = '<div class="loading_div"> <i class="fas fa-spinner rotateMe"></i> </div>'
         let data = {
@@ -91,14 +92,17 @@ const handleSubmit = async (e, num) => {
         if (resData.success) {
             if (resData.update) {
                 if (resData.id == userId) {
+                    vibrate.success();
                     location.reload();
                 }
                 else {
+                    vibrate.failure();
                     alert("Unexpected Error");
                     console.log(resData);
                 }
             }
             else {
+                vibrate.failure();
                 document.getElementById('popup').innerHTML = `
     <div class="popup-form"> 
             <p style="margin-bottom: 15px;">Error!!</p>
@@ -113,6 +117,7 @@ const handleSubmit = async (e, num) => {
             }
         }
         else {
+            vibrate.failure();
             document.getElementById('popup').innerHTML = `
                 <div class="popup-form"> 
                 ${showSWrong('editProfile()')}
@@ -124,33 +129,37 @@ const handleSubmit = async (e, num) => {
         let newPassword2 = e.target.newPassword2;
         let password = e.target.password;
         if (newPassword.value !== newPassword2.value) {
+            vibrate.warning();
             newPassword.style.border = '1px solid #ffa1a1';
             newPassword2.style.border = '1px solid #ffa1a1';
             showFormMsz(1, "Password Must be same!", 'red')
         }
         else if (newPassword.value.length < 6) {
+            vibrate.warning();
             newPassword.style.border = '1px solid #ffa1a1';
             newPassword2.style.border = '1px solid #ffa1a1';
             showFormMsz(1, "Password is too Short!", 'red')
         }
         else if (newPassword.value == password.value) {
+            vibrate.warning();
             newPassword.style.border = '1px solid #ffa1a1';
             password.style.border = '1px solid #ffa1a1';
             showFormMsz(2, "Use Different Password", 'red')
         }
         else {
             document.getElementById('popup').innerHTML = '<div class="loading_div"> <i class="fas fa-spinner rotateMe"></i> </div>'
-            console.log(password.value);
             try {
                 let resData = await myPost(`/student/updatePassword/${userId}`, { password: password.value, newPassword: newPassword.value });
                 if (resData.success) {
                     if (resData.update) {
                         if (resData.by == 'p') {
+                            vibrate.success();
                             location.reload();
                         } else
                             location.href = '/logout'
                     }
                     else {
+                        vibrate.failure();
                         document.getElementById('popup').innerHTML = `
                         <div class="popup-form"> 
                                 <p style="margin-bottom: 15px;">Error!!</p>
@@ -164,6 +173,7 @@ const handleSubmit = async (e, num) => {
                         `
                     }
                 } else {
+                    vibrate.failure();
                     document.getElementById('popup').innerHTML = `
                 <div class="popup-form"> 
                 ${showSWrong('changePassword()')}
@@ -171,6 +181,7 @@ const handleSubmit = async (e, num) => {
             `
                 }
             } catch (err) {
+                vibrate.failure();
                 document.getElementById('popup').innerHTML = `
                 <div class="popup-form"> 
                 ${showSWrong('changePassword()')}
@@ -193,15 +204,18 @@ const handleSubmit = async (e, num) => {
         let res = await myPost(`/class/updateStudent/${userId}`, data);
         if (res.success) {
             if (res.updated) {
+                vibrate.success();
                 closePopup();
                 location.reload();
             }
             else {
+                vibrate.failure();
                 alert(res.msz);
                 closePopup();
             }
         }
         else {
+            vibrate.failure();
             document.getElementById('popup').innerHTML = `
                 <div class="popup-form">
                 ${showSWrong('editStudent()')}
@@ -211,7 +225,7 @@ const handleSubmit = async (e, num) => {
     }
     else if (num == 4) {
         let data = {
-            name: e.target.username.value, 
+            name: e.target.username.value,
             phone: e.target.phone.value,
             dob: e.target.dob.value,
             subject: e.target.subjects.value,
@@ -223,15 +237,18 @@ const handleSubmit = async (e, num) => {
         let res = await myPost(`/teacher/updateTeacher/${userId}`, data);
         if (res.success) {
             if (res.updated) {
+                vibrate.success();
                 closePopup();
                 location.reload();
             }
             else {
+                vibrate.failure();
                 alert(res.msz);
                 closePopup();
             }
         }
         else {
+            vibrate.failure();
             document.getElementById('popup').innerHTML = `
                 <div class="popup-form">
                 ${showSWrong('editTeacher()')}
@@ -277,14 +294,17 @@ const changePassword = () => {
 
 const deleteStudent = async () => {
     try {
+        vibrate.confirm();
         let val = confirm("This Step cant be Undo!!");
         if (val) {
             document.getElementById('popup').style.display = 'block';
             document.getElementById('popup').innerHTML = '<div class="loading_div"> <i class="fas fa-spinner rotateMe"></i> </div>'
             let resData = await myGET(`/user/profile/remove/${userId}`);
             if (resData.success) {
+                vibrate.success();
                 history.back();
             } else {
+                vibrate.failure();
                 document.getElementById('popup').innerHTML = `
                 <div class="popup-form"> 
                 <div class="hidePopUp" ><i onClick = "closePopup()" class="fa-solid fa-xmark"></i></div>
@@ -294,6 +314,7 @@ const deleteStudent = async () => {
             }
         }
     } catch (err) {
+        vibrate.failure();
         document.getElementById('popup').innerHTML = `
         <div class="popup-form"> 
         <div class="hidePopUp" ><i onClick = "closePopup()" class="fa-solid fa-xmark"></i></div>
@@ -347,14 +368,17 @@ const genrateDateValue = (val) => {
 
 const deleteTeacher = async () => {
     try {
+        vibrate.confirm();
         let val = confirm("This Step cant be Undo!!");
         if (val) {
             document.getElementById('popup').style.display = 'block';
             document.getElementById('popup').innerHTML = '<div class="loading_div"> <i class="fas fa-spinner rotateMe"></i> </div>'
             let resData = await myGET(`/user/teacher/remove/${userId}`);
             if (resData.success) {
+                vibrate.success();
                 history.back();
             } else {
+                vibrate.failure();
                 document.getElementById('popup').innerHTML = `
                 <div class="popup-form"> 
                 <div class="hidePopUp" ><i onClick = "closePopup()" class="fa-solid fa-xmark"></i></div>
@@ -364,6 +388,7 @@ const deleteTeacher = async () => {
             }
         }
     } catch (err) {
+        vibrate.failure();
         document.getElementById('popup').innerHTML = `
         <div class="popup-form"> 
         <div class="hidePopUp" ><i onClick = "closePopup()" class="fa-solid fa-xmark"></i></div>
