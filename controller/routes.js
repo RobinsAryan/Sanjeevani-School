@@ -7,7 +7,7 @@ import classRoute from './classRoutes.js'
 import teacherRoute from './teacherRoutes.js'
 import userRoute, { userClass } from './userRoutes.js'
 import studentRoute from './studentRoutes.js'
-import { checkAuth } from '../utils/middleware.js';
+import { checkAuth, checkPrinciple } from '../utils/middleware.js';
 import webPush from '../utils/webPush.js'
 import webRTC from './RTC/liveClass.js'
 import rtcServer from './RTC/rtcServer.js'
@@ -18,7 +18,7 @@ passportLocal(passport);
 app.get('/', async (req, res) => {
     if (req.isAuthenticated()) {
         if (req.user.role === 'Principle') {
-            res.render('principle/home.ejs', { profile: req.user.profile, username: req.user.username});
+            res.render('principle/home.ejs', { profile: req.user.profile, username: req.user.username });
         } else if (req.user.role === 'Teacher') {
             res.render('teachers/home.ejs', { profile: req.user.profile, username: req.user.username, userId: req.user._id });
         }
@@ -83,8 +83,8 @@ app.get('/home', checkAuth, async (req, res) => {
     res.render('common/home.ejs', { username: req.user.username, amount: (await roomPrice()).amount });
 })
 
-app.get('/help', (req, res) => {
-    res.render('help');
+app.get('/graph', checkPrinciple, (req, res) => {
+    res.render('principle/graph.ejs');
 })
 
 app.get('/about', (req, res) => {
