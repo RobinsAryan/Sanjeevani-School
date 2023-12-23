@@ -87,8 +87,11 @@ app.get('/help', (req, res) => {
     res.render('help');
 })
 
-app.use(utilsRoute);
+app.get('/about', (req, res) => {
+    res.render('common/about.ejs');
+})
 
+app.use(utilsRoute);
 app.use('/class', classRoute);
 app.use('/teacher', teacherRoute);
 app.use('/user', userRoute);
@@ -97,5 +100,6 @@ app.use('/RTC', webRTC);
 app.use('/rtcServer', rtcServer);
 app.use('/cards', cardRoute);
 app.use(webPush);
+app.get('*', (req, res) => res.render('common/404.ejs'));
 
 export default app;

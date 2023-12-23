@@ -89,7 +89,7 @@ app.get('/profile/:id', checkAuth, async (req, res) => {
                 res.render('common/profile.ejs', { data, userData: JSON.stringify(data) })
             }
             else {
-                res.send("Unknown Pearson may be Principle of None!");
+                res.send("<h1>Unknown Pearson may be Principle or None!</h1>");
             }
         }
         else {
@@ -215,14 +215,14 @@ app.get('/gallary/all', checkAuth, async (req, res) => {
 app.get('/gallary/remove/:id', checkAuth, async (req, res) => {
     try {
         let frame = await Gallary.findByIdAndDelete(req.params.id);
-        res.json({ success: true }); 
+        res.json({ success: true });
         if (frame.images.length) {
             frame.images.map(async img => {
                 await deleteFile(`./static${img}`);
                 await deleteFile(`./static/compressed${img}`);
             })
-        } 
-    } catch (err) { 
+        }
+    } catch (err) {
         res.json({ success: false });
     }
 })

@@ -3,6 +3,8 @@ import express from 'express';
 import { v4 as uuidV4 } from 'uuid';
 import Room from '../../models/Room.js';
 import { checkAuth } from '../../utils/middleware.js';
+import { userClass } from '../userRoutes.js';
+import mongoose from 'mongoose';
 
 const app = express();
 dotenv.config();
@@ -34,26 +36,37 @@ if (turnServerEnabled && turnServerUrl && turnServerUsername && turnServerCreden
 }
 
 
-app.get('/join/:roomId/:cid', checkAuth, async function (req, res) {
-    if (hostCfg.authenticated) {
-        let RoomData = await Room.findOne({ roomId: req.params.roomId });
-        console.log(RoomData);
-        if (!RoomData && req.params.roomId && req.params.roomId.length == 36) {
-            await (new Room({
-                roomId: req.params.roomId,
-                class: req.params.cid,
-                userId: req.user._id,
-                title: `Meet No. ${Math.floor(Math.random() * 1000)}`
-            })).save();
+app.get('/join/:roomId', checkAuth, async function (req, res) {
+    try {
+        let room = await Room.findOne({ roomId: req.params.roomId });
+        if (room) {
+            if (req.user.role != 'Student') {
+                res.render('common/room.ejs', {
+                    username: req.user.username,
+                    rid: req.user.rid ? req.user.rid : (Math.floor(Math.random() * 8999 + 1000)),
+                    profile: req.user.profile ? req.user.profile : false
+                });
+            }
+            else {
+                let classData = await userClass(req.user._id);
+                if (classData._id.toString() === room.class) {
+                    res.render('common/room.ejs', {
+                        username: req.user.username,
+                        rid: req.user.rid ? req.user.rid : (Math.floor(Math.random() * 8999 + 1000)),
+                        profile: req.user.profile ? req.user.profile : false
+                    });
+                } else {
+                    res.render('common/404.ejs');
+                }
+            }
+        } else {
+            res.render('common/404.ejs');
         }
-        res.render('common/room.ejs', { username: req.user.username, rid: req.user.rid ? req.user.rid : (Math.floor(Math.random() * 8999 + 1000)), profile: req.user.profile ? req.user.profile : false });
-    } else {
-        if (hostCfg.protected) {
-            return res.sendFile(views.login);
-        }
-        res.redirect('/');
+    } catch (err) {
+        res.render('common/500.ejs');
     }
 });
+
 
 app.post('/meetingURL', checkAuth, (req, res) => {
     const meetingURL = getMeetingURL(host);

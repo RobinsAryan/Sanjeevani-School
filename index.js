@@ -10,14 +10,10 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import MemoryStore from 'memorystore';
 import path from 'path'
-import connectMongoDBSession from 'connect-mongodb-session';
 import routes from './controller/routes.js';
 import http from 'http';
-import https from 'https';
 import compression from 'compression';
 import cors from 'cors';
-import fs from 'fs';
-import { createServer } from 'http';
 import { Server } from 'socket.io';
 import ioFunction from './controller/RTC/io.js';
 
@@ -26,8 +22,7 @@ const app = express();
 
 
 dotenv.config({ path: ".env" });
-const MemorystoreSession = MemoryStore(expressSession);
-const MongoDBSession = connectMongoDBSession(expressSession);
+const memorystore = MemoryStore(expressSession);
 
 
 //DB connection
@@ -36,7 +31,7 @@ const MongoDBSession = connectMongoDBSession(expressSession);
         await mongoose.connect(process.env.MONGO_URL);
         console.log("connected to data base");
     } catch (err) {
-        console.error(err);
+        console.log(err);
     }
 })();
 
@@ -47,17 +42,12 @@ app.use(express.json());
 app.use(cookieParser('random'));
 app.use(compression());
 app.use(cors());
-const store = new MongoDBSession({
-    uri: process.env.MONGO_URL,
-    collection: "mySessions",
-    expires: 1000 * 60 * 60 * 24
-})
 app.use(expressSession({
     secret: "random",
     resave: true,
     saveUninitialized: true,
     maxAge: 24 * 60 * 60 * 1000,
-    store: store,
+    store: new memorystore(),
 }));
 app.use(express.static(path.join(path.resolve(), 'static')))
 app.set('view engine', 'ejs');

@@ -6,21 +6,21 @@ let slideNumber = 0;
 const slideData = [
     {
         img: "img/hero.jpg",
-        h1: "Welcome To School",
+        h1: "Welcome to The \n SANJEEVANI INTERNATIONAL SCHOOL",
         color1: '#fca8fa',
         color2: '#d47fd1',
         button_text: "Get Started",
     },
     {
         img: "img/hero2.jpg",
-        h1: "Some Text Page 2",
+        h1: "Play , learn & grow",
         color1: 'rgb(180 229 244)',
         color2: 'rgb(122 212 239)',
         button_text: "Next",
     },
     {
         img: "img/hero3.jpg",
-        h1: "Some Text Page 3",
+        h1: "Learn with The best school",
         color1: 'rgb(190 216 255)',
         color2: 'rgb(0 125 254)',
         button_text: "Next",

@@ -2,8 +2,24 @@ const CACHE_NAME = 'sanjeevani-school-1';
 
 const staticAssets = [
     '/img/noData.gif',
-    '/img/swrong.png'
+    '/img/swrong.png',
+    '/css/404.css',
+    '/img/404.gif'
 ];
+
+
+setInterval(() => {
+    caches.keys().then((cacheNames) => {
+        return Promise.all(
+            cacheNames.map((cacheName) => {
+                if (cacheName !== CACHE_NAME) {
+                    return caches.delete(cacheName);
+                }
+            })
+        );
+    });
+}, 24 * 60 * 60 * 1000);
+
 
 self.addEventListener('install', (event) => {
     event.waitUntil(

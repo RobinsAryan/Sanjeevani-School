@@ -11,10 +11,6 @@ const classSchema = new mongoose.Schema({
         type: [mongoose.Schema.Types.ObjectId],
         ref: 'user'
     },
-    subjects: {
-        type: [mongoose.Schema.Types.ObjectId],
-        ref: 'subject'
-    },
     inCharge: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'user'

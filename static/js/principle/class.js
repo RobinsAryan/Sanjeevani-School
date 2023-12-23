@@ -27,7 +27,7 @@ const loadIncharge = async () => {
                     </div>
                     <div class="optionInfo">
                         <p>${teacher.username}</p>
-                        <p class="optionMail">${teacher.subject.length?teacher.subject:teacher.phone}</p>
+                        <p class="optionMail">${teacher.subject.length ? teacher.subject : teacher.phone}</p>
                     </div>
                 </div>
             `
@@ -84,7 +84,7 @@ const removeClassPopup = () => {
         <div class="popup-form">
         <div class="hidePopUp"><i onClick="closePopup()" class="fa-solid fa-xmark"></i></div>
             <h2 style="font-size:15px;margin-bottom:20px">This Step cant be Undo</h2>
-            <p style="font-size:12px">Removing a class, remove all its access to students and teachers but students in the class remains unaffected.</p>
+            <p style="font-size:12px">Removing a class, remove all its ancestors in Sanjeevani School's <a href='/graph'>graph</a>.</p>
             <button onclick="removeClass()" style="background:#f07979">Remove</button>
         </div>
     `
@@ -104,7 +104,7 @@ const removeClass = async () => {
 }
 
 
-const editClass = () => { 
+const editClass = () => {
     document.getElementById('popup').style.display = 'block';
     document.getElementById('popup').innerHTML = `<div class="popup-form">
         <div class="hidePopUp" ><i onClick = "closePopup()" class="fa-solid fa-xmark"></i></div> 
@@ -119,13 +119,13 @@ const editClass = () => {
 }
 
 
-const handleSubmitClass = async(e) => {
+const handleSubmitClass = async (e) => {
     e.preventDefault();
     let newClassName = e.target.className.value;
     if (newClassName.length) {
         try {
             document.getElementById('popup').innerHTML = '<div class="loading_div"> <i class="fas fa-spinner rotateMe"></i> </div>'
-            let resData = await myPost(`/class/update/className/${classID}`,{className:newClassName})
+            let resData = await myPost(`/class/update/className/${classID}`, { className: newClassName })
             if (resData.success) {
                 location.reload();
             } else {

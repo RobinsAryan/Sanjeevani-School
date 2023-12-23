@@ -4,7 +4,7 @@ import User from '../models/User.js';
 import Class from '../models/Class.js';
 import Ebook from '../models/Ebook.js';
 import { checkAuth, checkPrinciple, formatTime, istToUtc, parseDateString, sendNotificationToClass } from '../utils/middleware.js';
-import mongoose from 'mongoose';
+import mongoose, { isValidObjectId } from 'mongoose';
 import { upload } from './utilsRoute.js';
 import fs from 'fs';
 import XLSX from 'xlsx'
@@ -18,17 +18,25 @@ import Result from '../models/Result.js';
 //class routes
 app.get('/single/:id', checkAuth, async (req, res) => {
     try {
-        if (req.user.role != 'Student') {
+        if (req.user.role != 'Student' && isValidObjectId(req.params.id)) {
             let data = await Class.findById(req.params.id);
             if (data) {
-                res.render('principle/class.ejs', { className: data.className, classId: req.params.id, isPrinciple: req.user.role === 'Principle', isInCharge: (req.user.role === 'Principle') || (data.inCharge && data.inCharge.toString() === req.user._id.toString()) });
+                res.render('principle/class.ejs', {
+                    className: data.className,
+                    classId: req.params.id,
+                    isPrinciple: req.user.role === 'Principle',
+                    isInCharge: (req.user.role === 'Principle') || (data.inCharge && data.inCharge.toString() === req.user._id.toString())
+                });
             }
+            else
+                res.render('common/404.ejs');
         }
         else {
-            res.render('400');
+            res.render('common/404.ejs');
         }
     } catch (err) {
-        res.render('500');
+        console.log(err)
+        res.render("common/500.ejs");
     }
 })
 
@@ -62,8 +70,13 @@ app.post('/add', checkAuth, checkPrinciple, async (req, res) => {
 
 app.post('/update/className/:id', checkAuth, checkPrinciple, async (req, res) => {
     try {
-        await Class.findByIdAndUpdate(req.params.id, { className: req.body.className });
-        res.json({ success: true });
+        if (isValidObjectId(req.params.id)) {
+            await Class.findByIdAndUpdate(req.params.id, { className: req.body.className });
+            res.json({ success: true });
+        }
+        else {
+            res.json({ success: false });
+        }
     } catch (err) {
         res.json({ success: false });
     }
@@ -72,16 +85,40 @@ app.post('/update/className/:id', checkAuth, checkPrinciple, async (req, res) =>
 
 app.get('/remove/:id', checkAuth, checkPrinciple, async (req, res) => {
     try {
-        let data = await Class.findByIdAndDelete(req.params.id);
-        if (data.icon != "/img/class.jpg") {
-            await deleteFile(`./static${data.icon}`);
+        if (isValidObjectId(req.params.id)) {
+            let data = await Class.findByIdAndDelete(req.params.id);
+            if (data.icon != "/img/class.jpg") {
+                await deleteFile(`./static${data.icon}`);
+            }
+            if (data.students) {
+                data.students.forEach(studentId => {
+                    deleteStudent(studentId);
+                })
+            }
+            await Attendance.deleteMany({ class: new mongoose.Types.ObjectId(req.params.id) });
+            await classWork.deleteMany({ class: new mongoose.Types.ObjectId(req.params.id) });
+            await Ebook.deleteMany({ class: new mongoose.Types.ObjectId(req.params.id) });
+            await Notification.deleteMany({ class: new mongoose.Types.ObjectId(req.params.id) });
+            res.json({ success: true });
+        } else {
+            res.json({ success: false });
         }
-        res.json({ success: true });
     } catch (err) {
         res.json({ success: false });
     }
 })
 
+
+/**
+ * 
+ * @param {*} studentId student Id to delete
+ */
+const deleteStudent = async (studentId) => {
+    let data = await User.findByIdAndDelete(studentId);
+    if (data.profile) {
+        await deleteFile(`./static${data.profile}`);
+    }
+}
 
 
 
@@ -89,29 +126,33 @@ app.get('/remove/:id', checkAuth, checkPrinciple, async (req, res) => {
 //Incharge routes
 app.get('/inCharge/:id', checkAuth, checkPrinciple, async (req, res) => {
     try {
-        let inCharge = '';
-        let data = await Class.findById(req.params.id);
-        inCharge = data.inCharge;
-        let teachers = await User.aggregate([
-            {
-                '$match': {
-                    'role': 'Teacher',
-                    'department': 'Teacher'
+        if (isValidObjectId(req.params.id)) {
+            let inCharge = '';
+            let data = await Class.findById(req.params.id);
+            inCharge = data.inCharge;
+            let teachers = await User.aggregate([
+                {
+                    '$match': {
+                        'role': 'Teacher',
+                        'department': 'Teacher'
+                    }
+                }, {
+                    '$project': {
+                        'username': 1,
+                        'phone': 1,
+                        'profile': 1,
+                        'subject': 1
+                    }
+                }, {
+                    '$sort': {
+                        'username': 1
+                    }
                 }
-            }, {
-                '$project': {
-                    'username': 1,
-                    'phone': 1,
-                    'profile': 1,
-                    'subject': 1
-                }
-            }, {
-                '$sort': {
-                    'username': 1
-                }
-            }
-        ]).exec();
-        res.json({ success: true, 'inCharge': inCharge || false, teachers });
+            ]).exec();
+            res.json({ success: true, 'inCharge': inCharge || false, teachers });
+        } else {
+            res.json({ success: false });
+        }
     } catch (err) {
         res.json({ success: false });
     }
@@ -119,10 +160,19 @@ app.get('/inCharge/:id', checkAuth, checkPrinciple, async (req, res) => {
 
 app.get('/setInCharge/:classID/:id', checkAuth, checkPrinciple, async (req, res) => {
     try {
-        await Class.findByIdAndUpdate(req.params.classID, {
-            inCharge: req.params.id
-        });
-        res.json({ success: true });
+        if (isValidObjectId(req.params.id) && isValidObjectId(req.params.classID)) {
+            let userData = await User.findById(req.params.id);
+            if (userData.role == 'Teacher') {
+                await Class.findByIdAndUpdate(req.params.classID, {
+                    inCharge: req.params.id
+                });
+                res.json({ success: true });
+            } else {
+                res.json({ success: false });
+            }
+        } else {
+            res.json({ success: false });
+        }
     } catch (err) {
         res.json({ success: false });
     }
@@ -136,66 +186,87 @@ app.get('/setInCharge/:classID/:id', checkAuth, checkPrinciple, async (req, res)
 
 //students routes
 app.get('/student/:cid', checkAuth, async (req, res) => {
-    if (req.user.role != 'Student') {
-        let data = await Class.findById(req.params.cid);
-        if (data) {
-            res.render('principle/student.ejs', { className: data.className, classId: req.params.cid, isPrinciple: req.user.role === 'Principle' });
+    try {
+        if (req.user.role != 'Student' && isValidObjectId(req.params.cid)) {
+            let data = await Class.findById(req.params.cid);
+            if (data) {
+                res.render('principle/student.ejs', {
+                    className: data.className,
+                    classId: req.params.cid,
+                    isPrinciple: req.user.role === 'Principle'
+                });
+            }
+            else {
+                res.render("common/404.ejs");
+            }
+        } else {
+            res.render("common/404.ejs");
         }
-    } else {
-        res.render('404');
+    } catch (err) {
+        res.render("common/500.ejs");
     }
 })
 
 app.get('/students/all/:classID', checkAuth, async (req, res) => {
     try {
-        let data = await Class.aggregate([
-            {
-                '$match': {
-                    '_id': new mongoose.Types.ObjectId(req.params.classID)
+        if (isValidObjectId(req.params.classID)) {
+            let data = await Class.aggregate([
+                {
+                    '$match': {
+                        '_id': new mongoose.Types.ObjectId(req.params.classID)
+                    }
+                }, {
+                    '$project': {
+                        'students': 1
+                    }
+                }, {
+                    '$unwind': {
+                        'path': '$students'
+                    }
+                }, {
+                    '$lookup': {
+                        'from': 'users',
+                        'localField': 'students',
+                        'foreignField': '_id',
+                        'as': 'student'
+                    }
+                }, {
+                    '$unwind': {
+                        'path': '$student'
+                    }
+                }, {
+                    '$project': {
+                        'student._id': 1,
+                        'student.rollno': 1,
+                        'student.username': 1,
+                        'student.rid': 1,
+                        'student.phone': 1,
+                        'student.fname': 1,
+                        'student.profile': 1,
+                        '_id': 0
+                    }
+                }, {
+                    '$sort': {
+                        'student.rollno': 1
+                    }
                 }
-            }, {
-                '$project': {
-                    'students': 1
-                }
-            }, {
-                '$unwind': {
-                    'path': '$students'
-                }
-            }, {
-                '$lookup': {
-                    'from': 'users',
-                    'localField': 'students',
-                    'foreignField': '_id',
-                    'as': 'student'
-                }
-            }, {
-                '$unwind': {
-                    'path': '$student'
-                }
-            }, {
-                '$project': {
-                    'student.rollno': 1,
-                    'student.username': 1,
-                    'student.rid': 1,
-                    'student.phone': 1,
-                    'student.fname': 1,
-                    'student.profile': 1,
-                    'student._id': 1,
-                    '_id': 0
-                }
-            }, {
-                '$sort': {
-                    'student.rollno': 1
-                }
-            }
-        ])
-        res.json({ success: true, data });
+            ])
+            res.json({ success: true, data });
+        } else {
+            res.json({ success: false });
+        }
     } catch (err) {
         res.json({ success: false });
     }
 })
 
 
+/**
+ * 
+ * @param {*} data student Data
+ * @param {*} id class Id
+ * @returns student added or not
+ */
 const addStudent = (data, id) => {
     let { regId, name, rollno, phone, dob, fname, add, gender } = data;
     return new Promise(async (resolve, reject) => {
@@ -259,14 +330,20 @@ const addStudent = (data, id) => {
 
 app.post('/addSingleStudent/:classID', checkAuth, checkPrinciple, async (req, res) => {
     try {
-        let phone = req.body.phone;
-        phone = (typeof (phone) === 'number' ? parseInt((phone.toString()).split('-').pop()) : parseInt(phone.split('-').pop()));
-        req.body.phone = phone;
-        let dob = parseDateString(req.body.dob);
-        if (!dob) return res.json({ success: true, added: false, msz: "Invalid Dob" });
-        req.body.dob = dob;
-        let resData = await addStudent(req.body, req.params.classID);
-        res.json(resData);
+        if (isValidObjectId(req.params.classID)) {
+            let classData = await Class.findById(req.params.classID);
+            if (!classData) return res.json({ success: false });
+            let phone = req.body.phone;
+            phone = (typeof (phone) === 'number' ? parseInt((phone.toString()).split('-').pop()) : parseInt(phone.split('-').pop()));
+            req.body.phone = phone;
+            let dob = parseDateString(req.body.dob);
+            if (!dob) return res.json({ success: true, added: false, msz: "Invalid Dob" });
+            req.body.dob = dob;
+            let resData = await addStudent(req.body, req.params.classID);
+            res.json(resData);
+        } else {
+            res.json({ success: false });
+        }
     } catch (err) {
         res.json({ success: false });
     }
@@ -277,44 +354,61 @@ app.post('/addSingleStudent/:classID', checkAuth, checkPrinciple, async (req, re
 
 app.post('/addMultipleStudents/:classID', checkAuth, checkPrinciple, upload.single('file'), async (req, res) => {
     try {
-        let uninsertedStudents = [];
-        let classID = req.params.classID;
-        fs.readFile(req.file.path, async (err, data) => {
-            try {
-                await deleteFile(req.file.path);
-                const workbook = XLSX.read(data);
-                const sheet_name_list = workbook.SheetNames;
-                let students = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
-                if (students.length == 0) return res.json({ success: true });
-                else {
-                    students = students.map(student => {
-                        let date = new Date();
-                        if (typeof (student.Dob) === 'number') {
-                            date = XLSX.SSF.parse_date_code(student.Dob);
-                            date = `${new Date(Date.parse(`${date.y}-${date.m}-${date.d}`))}`;
-                        }
-                        else {
-                            date = parseDateString(student.Dob);
-                        }
-                        return {
-                            regId: student["Registration Number"],
-                            name: student.Name,
-                            phone: typeof (student.Phone) === 'number' ? parseInt((student.Phone.toString()).split('-').pop()) : parseInt((student.Phone).split('-').pop()),
-                            fname: student["Father Name"],
-                            add: student["Current Address"],
-                            gender: student["Gender"],
-                            rollno: student["Roll No."],
-                            dob: date,
-                        }
-                    })
-                }
+        if (isValidObjectId(req.params.classID)) {
+            let classData = await Class.findById(req.params.classID);
+            if (!classData) return res.json({ success: false });
+            let uninsertedStudents = [];
+            let classID = req.params.classID;
+            fs.readFile(req.file.path, async (err, data) => {
+                try {
+                    await deleteFile(req.file.path);
+                    const workbook = XLSX.read(data);
+                    const sheet_name_list = workbook.SheetNames;
+                    let students = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
+                    if (students.length == 0) return res.json({ success: true });
+                    else {
+                        students = students.map(student => {
+                            let date = new Date();
+                            if (typeof (student.Dob) === 'number') {
+                                date = XLSX.SSF.parse_date_code(student.Dob);
+                                date = `${new Date(Date.parse(`${date.y}-${date.m}-${date.d}`))}`;
+                            }
+                            else {
+                                date = parseDateString(student.Dob);
+                            }
+                            return {
+                                regId: student["Registration Number"],
+                                name: student.Name,
+                                phone: typeof (student.Phone) === 'number' ? parseInt((student.Phone.toString()).split('-').pop()) : parseInt((student.Phone).split('-').pop()),
+                                fname: student["Father Name"],
+                                add: student["Current Address"],
+                                gender: student["Gender"],
+                                rollno: student["Roll No."],
+                                dob: date,
+                            }
+                        })
+                    }
 
-                await Promise.all(
-                    students.map(async student => {
-                        if (student.dob) {
-                            let resData = await addStudent(student, classID);
-                            if (resData.success) {
-                                if (!resData.added) {
+                    await Promise.all(
+                        students.map(async student => {
+                            if (student.dob) {
+                                let resData = await addStudent(student, classID);
+                                if (resData.success) {
+                                    if (!resData.added) {
+                                        uninsertedStudents.push({
+                                            regId: student.regId,
+                                            name: student.name,
+                                            phone: student.phone,
+                                            dob: student.dob,
+                                            fname: student.fname,
+                                            add: student.add,
+                                            gender: student.gender,
+                                            rollno: student.rollno,
+                                            "reasone": resData.msz,
+                                        })
+                                    }
+                                }
+                                else {
                                     uninsertedStudents.push({
                                         regId: student.regId,
                                         name: student.name,
@@ -324,11 +418,10 @@ app.post('/addMultipleStudents/:classID', checkAuth, checkPrinciple, upload.sing
                                         add: student.add,
                                         gender: student.gender,
                                         rollno: student.rollno,
-                                        "reasone": resData.msz,
+                                        "reasone": "UnExpected Error!",
                                     })
                                 }
-                            }
-                            else {
+                            } else {
                                 uninsertedStudents.push({
                                     regId: student.regId,
                                     name: student.name,
@@ -338,53 +431,43 @@ app.post('/addMultipleStudents/:classID', checkAuth, checkPrinciple, upload.sing
                                     add: student.add,
                                     gender: student.gender,
                                     rollno: student.rollno,
-                                    "reasone": "UnExpected Error!",
+                                    "reasone": "Invalid Dob!",
                                 })
                             }
-                        } else {
-                            uninsertedStudents.push({
-                                regId: student.regId,
-                                name: student.name,
-                                phone: student.phone,
-                                dob: student.dob,
-                                fname: student.fname,
-                                add: student.add,
-                                gender: student.gender,
-                                rollno: student.rollno,
-                                "reasone": "Invalid Dob!",
-                            })
-                        }
-                    })
-                )
-                if (uninsertedStudents.length) {
-                    uninsertedStudents = uninsertedStudents.map(student => {
-                        let date = new Date(student.dob);
-                        return {
-                            "Registration Number": student.regId,
-                            "Name": student.name,
-                            "Phone": student.phone.toString(),
-                            "Father Name": student.fname,
-                            "Roll No.": student.rollno,
-                            "Dob": student.dob ? `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}` : '-',
-                            "Gender": student.gender,
-                            "Current Address": student.add,
-                            "Error": student.reasone
-                        }
-                    })
-                    const workSheet = XLSX.utils.json_to_sheet(uninsertedStudents);
-                    const workBook = XLSX.utils.book_new();
-                    XLSX.utils.book_append_sheet(workBook, workSheet, `students`);
-                    const fileName = `${Date.now()}-WorkBook-uninsertedStudents.xlsx`
-                    const outputPath = `static/downloads/${fileName}`;
-                    XLSX.writeFile(workBook, outputPath);
-                    res.json({ success: true, allInserted: false, total: students.length, unInserted: uninsertedStudents.length, descFile: fileName });
-                } else {
-                    res.json({ success: true, allInserted: true, total: students.length });
+                        })
+                    )
+                    if (uninsertedStudents.length) {
+                        uninsertedStudents = uninsertedStudents.map(student => {
+                            let date = new Date(student.dob);
+                            return {
+                                "Registration Number": student.regId,
+                                "Name": student.name,
+                                "Phone": student.phone.toString(),
+                                "Father Name": student.fname,
+                                "Roll No.": student.rollno,
+                                "Dob": student.dob ? `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}` : '-',
+                                "Gender": student.gender,
+                                "Current Address": student.add,
+                                "Error": student.reasone
+                            }
+                        })
+                        const workSheet = XLSX.utils.json_to_sheet(uninsertedStudents);
+                        const workBook = XLSX.utils.book_new();
+                        XLSX.utils.book_append_sheet(workBook, workSheet, `students`);
+                        const fileName = `${Date.now()}-WorkBook-uninsertedStudents.xlsx`
+                        const outputPath = `static/downloads/${fileName}`;
+                        XLSX.writeFile(workBook, outputPath);
+                        res.json({ success: true, allInserted: false, total: students.length, unInserted: uninsertedStudents.length, descFile: fileName });
+                    } else {
+                        res.json({ success: true, allInserted: true, total: students.length });
+                    }
+                } catch (err) {
+                    res.json({ success: false });
                 }
-            } catch (err) {
-                res.json({ success: false });
-            }
-        });
+            });
+        } else {
+            res.json({ success: false });
+        }
     } catch (err) {
         res.json({ success: false });
     }
@@ -393,60 +476,65 @@ app.post('/addMultipleStudents/:classID', checkAuth, checkPrinciple, upload.sing
 
 app.post('/updateStudent/:id', checkAuth, checkPrinciple, async (req, res) => {
     try {
-        let userData = await User.findById(req.params.id);
-        let { regId, name, rollno, phone, dob, fname, add, gender } = req.body;
-        dob = parseDateString(dob);
-        let isSameIdUser = await User.find({ rid: regId });
-        if (isSameIdUser.length && isSameIdUser[0]._id.toString() != req.params.id) {
-            return res.json({ success: true, updated: false, msz: "Duplicate Reg. Id within School!" });
-        }
-        let classData = await userClass(req.params.id);
-        let isSameRollUser = await Class.aggregate([
-            {
-                '$match': {
-                    '_id': new mongoose.Types.ObjectId(classData._id)
-                }
-            }, {
-                '$unwind': {
-                    'path': '$students'
-                }
-            }, {
-                '$lookup': {
-                    'from': 'users',
-                    'localField': 'students',
-                    'foreignField': '_id',
-                    'as': 'student'
-                }
-            }, {
-                '$match': {
-                    'student.rollno': parseInt(rollno)
-                }
+        if (isValidObjectId(req.params.id)) {
+            let userData = await User.findById(req.params.id);
+            if (!userData && userData.role !== "Student") res.json({ success: false });
+            let { regId, name, rollno, phone, dob, fname, add, gender } = req.body;
+            dob = parseDateString(dob);
+            let isSameIdUser = await User.find({ rid: regId });
+            if (isSameIdUser.length && isSameIdUser[0]._id.toString() != req.params.id) {
+                return res.json({ success: true, updated: false, msz: "Duplicate Reg. Id within School!" });
             }
-        ]);
-        if (isSameRollUser.length && isSameRollUser[0].students.toString() != req.params.id) {
-            res.json({ success: true, added: false, msz: "Duplicate Roll within Class" });
-        }
-        else {
-            let possibleOldPassword = `${userData.username.slice(0, 3)}${parseInt(userData.phone) % 10000}`;
-            let newPassword = userData.password;
-            if (possibleOldPassword == userData.password) {
-                if (typeof (phone) === 'string') phone = parseInt(phone);
-                newPassword = `${name.slice(0, 3)}${phone % 10000}`;
+            let classData = await userClass(req.params.id);
+            let isSameRollUser = await Class.aggregate([
+                {
+                    '$match': {
+                        '_id': new mongoose.Types.ObjectId(classData._id)
+                    }
+                }, {
+                    '$unwind': {
+                        'path': '$students'
+                    }
+                }, {
+                    '$lookup': {
+                        'from': 'users',
+                        'localField': 'students',
+                        'foreignField': '_id',
+                        'as': 'student'
+                    }
+                }, {
+                    '$match': {
+                        'student.rollno': parseInt(rollno)
+                    }
+                }
+            ]);
+            if (isSameRollUser.length && isSameRollUser[0].students.toString() != req.params.id) {
+                res.json({ success: true, added: false, msz: "Duplicate Roll within Class" });
             }
+            else {
+                let possibleOldPassword = `${userData.username.slice(0, 3)}${parseInt(userData.phone) % 10000}`;
+                let newPassword = userData.password;
+                if (possibleOldPassword == userData.password) {
+                    if (typeof (phone) === 'string') phone = parseInt(phone);
+                    newPassword = `${name.slice(0, 3)}${phone % 10000}`;
+                }
 
-            await User.findByIdAndUpdate(req.params.id, {
-                rid: regId,
-                username: name,
-                phone,
-                dob,
-                fname,
-                password: newPassword,
-                role: 'Student',
-                rollno,
-                add,
-                gender
-            });
-            res.json({ success: true, updated: true });
+                await User.findByIdAndUpdate(req.params.id, {
+                    rid: regId,
+                    username: name,
+                    phone,
+                    dob,
+                    fname,
+                    password: newPassword,
+                    role: 'Student',
+                    rollno,
+                    add,
+                    gender
+                });
+                res.json({ success: true, updated: true });
+            }
+        } else {
+            res.json({ success: false });
         }
     } catch (err) {
         res.json({ success: false });
@@ -454,7 +542,6 @@ app.post('/updateStudent/:id', checkAuth, checkPrinciple, async (req, res) => {
 })
 
 //Announcement
-
 app.post('/announcement/add', checkAuth, checkPrinciple, async (req, res) => {
     try {
         let newNotification = new Notification({
@@ -499,10 +586,14 @@ app.get('/announcement/all', checkAuth, async (req, res) => {
 
 app.get('/announcement/remove/:id', checkAuth, checkPrinciple, async (req, res) => {
     try {
-        res.json({ success: true });
-        let notify = await Notification.findByIdAndDelete(req.params.id);
-        if (notify.icon !== '/img/logo.png')
-            await deleteFile(`./static${notify.icon}`);
+        if (isValidObjectId(req.params.id)) {
+            res.json({ success: true });
+            let notify = await Notification.findByIdAndDelete(req.params.id);
+            if (notify.icon !== '/img/logo.png')
+                await deleteFile(`./static${notify.icon}`);
+        } else {
+            res.json({ success: false });
+        }
     } catch (err) {
         res.json({ success: false });
     }
@@ -513,34 +604,45 @@ app.get('/announcement/remove/:id', checkAuth, checkPrinciple, async (req, res) 
 // Ebooks
 app.get('/Ebooks/:id', checkAuth, async (req, res) => {
     try {
-        if (req.user.role != 'Student') {
+        if (req.user.role != 'Student' && isValidObjectId(req.params.id)) {
             let data = await Class.findById(req.params.id);
             if (data) {
-                res.render('principle/ebook.ejs', { className: data.className, classId: req.params.id, canAdd: true });
+                res.render('principle/ebook.ejs', {
+                    className: data.className,
+                    classId: req.params.id,
+                    canAdd: true
+                });
+            } else {
+                res.render('common/404.ejs');
             }
         }
         else {
-            res.render('400');
+            res.render('common/404.ejs');
         }
     } catch (err) {
-        res.render('500');
+        res.render("common/500.ejs");
     }
 })
 
 app.get('/ebooks/all/:id', checkAuth, async (req, res) => {
     try {
-        let data = await Ebook.aggregate([
-            {
-                $match: {
-                    class: new mongoose.Types.ObjectId(req.params.id)
+        if (isValidObjectId(req.params.id)) {
+
+            let data = await Ebook.aggregate([
+                {
+                    $match: {
+                        class: new mongoose.Types.ObjectId(req.params.id)
+                    }
+                }, {
+                    $sort: {
+                        createdAt: -1,
+                    }
                 }
-            }, {
-                $sort: {
-                    createdAt: -1,
-                }
-            }
-        ])
-        res.json({ success: true, data });
+            ])
+            res.json({ success: true, data });
+        } else {
+            res.json({ success: false });
+        }
     } catch (err) {
         res.json({ success: false });
     }
@@ -550,7 +652,7 @@ app.get('/ebooks/all/:id', checkAuth, async (req, res) => {
 
 app.post('/ebook/add/:id', checkAuth, async (req, res) => {
     try {
-        if (req.user != 'Student') {
+        if (req.user != 'Student' && isValidObjectId(req.params.id)) {
             let ebook = new Ebook({
                 url: req.body.url,
                 title: req.body.title,
@@ -578,7 +680,7 @@ app.post('/ebook/add/:id', checkAuth, async (req, res) => {
 
 app.get('/ebook/remove/:id', checkAuth, async (req, res) => {
     try {
-        if (req.user != 'Student') {
+        if (req.user != 'Student' && isValidObjectId(req.params.id)) {
             let ebook = await Ebook.findByIdAndDelete(req.params.id);
             await deleteFile(`./static/downloads/${ebook.url}`);
             res.json({ success: true });
@@ -598,59 +700,70 @@ app.get('/ebook/remove/:id', checkAuth, async (req, res) => {
 //class Work
 app.get('/classWork/:id', checkAuth, async (req, res) => {
     try {
-        if (req.user.role != 'Student') {
+        if (req.user.role != 'Student' && isValidObjectId(req.params.id)) {
             let data = await Class.findById(req.params.id);
             if (data) {
-                res.render('principle/classWork.ejs', { className: data.className, classId: req.params.id, canAdd: true });
+                res.render('principle/classWork.ejs', {
+                    className: data.className,
+                    classId: req.params.id,
+                    canAdd: true
+                });
+            }
+            else {
+                res.render('common/404.ejs');
             }
         }
         else {
-            res.render('400');
+            res.render('common/404.ejs');
         }
     } catch (err) {
-        res.render('500');
+        res.render("common/500.ejs");
     }
 })
 
 
 app.get('/classWork/all/:id', checkAuth, async (req, res) => {
     try {
-        let data = await classWork.aggregate([
-            {
-                '$match': {
-                    'class': new mongoose.Types.ObjectId(req.params.id)
-                }
-            }, {
-                '$sort': {
-                    'createdAt': -1
-                }
-            }, {
-                '$lookup': {
-                    'from': 'users',
-                    'localField': 'author',
-                    'foreignField': '_id',
-                    'as': 'user'
-                }
-            }, {
-                '$unwind': {
-                    'path': '$user',
-                    'preserveNullAndEmptyArrays': false
-                }
-            }, {
-                $project: {
-                    file: 1,
-                    text: 1,
-                    size: 1,
-                    createdAt: 1,
-                    user: {
-                        _id: 1,
-                        username: 1,
-                        profile: 1
+        if (isValidObjectId(req.params.id)) {
+            let data = await classWork.aggregate([
+                {
+                    '$match': {
+                        'class': new mongoose.Types.ObjectId(req.params.id)
+                    }
+                }, {
+                    '$sort': {
+                        'createdAt': -1
+                    }
+                }, {
+                    '$lookup': {
+                        'from': 'users',
+                        'localField': 'author',
+                        'foreignField': '_id',
+                        'as': 'user'
+                    }
+                }, {
+                    '$unwind': {
+                        'path': '$user',
+                        'preserveNullAndEmptyArrays': false
+                    }
+                }, {
+                    $project: {
+                        file: 1,
+                        text: 1,
+                        size: 1,
+                        createdAt: 1,
+                        user: {
+                            _id: 1,
+                            username: 1,
+                            profile: 1
+                        }
                     }
                 }
-            }
-        ])
-        res.json({ success: true, data });
+            ])
+            res.json({ success: true, data });
+        } else {
+            res.json({ success: false });
+        }
     } catch (err) {
         res.json({ success: false });
     }
@@ -659,7 +772,7 @@ app.get('/classWork/all/:id', checkAuth, async (req, res) => {
 
 app.post('/classWork/add/:id', checkAuth, async (req, res) => {
     try {
-        if (req.user.role !== 'Student') {
+        if (req.user.role !== 'Student' && isValidObjectId(req.params.id) && await Class.findById(req.params.id)) {
             let work = new classWork({
                 file: req.body.file,
                 text: req.body.text,
@@ -689,7 +802,7 @@ app.post('/classWork/add/:id', checkAuth, async (req, res) => {
 
 app.get('/classWork/remove/:id', checkAuth, async (req, res) => {
     try {
-        if (req.user.role !== 'Student') {
+        if (req.user.role !== 'Student' && isValidObjectId(req.params.id)) {
             let work = await classWork.findByIdAndDelete(req.params.id);
             res.json({ success: true });
             if (work.file.length) {
@@ -709,7 +822,7 @@ app.get('/classWork/remove/:id', checkAuth, async (req, res) => {
 //Attandance
 app.get('/attandance/:id', checkAuth, async (req, res) => {
     try {
-        if (req.user.role != 'Student') {
+        if (req.user.role != 'Student' && isValidObjectId(req.params.id) && await Class.findById(req.params.id)) {
             let data = await Class.findById(req.params.id);
             let startDate = new Date();
             startDate.setHours(0, 0, 0, 0);
@@ -727,20 +840,25 @@ app.get('/attandance/:id', checkAuth, async (req, res) => {
                 }]);
             let todayAttandance = attandanceData.length ? true : false;
             if (data) {
-                res.render('principle/attandance.ejs', { className: data.className, classId: req.params.id, isPrinciple: req.user.role === 'Principle', todayAttandance });
+                res.render('principle/attandance.ejs', {
+                    className: data.className,
+                    classId: req.params.id,
+                    isPrinciple: req.user.role === 'Principle',
+                    todayAttandance
+                });
             }
         }
         else {
-            res.render('400');
+            res.render('common/404.ejs');
         }
     } catch (err) {
-        res.render('500');
+        res.render("common/500.ejs");
     }
 })
 
 app.post('/attandance/upload/:id', checkAuth, async (req, res) => {
     try {
-        if (req.user.role != 'Student') {
+        if (req.user.role != 'Student' && isValidObjectId(req.params.id) && await Class.findById(req.params.id)) {
             let attandanceJson = req.body.data;
             let attandanceSheet = Object.entries(attandanceJson).map(data => {
                 return {
@@ -755,6 +873,8 @@ app.post('/attandance/upload/:id', checkAuth, async (req, res) => {
             })
             await attandance.save();
             res.json({ success: true });
+        } else {
+            res.json({ success: false });
         }
     } catch (err) {
         res.json({ success: false });
@@ -763,7 +883,7 @@ app.post('/attandance/upload/:id', checkAuth, async (req, res) => {
 
 app.get('/attandance/download/:id', checkAuth, async (req, res) => {
     try {
-        if (req.user.role != 'Student') {
+        if (req.user.role != 'Student' && isValidObjectId(req.params.id) && await Attendance.findById(req.params.id)) {
             let attandanceSheet = await Attendance.aggregate([
                 {
                     '$match': {
@@ -847,8 +967,7 @@ app.get('/attandance/download/:id', checkAuth, async (req, res) => {
 
 app.get('/attandance/prev/:classID/:date', checkAuth, async (req, res) => {
     try {
-        if (req.user.role != 'Student') {
-
+        if (req.user.role != 'Student' && isValidObjectId(req.params.classID) && await Class.findById(req.params.classID)) {
             const searchDate = new Date(req.params.date);
             const startDate = new Date(searchDate);
             startDate.setHours(0, 0, 0, 0);
@@ -937,7 +1056,7 @@ app.get('/attandance/prev/:classID/:date', checkAuth, async (req, res) => {
 
 app.post('/attandance/update/:sheetId', checkAuth, async (req, res) => {
     try {
-        if (req.user.role != 'Student') {
+        if (req.user.role != 'Student' && isValidObjectId(req.params.sheetId) && await Attendance.findById(req.params.sheetId)) {
             let attandanceSheet = req.body.data;
             await Attendance.findByIdAndUpdate(req.params.sheetId, {
                 status: attandanceSheet
@@ -953,86 +1072,90 @@ app.post('/attandance/update/:sheetId', checkAuth, async (req, res) => {
 
 app.get('/attandance/download/all/:classId', checkAuth, checkPrinciple, async (req, res) => {
     try {
-        let attandanceSheet = await Attendance.aggregate(
-            [
-                {
-                    $match: {
-                        'class': new mongoose.Types.ObjectId(req.params.classId)
-                    }
-                },
-                {
-                    '$project': {
-                        'status.userId': 1,
-                        'status.attendance': 1,
-                        'createdAt': 1
-                    }
-                }, {
-                    '$sort': {
-                        'createdAt': 1
-                    }
-                }, {
-                    '$unwind': {
-                        'path': '$status'
-                    }
-                }, {
-                    '$group': {
-                        '_id': '$status.userId',
-                        'status': {
-                            '$push': {
-                                'date': '$createdAt',
-                                'status': '$status.attendance'
+        if (isValidObjectId(req.params.classId) && await Class.findById(req.params.classId)) {
+            let attandanceSheet = await Attendance.aggregate(
+                [
+                    {
+                        $match: {
+                            'class': new mongoose.Types.ObjectId(req.params.classId)
+                        }
+                    },
+                    {
+                        '$project': {
+                            'status.userId': 1,
+                            'status.attendance': 1,
+                            'createdAt': 1
+                        }
+                    }, {
+                        '$sort': {
+                            'createdAt': 1
+                        }
+                    }, {
+                        '$unwind': {
+                            'path': '$status'
+                        }
+                    }, {
+                        '$group': {
+                            '_id': '$status.userId',
+                            'status': {
+                                '$push': {
+                                    'date': '$createdAt',
+                                    'status': '$status.attendance'
+                                }
                             }
                         }
+                    }, {
+                        '$lookup': {
+                            'from': 'users',
+                            'localField': '_id',
+                            'foreignField': '_id',
+                            'as': 'user'
+                        }
+                    }, {
+                        '$project': {
+                            'status': 1,
+                            'user.username': 1,
+                            'user.rid': 1,
+                            'user.rollno': 1
+                        }
+                    }, {
+                        '$unwind': {
+                            'path': '$user'
+                        }
+                    }, {
+                        '$sort': {
+                            'user.rollno': 1
+                        }
                     }
-                }, {
-                    '$lookup': {
-                        'from': 'users',
-                        'localField': '_id',
-                        'foreignField': '_id',
-                        'as': 'user'
-                    }
-                }, {
-                    '$project': {
-                        'status': 1,
-                        'user.username': 1,
-                        'user.rid': 1,
-                        'user.rollno': 1
-                    }
-                }, {
-                    '$unwind': {
-                        'path': '$user'
-                    }
-                }, {
-                    '$sort': {
-                        'user.rollno': 1
-                    }
+
+                ]);
+            let jsonSheet = attandanceSheet.map(obj => {
+                return {
+                    'Reg. ID': obj.user.rid,
+                    'Roll No': obj.user.rollno,
+                    'Name': obj.user.username,
+                    'attandance': obj.status,
                 }
-
-            ]);
-        let jsonSheet = attandanceSheet.map(obj => {
-            return {
-                'Reg. ID': obj.user.rid,
-                'Roll No': obj.user.rollno,
-                'Name': obj.user.username,
-                'attandance': obj.status,
-            }
-        });
-        jsonSheet.map(obj => {
-            let attandance = obj.attandance;
-            delete obj.attandance;
-            attandance.map(obj2 => {
-                let date = new Date(obj2.date);
-                obj[`${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`] = obj2.status ? 'P' : 'A';
+            });
+            jsonSheet.map(obj => {
+                let attandance = obj.attandance;
+                delete obj.attandance;
+                attandance.map(obj2 => {
+                    let date = new Date(obj2.date);
+                    obj[`${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`] = obj2.status ? 'P' : 'A';
+                })
             })
-        })
-        const workSheet = XLSX.utils.json_to_sheet(jsonSheet);
-        const workBook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workBook, workSheet, `students`);
-        const fileName = `WorkBook_attandance.xlsx`
-        const outputPath = `static/downloads/${fileName}`;
-        XLSX.writeFile(workBook, outputPath);
-        res.json({ success: true, fileName });
-
+            const workSheet = XLSX.utils.json_to_sheet(jsonSheet);
+            const workBook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workBook, workSheet, `students`);
+            const fileName = `WorkBook_attandance.xlsx`
+            const outputPath = `static/downloads/${fileName}`;
+            XLSX.writeFile(workBook, outputPath);
+            res.json({ success: true, fileName });
+        }
+        else {
+            res.json({ success: false });
+        }
     } catch (err) {
         res.json({ success: false });
     }
@@ -1040,9 +1163,12 @@ app.get('/attandance/download/all/:classId', checkAuth, checkPrinciple, async (r
 
 app.get('/attandance/remove/all/:cid', checkAuth, checkPrinciple, async (req, res) => {
     try {
-        let data = await Attendance.deleteMany({ class: req.params.cid });
-        console.log(data);
-        res.json({ success: true, data });
+        if (isValidObjectId(req.params.cid) && await Class.findById(req.params.id)) {
+            let data = await Attendance.deleteMany({ class: req.params.cid });
+            res.json({ success: true, data });
+        } else {
+            res.json({ success: false });
+        }
     } catch (err) {
         res.json({ success: false });
     }
@@ -1061,13 +1187,13 @@ app.get('/announcement/:id', checkAuth, async (req, res) => {
                 res.render('principle/announcement.ejs', { className: data.className, classId: req.params.id });
             }
             else {
-                res.render("404");
+                res.render("common/404.ejs");
             }
         } else {
-            res.render("404");
+            res.render("common/404.ejs");
         }
     } catch (err) {
-        res.render("500");
+        res.render("common/500.ejs");
     }
 })
 app.post('/announcement/add/:id', checkAuth, async (req, res) => {
@@ -1153,13 +1279,13 @@ app.get('/syllabus/:id', checkAuth, async (req, res) => {
                 res.render('principle/syllabus.ejs', { className: data.className, classId: req.params.id, syllabus: data.syllabus || false });
             }
             else {
-                res.render("404");
+                res.render("common/404.ejs");
             }
         } else {
-            res.render("404");
+            res.render("common/404.ejs");
         }
     } catch (err) {
-        res.render("500")
+        res.render("common/500.ejs")
     }
 })
 
@@ -1190,14 +1316,14 @@ app.get('/schedule/:id', checkAuth, async (req, res) => {
                 res.render('principle/schedule.ejs', { className: data.className, classId: req.params.id, schedule: data.schedule || false });
             }
             else {
-                res.render("404")
+                res.render("common/404.ejs")
             }
         }
         else {
-            res.render("404")
+            res.render("common/404.ejs")
         }
     } catch (err) {
-        res.render("500")
+        res.render("common/500.ejs")
     }
 })
 
@@ -1228,14 +1354,14 @@ app.get('/principleResult/:id', checkAuth, async (req, res) => {
                 res.render('principle/result.ejs', { className: data.className, classId: req.params.id, isInCharge: (req.user.role === 'Principle') || (data.inCharge && data.inCharge.toString() === req.user._id.toString()) });
             }
             else {
-                res.render("404")
+                res.render("common/404.ejs")
             }
         }
         else {
-            res.render("404")
+            res.render("common/404.ejs")
         }
     } catch (err) {
-        res.render("500")
+        res.render("common/500.ejs")
     }
 })
 
@@ -1349,13 +1475,13 @@ app.get('/explainResult/:id/:classId', checkAuth, async (req, res) => {
                 res.render('principle/explain_result.ejs', { className: data.className, classId: req.params.id, resultId: req.params.id, isInCharge: (req.user.role === 'Principle') || (data.inCharge && data.inCharge.toString() === req.user._id.toString()) });
             }
             else {
-                res.render("404")
+                res.render("common/404.ejs")
             }
         } else {
-            res.render("404")
+            res.render("common/404.ejs")
         }
     } catch (err) {
-        res.render("500")
+        res.render("common/500.ejs")
     }
 })
 
@@ -1471,13 +1597,13 @@ app.get('/result/students/:id', checkAuth, async (req, res) => {
                 res.render('principle/result_students.ejs', { data: data[0] });
             }
             else {
-                res.render("404")
+                res.render("common/404.ejs")
             }
         } else {
-            res.render("404")
+            res.render("common/404.ejs")
         }
     } catch (err) {
-        res.render("500")
+        res.render("common/500.ejs")
     }
 })
 
@@ -1615,10 +1741,10 @@ app.get('/result/students/single/:sid/:rid', checkAuth, async (req, res) => {
             res.render('common/result.ejs', { data, isPrinciple: (req.user.role === 'Principle') || (data.class.inCharge && data.class.inCharge.toString() === req.user._id.toString()) });
         }
         else {
-            res.render("404")
+            res.render("common/404.ejs")
         }
     } catch (err) {
-        res.render("500")
+        res.render("common/500.ejs")
     }
 })
 

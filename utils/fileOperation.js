@@ -1,5 +1,11 @@
 import fs from "fs";
 import jimp from 'jimp';
+
+/**
+ * 
+ * @param {string} path Path of file to Delete
+ * @returns true/false deleted or not
+ */
 export const deleteFile = (path) => {
     return new Promise((resolve, reject) => {
         try {
@@ -12,6 +18,13 @@ export const deleteFile = (path) => {
         }
     })
 }
+
+
+/**
+ * 
+ * @param {string} filePath Path of Fileq
+ * @returns next or null
+ */
 
 export const compressAndOverwrite = async (filePath) => {//webp not supports
     try {
@@ -28,6 +41,15 @@ export const compressAndOverwrite = async (filePath) => {//webp not supports
     }
 };
 
+
+/**
+ * 
+ * @param {string} filePath Path of image
+ * @param {number} height Height of Image
+ * @param {number} width Width of Image
+ * @param {number} quality Quality of Image [0,100]
+ * @returns 
+ */
 export const resizeImages = async (filePath, height, width, quality) => {
     try {
         jimp.read(`./static${filePath}`, (err, lenna) => {
@@ -42,7 +64,17 @@ export const resizeImages = async (filePath, height, width, quality) => {
         return null;
     }
 }
-import { createCanvas, loadImage, registerFont } from 'canvas'
+
+
+
+import { createCanvas, loadImage } from 'canvas'
+
+/**
+ * 
+ * @param {object} cardData Information of Card
+ * @param {object} studentData Information of Student used in cardData
+ * @returns 
+ */
 export const createIdCard = (cardData, studentData) => {
     try {
         loadImage(`./static${cardData.baseImg}`).then(async (image) => {

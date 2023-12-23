@@ -121,6 +121,7 @@
 .c8 {
     background: url('../img/schedule.jpg');
 }
+
 .c9 {
     background: url('../img/liveClassbg.jpg');
 }
@@ -139,6 +140,10 @@
     color: white;
     box-shadow: 0 0 10px 2px #dbdbdb;
     cursor: pointer;
+}
+
+.smallCard:hover {
+    transform: scale(1.05);
 }
 
 .birthDays {

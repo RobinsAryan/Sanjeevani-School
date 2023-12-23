@@ -162,7 +162,7 @@ const loadStudents = async () => {
                         <p style="font-size: 12px; color: gray;">Phone No. ${student.student.phone}</p>
                         <p style="font-size: 12px; color: gray;">Reg. Id ${student.student.rid}</p>
                         </div> 
-                        <a class="phone" href="tel:${student.phone}"><i class="fas fa-phone-alt"></i></a>
+                        <a class="phone" href="tel:${student.student.phone}"><i class="fas fa-phone-alt"></i></a>
                         </div>`
         })
     }
