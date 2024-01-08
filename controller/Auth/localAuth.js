@@ -1,5 +1,6 @@
 import user from '../../models/User.js';
 import { Strategy as localStrategy } from 'passport-local';
+import { createLog } from '../logs/logs.js';
 
 export default function (passport) {
     passport.use(new localStrategy({ usernameField: 'email' }, async (email, password, done) => {
@@ -31,7 +32,7 @@ export default function (passport) {
             }
         }
         catch (err) {
-            console.log(err);
+            createLog(null, `Local Authentication Fail reason:${err}`, 'error');
             return done(null, false, { message: "Server Error" });
         }
     }));

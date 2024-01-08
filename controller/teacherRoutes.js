@@ -1,13 +1,15 @@
 import express from 'express';
 const app = express();
-import User from '../models/User.js'; 
+import User from '../models/User.js';
 import { checkAuth, checkPrinciple } from '../utils/middleware.js';
+import { createLog } from './logs/logs.js';
 
 app.get('/all', checkAuth, async (req, res) => {
     try {
         let data = await User.find({ role: "Teacher" }).sort({ createdAt: -1 });
         res.json({ success: true, data });
     } catch (err) {
+        createLog(req.user, 'In teachers/all during getting all teachers error:' + err, 'error');
         res.json({ success: false });
     }
 })
@@ -32,6 +34,7 @@ app.post('/add', checkAuth, checkPrinciple, async (req, res) => {
         await newClass.save();
         res.json({ success: true });
     } catch (err) {
+        createLog(req.user, 'In teachers/add during adding a teacher error:' + err, 'error');
         res.json({ success: false });
     }
 })
@@ -58,8 +61,8 @@ app.post('/updateTeacher/:id', checkAuth, checkPrinciple, async (req, res) => {
             department: req.body.department
         })
         res.json({ success: true, updated: true });
-    } catch (err) {
-        console.log(err);
+    } catch (err) { 
+        createLog(req.user, 'In updateTeacher/:id during updating a teacher error:' + err, 'error');
         res.json({ success: false });
     }
 })

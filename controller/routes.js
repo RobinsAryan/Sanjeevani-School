@@ -11,6 +11,7 @@ import { checkAuth, checkPrinciple } from '../utils/middleware.js';
 import webPush from '../utils/webPush.js'
 import webRTC from './RTC/liveClass.js'
 import rtcServer from './RTC/rtcServer.js'
+import logRoute, { createLog } from './logs/logs.js'
 import cardRoute from './cards.js';
 passportLocal(passport);
 
@@ -42,6 +43,7 @@ app.get('/', async (req, res) => {
 
 app.get('/login', (req, res) => {
     if (req.isAuthenticated()) {
+        createLog(req.user, "Trys reLogin!!")
         res.redirect('/');
     }
     else {
@@ -58,6 +60,7 @@ app.post('/login', (req, res, next) => {
 })
 
 app.get('/loginFail', async (req, res) => {
+    createLog(null, `Login Failed msz: ${res.locals.error}`,'warn');
     res.json({
         success: false,
         msz: res.locals.error.length ? res.locals.error[0] : 'something wrong',
@@ -65,6 +68,7 @@ app.get('/loginFail', async (req, res) => {
 })
 
 app.get('/loginSuccess', checkAuth, async (req, res) => {
+    createLog(req.user, 'Logged In!!','info'); 
     res.json({
         success: true,
     })
@@ -72,6 +76,7 @@ app.get('/loginSuccess', checkAuth, async (req, res) => {
 
 
 app.get('/logout', (req, res) => {
+    createLog(req.user, 'Logged Out!!','info');
     req.logout(function (err) {
         req.session.destroy(function (err) {
             res.redirect('/');
@@ -79,15 +84,13 @@ app.get('/logout', (req, res) => {
     });
 });
 
-app.get('/home', checkAuth, async (req, res) => {
-    res.render('common/home.ejs', { username: req.user.username, amount: (await roomPrice()).amount });
-})
-
 app.get('/graph', checkPrinciple, (req, res) => {
+    createLog(req.user, 'Accessed Graph','info');
     res.render('principle/graph.ejs');
 })
 
 app.get('/about', (req, res) => {
+    createLog(req.user, 'Accessed About','info');
     res.render('common/about.ejs');
 })
 
@@ -99,6 +102,7 @@ app.use('/student', studentRoute);
 app.use('/RTC', webRTC);
 app.use('/rtcServer', rtcServer);
 app.use('/cards', cardRoute);
+app.use('/logs', logRoute);
 app.use(webPush);
 app.get('*', (req, res) => res.render('common/404.ejs'));
 

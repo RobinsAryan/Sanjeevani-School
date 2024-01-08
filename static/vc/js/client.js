@@ -24,7 +24,7 @@ const images = {
     forbidden: '../images/forbidden.png',
     avatar: '../images/mirotalk-logo.png',
     recording: '../images/recording.png',
-}; // nice free icon: https://www.iconfinder.com
+};
 
 const className = {
     user: 'fas fa-user',
@@ -60,8 +60,7 @@ const className = {
     speech: 'fas fa-volume-high',
     heart: 'fas fa-heart',
     pip: 'fas fa-images',
-};
-// https://fontawesome.com/search?o=r&m=free
+}; 
 
 const icons = {
     lock: '<i class="fas fa-lock"></i>',

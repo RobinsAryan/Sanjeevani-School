@@ -14,6 +14,7 @@ import { deleteFile } from '../utils/fileOperation.js';
 import Notification from '../models/Notification.js';
 import { userClass } from './userRoutes.js';
 import Result from '../models/Result.js';
+import { createLog } from './logs/logs.js';
 
 //class routes
 app.get('/single/:id', checkAuth, async (req, res) => {
@@ -27,18 +28,24 @@ app.get('/single/:id', checkAuth, async (req, res) => {
                     isPrinciple: req.user.role === 'Principle',
                     isInCharge: (req.user.role === 'Principle') || (data.inCharge && data.inCharge.toString() === req.user._id.toString())
                 });
+                createLog(req.user, 'Accessed Class', 'info');
             }
-            else
+            else {
                 res.render('common/404.ejs');
+                noPermissionLog(req.user, 'Class Page')
+            }
         }
         else {
+            createLog(req.user, 'In class/single/:id Invalid Class Id or no permissible Route', 'warn');
             res.render('common/404.ejs');
         }
     } catch (err) {
-        console.log(err)
+        createLog(req.user, 'In class/single/:id Error in getting Class error:' + err, 'error');
         res.render("common/500.ejs");
     }
 })
+
+
 
 app.get('/all', checkAuth, async (req, res) => {
     try {
@@ -48,11 +55,15 @@ app.get('/all', checkAuth, async (req, res) => {
         }
         else {
             res.json({ success: false });
+            noPermissionLog(req.user, 'all Class Info');
         }
     } catch (err) {
+        createLog(req.user, 'In class/all Error in getting all Class data error:' + err, 'error');
         res.json({ success: false });
     }
 })
+
+
 
 app.post('/add', checkAuth, checkPrinciple, async (req, res) => {
     try {
@@ -62,7 +73,9 @@ app.post('/add', checkAuth, checkPrinciple, async (req, res) => {
         })
         await newClass.save();
         res.json({ success: true });
+        infoLog(req.user, 'Added a New Class');
     } catch (err) {
+        createLog(req.user, 'In class/add Error in adding new Class error:' + err, 'error');
         res.json({ success: false });
     }
 })
@@ -73,11 +86,14 @@ app.post('/update/className/:id', checkAuth, checkPrinciple, async (req, res) =>
         if (isValidObjectId(req.params.id)) {
             await Class.findByIdAndUpdate(req.params.id, { className: req.body.className });
             res.json({ success: true });
+            infoLog(req.user, 'Update ClassName');
         }
         else {
+            createLog(req.user, 'No class exist with provided id ' + req.params.id, 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, 'In class/update/className/:id Error in updating Class Name error:' + err, 'error');
         res.json({ success: false });
     }
 })
@@ -100,10 +116,13 @@ app.get('/remove/:id', checkAuth, checkPrinciple, async (req, res) => {
             await Ebook.deleteMany({ class: new mongoose.Types.ObjectId(req.params.id) });
             await Notification.deleteMany({ class: new mongoose.Types.ObjectId(req.params.id) });
             res.json({ success: true });
+            infoLog(req.user, 'Removed Class', 'info');
         } else {
+            createLog(req.user, 'No class exist with provided id ' + req.params.id, 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, 'In class/remove/:id Error in removing Class error:' + err, 'error');
         res.json({ success: false });
     }
 })
@@ -150,10 +169,13 @@ app.get('/inCharge/:id', checkAuth, checkPrinciple, async (req, res) => {
                 }
             ]).exec();
             res.json({ success: true, 'inCharge': inCharge || false, teachers });
+            infoLog(req.user, 'Accessed Incharges of class');
         } else {
+            createLog(req.user, 'No class exist with provided id ' + req.params.id, 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, 'In class/incharge/:id Error in getting Class incharge:' + err, 'error');
         res.json({ success: false });
     }
 })
@@ -167,13 +189,17 @@ app.get('/setInCharge/:classID/:id', checkAuth, checkPrinciple, async (req, res)
                     inCharge: req.params.id
                 });
                 res.json({ success: true });
+                infoLog(req.user, 'Seted new Incharge');
             } else {
+                createLog(req.user, 'Not a Teacher to set a Incharge', 'warn');
                 res.json({ success: false });
             }
         } else {
+            createLog(req.user, 'No class exist with provided id ' + req.params.classID, 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, 'In class/setInCharge/:classID/:id Error in setting Class Incharge error:' + err, 'error');
         res.json({ success: false });
     }
 })
@@ -195,14 +221,18 @@ app.get('/student/:cid', checkAuth, async (req, res) => {
                     classId: req.params.cid,
                     isPrinciple: req.user.role === 'Principle'
                 });
+                infoLog(req.user, 'Accessed Class Students');
             }
             else {
+                createLog(req.user, 'No class exist with provided id ' + req.params.cid, 'warn');
                 res.render("common/404.ejs");
             }
         } else {
+            createLog(req.user, 'No class exist with provided id or Student Forbiden Route /student/:cid', 'warn');
             res.render("common/404.ejs");
         }
     } catch (err) {
+        createLog(req.user, 'In class/student/:cid Error in getting Class students error:' + err, 'error');
         res.render("common/500.ejs");
     }
 })
@@ -253,9 +283,11 @@ app.get('/students/all/:classID', checkAuth, async (req, res) => {
             ])
             res.json({ success: true, data });
         } else {
+            createLog(req.user, 'No class exist with provided id ' + req.params.classID, 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, 'In class/student/all/:classID Error in getting all Class students error:' + err, 'error');
         res.json({ success: false });
     }
 })
@@ -320,7 +352,7 @@ const addStudent = (data, id) => {
                 resolve({ success: true, added: true });
             }
         } catch (err) {
-            console.log(err)
+            createLog(req.user, 'In addStudent Error in adding new student error:' + err, 'error');
             resolve({ success: false });
         }
     })
@@ -341,10 +373,13 @@ app.post('/addSingleStudent/:classID', checkAuth, checkPrinciple, async (req, re
             req.body.dob = dob;
             let resData = await addStudent(req.body, req.params.classID);
             res.json(resData);
+            infoLog(req.user, 'Add a new Single student');
         } else {
+            createLog(req.user, 'No class exist with provided id ' + req.params.classID, 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, 'In /addSingleStudent/:classId Error in adding new single student error:' + err, 'error');
         res.json({ success: false });
     }
 })
@@ -458,17 +493,22 @@ app.post('/addMultipleStudents/:classID', checkAuth, checkPrinciple, upload.sing
                         const outputPath = `static/downloads/${fileName}`;
                         XLSX.writeFile(workBook, outputPath);
                         res.json({ success: true, allInserted: false, total: students.length, unInserted: uninsertedStudents.length, descFile: fileName });
+                        infoLog(req.user, "New Students added via uploading sheet");
                     } else {
                         res.json({ success: true, allInserted: true, total: students.length });
+                        infoLog(req.user, "New Students added via uploading sheet");
                     }
                 } catch (err) {
+                    createLog(req.user, 'In /addMultipleStudent/:classId Error in reading file:' + req.file.path + 'Error: ' + err, 'error');
                     res.json({ success: false });
                 }
             });
         } else {
+            createLog(req.user, 'No class exist with provided id ' + req.params.classID, 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, 'In /addMultipleStudent/:classId Error in adding new multiple students error:' + err, 'error');
         res.json({ success: false });
     }
 })
@@ -532,11 +572,14 @@ app.post('/updateStudent/:id', checkAuth, checkPrinciple, async (req, res) => {
                     gender
                 });
                 res.json({ success: true, updated: true });
+                infoLog(req.user, 'Updated Studnet');
             }
         } else {
+            createLog(req.user, 'No student exist with provided id ' + req.params.id, 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, "In /updatestudent/:id during updating Student info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
@@ -553,7 +596,9 @@ app.post('/announcement/add', checkAuth, checkPrinciple, async (req, res) => {
         });
         await newNotification.save();
         res.json({ success: true });
+        infoLog(req.user, "Added a New Announcement");
     } catch (err) {
+        createLog(req.user, "In /announcement/add during creating Announcement info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
@@ -580,6 +625,7 @@ app.get('/announcement/all', checkAuth, async (req, res) => {
         ])
         res.json({ success: true, data });
     } catch (err) {
+        createLog(req.user, "In /announcement/all during getting Announcement info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
@@ -591,10 +637,13 @@ app.get('/announcement/remove/:id', checkAuth, checkPrinciple, async (req, res) 
             let notify = await Notification.findByIdAndDelete(req.params.id);
             if (notify.icon !== '/img/logo.png')
                 await deleteFile(`./static${notify.icon}`);
+            infoLog(req.user, "New Announcement Added");
         } else {
+            createLog(req.user, 'No Announcemnet exist with provided id ' + req.params.id, 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, "In /announcement/remove/:id during removing Announcement info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
@@ -612,14 +661,18 @@ app.get('/Ebooks/:id', checkAuth, async (req, res) => {
                     classId: req.params.id,
                     canAdd: true
                 });
+                infoLog(req.user, 'Accessed Ebooks');
             } else {
+                createLog(req.user, 'No class exist with provided id ' + req.params.id, 'warn');
                 res.render('common/404.ejs');
             }
         }
         else {
+            noPermissionLog(req.user, "Principle/Teacher Ebook Page");
             res.render('common/404.ejs');
         }
     } catch (err) {
+        createLog(req.user, "In /Ebooks/:id during getting Ebook Page info Error:" + err, 'error');
         res.render("common/500.ejs");
     }
 })
@@ -627,7 +680,6 @@ app.get('/Ebooks/:id', checkAuth, async (req, res) => {
 app.get('/ebooks/all/:id', checkAuth, async (req, res) => {
     try {
         if (isValidObjectId(req.params.id)) {
-
             let data = await Ebook.aggregate([
                 {
                     $match: {
@@ -641,9 +693,11 @@ app.get('/ebooks/all/:id', checkAuth, async (req, res) => {
             ])
             res.json({ success: true, data });
         } else {
+            createLog(req.user, 'No class exist with provided id ' + req.params.id, 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, "In /Ebooks/all/:id during getting all Ebooks info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
@@ -671,9 +725,11 @@ app.post('/ebook/add/:id', checkAuth, async (req, res) => {
             await newNotification.save();
             sendNotificationToClass(req.params.id, "Ebooks", `Book ${req.body.title} is Added in Classroom`)
         } else {
+            createLog(req.user, "Invalid Id or Studnet trying to Add New Ebooks", 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, "In /ebook/add/:id during adding Ebooks info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
@@ -683,11 +739,14 @@ app.get('/ebook/remove/:id', checkAuth, async (req, res) => {
         if (req.user != 'Student' && isValidObjectId(req.params.id)) {
             let ebook = await Ebook.findByIdAndDelete(req.params.id);
             await deleteFile(`./static/downloads/${ebook.url}`);
+            infoLog(req.user, 'Removed Ebooks');
             res.json({ success: true });
         } else {
+            createLog(req.user, "Invalid Id or Studnet trying to remove Ebooks", 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, "In /ebook/remove/:id during removing Ebooks info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
@@ -708,15 +767,19 @@ app.get('/classWork/:id', checkAuth, async (req, res) => {
                     classId: req.params.id,
                     canAdd: true
                 });
+                infoLog(req.user, 'Accessed Classwork Page');
             }
             else {
+                createLog(req.user, 'No class exist with provided id ' + req.params.id, 'warn');
                 res.render('common/404.ejs');
             }
         }
         else {
+            createLog(req.user, "Invalid Id or Studnet trying to access principle/teacher classwork", 'warn');
             res.render('common/404.ejs');
         }
     } catch (err) {
+        createLog(req.user, "In /classWork/:id during getting classwork Page info Error:" + err, 'error');
         res.render("common/500.ejs");
     }
 })
@@ -762,9 +825,11 @@ app.get('/classWork/all/:id', checkAuth, async (req, res) => {
             ])
             res.json({ success: true, data });
         } else {
+            createLog(req.user, "Invalid Id", 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, "In /classWork/all/:id during getting all classwork info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
@@ -781,6 +846,7 @@ app.post('/classWork/add/:id', checkAuth, async (req, res) => {
                 author: req.user._id
             })
             await work.save();
+            infoLog(req.user, 'Added new Classwork');
             res.json({ success: true });
             let newNotification = new Notification({
                 title: 'New Class Work',
@@ -792,9 +858,11 @@ app.post('/classWork/add/:id', checkAuth, async (req, res) => {
             await newNotification.save();
         }
         else {
+            createLog(req.user, "Invalid Id or Studnet trying to add classwork", 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, "In /classWork/add/:id during adding classwork info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
@@ -808,10 +876,13 @@ app.get('/classWork/remove/:id', checkAuth, async (req, res) => {
             if (work.file.length) {
                 await deleteFile(`./static/downloads/${work.file}`);
             }
+            infoLog(req.user, 'Classwork Removed');
         } else {
+            createLog(req.user, "Invalid Id or Studnet trying to remove classwork", 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, "In /classWork/remove/:id during removing classwork info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
@@ -847,11 +918,14 @@ app.get('/attandance/:id', checkAuth, async (req, res) => {
                     todayAttandance
                 });
             }
+            infoLog(req.user, 'Accessed Attandance');
         }
         else {
+            createLog(req.user, "Invalid Id or Studnet trying to access Principle/Teacher Attandance Routes", 'warn');
             res.render('common/404.ejs');
         }
     } catch (err) {
+        createLog(req.user, "In /attandance/:id during getting attandance Page info Error:" + err, 'error');
         res.render("common/500.ejs");
     }
 })
@@ -874,9 +948,11 @@ app.post('/attandance/upload/:id', checkAuth, async (req, res) => {
             await attandance.save();
             res.json({ success: true });
         } else {
+            createLog(req.user, "Invalid Id or Studnet trying to uploading Attandance", 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, "In /attandance/upload/:id during uploading attandance info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
@@ -958,9 +1034,11 @@ app.get('/attandance/download/:id', checkAuth, async (req, res) => {
             XLSX.writeFile(workBook, outputPath);
             res.json({ success: true, fileName });
         } else {
+            createLog(req.user, "Invalid Id or Studnet trying to download attandance", 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, "In /attandance/download/:id during downloading attandance info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
@@ -1046,9 +1124,11 @@ app.get('/attandance/prev/:classID/:date', checkAuth, async (req, res) => {
             ])
             res.json({ success: true, data });
         } else {
+            createLog(req.user, "Invalid Id or Studnet trying to load class prev attandance", 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, "In /attandance/prev/:classID/:date during getting previous attandance info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
@@ -1062,10 +1142,13 @@ app.post('/attandance/update/:sheetId', checkAuth, async (req, res) => {
                 status: attandanceSheet
             })
             res.json({ success: true });
+            infoLog("Attandance Updated");
         } else {
+            createLog(req.user, "Invalid Id or Studnet trying to updating attandance", 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, "In /attandance/update/:sheetId during updating previous attandance info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
@@ -1152,11 +1235,14 @@ app.get('/attandance/download/all/:classId', checkAuth, checkPrinciple, async (r
             const outputPath = `static/downloads/${fileName}`;
             XLSX.writeFile(workBook, outputPath);
             res.json({ success: true, fileName });
+            infoLog(req.user, 'Attandance of all class downloaded');
         }
         else {
+            createLog(req.user, "Invalid Id to download all class attandance" + req.params.classId, 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, "In /attandance/download/:id during downloading previous attandance info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
@@ -1166,10 +1252,13 @@ app.get('/attandance/remove/all/:cid', checkAuth, checkPrinciple, async (req, re
         if (isValidObjectId(req.params.cid) && await Class.findById(req.params.id)) {
             let data = await Attendance.deleteMany({ class: req.params.cid });
             res.json({ success: true, data });
+            infoLog(req.user, 'Attandance of class removed');
         } else {
+            createLog(req.user, "Invalid Id to remove all class attandance" + req.params.classId, 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, "In /attandance/remove/all/:cid during removing all attandance of a class info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
@@ -1181,24 +1270,28 @@ app.get('/attandance/remove/all/:cid', checkAuth, checkPrinciple, async (req, re
 
 app.get('/announcement/:id', checkAuth, async (req, res) => {
     try {
-        if (req.user.role != 'Student') {
+        if (req.user.role != 'Student' && isValidObjectId(req.params.id)) {
             let data = await Class.findById(req.params.id);
             if (data) {
                 res.render('principle/announcement.ejs', { className: data.className, classId: req.params.id });
+                infoLog(req.user, 'Accessed Announcement Page');
             }
             else {
+                createLog(req.user, 'No class exist with provided id ' + req.params.id, 'warn');
                 res.render("common/404.ejs");
             }
         } else {
+            createLog(req.user, "Invalid Id or Studnet trying to access principle/teacher announcement page", 'warn');
             res.render("common/404.ejs");
         }
     } catch (err) {
+        createLog(req.user, "In /announcement/:id during getting class announcement page info Error:" + err, 'error');
         res.render("common/500.ejs");
     }
 })
 app.post('/announcement/add/:id', checkAuth, async (req, res) => {
     try {
-        if (req.user.role != 'Student') {
+        if (req.user.role != 'Student' && isValidObjectId(req.params.id)) {
             let data = await Class.findById(req.params.id);
             if (data) {
                 await (new Notification({
@@ -1211,59 +1304,68 @@ app.post('/announcement/add/:id', checkAuth, async (req, res) => {
                 })).save();
                 res.json({ success: true });
                 sendNotificationToClass(req.params.id, req.body.title, req.body.body)
+                infoLog(req.user, 'Announcement Added');
             }
             else {
+                createLog(req.user, 'No class exist with provided id ' + req.params.id, 'warn');
                 res.json({ success: false });
             }
         }
         else {
+            createLog(req.user, "Invalid Id or Studnet trying to add Announcement", 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, "In /announcement/add/:id during adding class announcement info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
 
 app.get('/announcement/all/:id', checkAuth, async (req, res) => {
     try {
-        let data = await Notification.aggregate([
-            {
-                '$match': {
-                    'scope': 'Class'
+        if (isValidObjectId(req.params.id)) {
+            let data = await Notification.aggregate([
+                {
+                    '$match': {
+                        'scope': 'Class'
+                    }
+                },
+                {
+                    '$match': {
+                        'class': new mongoose.Types.ObjectId(req.params.id)
+                    }
+                }, {
+                    '$lookup': {
+                        'from': 'users',
+                        'localField': 'author',
+                        'foreignField': '_id',
+                        'as': 'author'
+                    }
+                }, {
+                    '$unwind': {
+                        'path': '$author'
+                    }
+                }, {
+                    '$project': {
+                        'title': 1,
+                        'body': 1,
+                        'author._id': 1,
+                        'author.username': 1,
+                        'author.profile': 1,
+                        'createdAt': 1
+                    }
+                }, {
+                    '$sort': {
+                        'createdAt': -1
+                    }
                 }
-            },
-            {
-                '$match': {
-                    'class': new mongoose.Types.ObjectId(req.params.id)
-                }
-            }, {
-                '$lookup': {
-                    'from': 'users',
-                    'localField': 'author',
-                    'foreignField': '_id',
-                    'as': 'author'
-                }
-            }, {
-                '$unwind': {
-                    'path': '$author'
-                }
-            }, {
-                '$project': {
-                    'title': 1,
-                    'body': 1,
-                    'author._id': 1,
-                    'author.username': 1,
-                    'author.profile': 1,
-                    'createdAt': 1
-                }
-            }, {
-                '$sort': {
-                    'createdAt': -1
-                }
-            }
-        ])
-        res.json({ success: true, data });
+            ])
+            res.json({ success: true, data });
+        } else {
+            createLog(req.user, "Invalid Id", 'warn');
+        }
     } catch (err) {
+        createLog(req.user, "In /announcement/all/:id during getting all class announcement info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
@@ -1273,18 +1375,22 @@ app.get('/announcement/all/:id', checkAuth, async (req, res) => {
 //Syllabus
 app.get('/syllabus/:id', checkAuth, async (req, res) => {
     try {
-        if (req.user.role != 'Student') {
+        if (req.user.role != 'Student' && isValidObjectId(req.params.id)) {
             let data = await Class.findById(req.params.id);
             if (data) {
+                infoLog(req.user, "Accessed Syllabus");
                 res.render('principle/syllabus.ejs', { className: data.className, classId: req.params.id, syllabus: data.syllabus || false });
             }
             else {
+                createLog(req.user, 'No class exist with provided id ' + req.params.id, 'warn');
                 res.render("common/404.ejs");
             }
         } else {
+            createLog(req.user, "Invalid Id or Studnet trying to access add syllabus page", 'warn');
             res.render("common/404.ejs");
         }
     } catch (err) {
+        createLog(req.user, "In syllabus/:id during getting syllabus info Error:" + err, 'error');
         res.render("common/500.ejs")
     }
 })
@@ -1292,15 +1398,18 @@ app.get('/syllabus/:id', checkAuth, async (req, res) => {
 
 app.post('/syllabus/add/:id', checkAuth, async (req, res) => {
     try {
-        if (req.user.role != 'Student') {
+        if (req.user.role != 'Student' && isValidObjectId(req.params.id)) {
             await Class.findByIdAndUpdate(req.params.id, {
                 syllabus: req.body.url,
             })
             res.json({ success: true });
+            infoLog("Syllabus Added");
         } else {
+            createLog(req.user, "Invalid Id or Studnet trying to access add syllabus", 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, "In syllabus/add/:id during adding syllabus info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
@@ -1310,19 +1419,23 @@ app.post('/syllabus/add/:id', checkAuth, async (req, res) => {
 //Schedule
 app.get('/schedule/:id', checkAuth, async (req, res) => {
     try {
-        if (req.user.role != 'Student') {
+        if (req.user.role != 'Student' && isValidObjectId(req.params.id)) {
             let data = await Class.findById(req.params.id);
             if (data) {
                 res.render('principle/schedule.ejs', { className: data.className, classId: req.params.id, schedule: data.schedule || false });
+                infoLog(req.user, "Accessed Schedule Page");
             }
             else {
+                createLog(req.user, 'No class exist with provided id ' + req.params.id, 'warn');
                 res.render("common/404.ejs")
             }
         }
         else {
+            createLog(req.user, "Invalid Id or Studnet trying to access add schedule page", 'warn');
             res.render("common/404.ejs")
         }
     } catch (err) {
+        createLog(req.user, "In /schedule/:id during getting schedule page info Error:" + err, 'error');
         res.render("common/500.ejs")
     }
 })
@@ -1330,15 +1443,18 @@ app.get('/schedule/:id', checkAuth, async (req, res) => {
 
 app.post('/schedule/add/:id', checkAuth, async (req, res) => {
     try {
-        if (req.user.role != 'Student') {
+        if (req.user.role != 'Student' && isValidObjectId(req.params.id)) {
             await Class.findByIdAndUpdate(req.params.id, {
                 schedule: req.body.url,
             })
             res.json({ success: true });
+            infoLog(req.user, 'Add Schedule');
         } else {
+            createLog(req.user, "Invalid Id or Studnet trying to access add schedule", 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, "In /schedule/add/:id during adding schedule info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
@@ -1348,19 +1464,27 @@ app.post('/schedule/add/:id', checkAuth, async (req, res) => {
 //Result
 app.get('/principleResult/:id', checkAuth, async (req, res) => {
     try {
-        if (req.user.role != 'Student') {
+        if (req.user.role != 'Student' && isValidObjectId(req.params.id)) {
             let data = await Class.findById(req.params.id);
             if (data) {
-                res.render('principle/result.ejs', { className: data.className, classId: req.params.id, isInCharge: (req.user.role === 'Principle') || (data.inCharge && data.inCharge.toString() === req.user._id.toString()) });
+                res.render('principle/result.ejs', {
+                    className: data.className,
+                    classId: req.params.id,
+                    isInCharge: (req.user.role === 'Principle') || (data.inCharge && data.inCharge.toString() === req.user._id.toString())
+                });
+                infoLog(req.user, "Accessed Principle/Techer Result Page");
             }
             else {
+                createLog(req.user, 'No class exist with provided id ' + req.params.id, 'warn');
                 res.render("common/404.ejs")
             }
         }
         else {
+            createLog(req.user, "Invalid Id or Studnet trying to access Priciple/techer result page", 'warn');
             res.render("common/404.ejs")
         }
     } catch (err) {
+        createLog(req.user, "In /principleResult/:id during getting result Page info Error:" + err, 'error');
         res.render("common/500.ejs")
     }
 })
@@ -1368,7 +1492,7 @@ app.get('/principleResult/:id', checkAuth, async (req, res) => {
 
 app.post('/result/upload/:id', checkAuth, async (req, res) => {
     try {
-        if (req.user.role != 'Student') {
+        if (req.user.role != 'Student' && isValidObjectId(req.params.id)) {
             let filePath = `./static/downloads/${req.body.url}`;
             fs.readFile(filePath, async (err, data) => {
                 await deleteFile(filePath);
@@ -1379,8 +1503,7 @@ app.post('/result/upload/:id', checkAuth, async (req, res) => {
                 await Promise.all(resultData.map(async item => {
                     let student = await User.findOne({ rid: item['Reg. ID'] });
                     if (student && student.role === 'Student') {
-                        let classData = await userClass(student._id);
-                        console.log(classData);
+                        let classData = await userClass(student._id); 
                         if (classData && classData._id.toString() === req.params.id) {
                             let result = resultBuilder(item);
                             JSONResult.push({
@@ -1407,28 +1530,25 @@ app.post('/result/upload/:id', checkAuth, async (req, res) => {
                         })
                     }
                 }))
-                if (resultData.length === JSONResult.length) {
-                    console.log(JSONResult);
-                    console.log(errorData);
+                if (resultData.length === JSONResult.length) { 
                     await (new Result({
                         title: req.body.title,
                         classId: req.params.id,
                         MM: req.body.MM,
                         result: JSONResult
                     })).save();
-
                 } else {
-                    console.log(JSONResult);
-                    console.log(errorData);
                     return res.json({ success: true, uploaded: false, data: errorData });
                 }
+                infoLog(req.user, "Result Uploaded");
                 res.json({ success: true, uploaded: true });
             })
         } else {
+            createLog(req.user, "Invalid Id or Studnet trying to add Result", 'warn');
             res.json({ success: false });
         }
     } catch (err) {
-        console.log(err);
+        createLog(req.user, "In /result/upload/:id during uploading result info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
@@ -1441,27 +1561,32 @@ const resultBuilder = (data) => {
 
 app.get('/result/all/:id', checkAuth, async (req, res) => {
     try {
-        let data = await Result.aggregate([
-            {
-                $match: {
-                    classId: new mongoose.Types.ObjectId(req.params.id)
+        if (isValidObjectId(req.params.id)) {
+            let data = await Result.aggregate([
+                {
+                    $match: {
+                        classId: new mongoose.Types.ObjectId(req.params.id)
+                    }
+                },
+                {
+                    $project: {
+                        title: 1,
+                        createdAt: 1,
+                    }
+                },
+                {
+                    $sort: {
+                        createdAt: -1
+                    }
                 }
-            },
-            {
-                $project: {
-                    title: 1,
-                    createdAt: 1,
-                }
-            },
-            {
-                $sort: {
-                    createdAt: -1
-                }
-            }
-        ])
-        res.json({ success: true, data });
+            ])
+            res.json({ success: true, data });
+        } else {
+            createLog(req.user, "Invalid Id", 'warn');
+            res.json({ success: false });
+        }
     } catch (err) {
-        console.log(err)
+        createLog(req.user, "In /result/all/:id during getting all result info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
@@ -1469,18 +1594,27 @@ app.get('/result/all/:id', checkAuth, async (req, res) => {
 
 app.get('/explainResult/:id/:classId', checkAuth, async (req, res) => {
     try {
-        if (req.user.role != 'Student') {
+        if (req.user.role != 'Student' && isValidObjectId(req.params.id) && isValidObjectId(req.params.classId)) {
             let data = await Class.findById(req.params.classId);
             if (data) {
-                res.render('principle/explain_result.ejs', { className: data.className, classId: req.params.id, resultId: req.params.id, isInCharge: (req.user.role === 'Principle') || (data.inCharge && data.inCharge.toString() === req.user._id.toString()) });
+                res.render('principle/explain_result.ejs', {
+                    className: data.className,
+                    classId: data._id,
+                    resultId: req.params.id,
+                    isInCharge: (req.user.role === 'Principle') || (data.inCharge && data.inCharge.toString() === req.user._id.toString())
+                });
+                infoLog(req.user, 'Accessed Explaine Result');
             }
             else {
+                createLog(req.user, 'No class exist with provided id ' + req.params.classId, 'warn');
                 res.render("common/404.ejs")
             }
         } else {
+            createLog(req.user, "Invalid Id or Studnet trying to access class Explain Result page", 'warn');
             res.render("common/404.ejs")
         }
     } catch (err) {
+        createLog(req.user, "In /explainResult/:id/:classId during getting explained result page info Error:" + err, 'error');
         res.render("common/500.ejs")
     }
 })
@@ -1488,7 +1622,7 @@ app.get('/explainResult/:id/:classId', checkAuth, async (req, res) => {
 
 app.get('/result/single/:id', checkAuth, async (req, res) => {
     try {
-        if (req.user.role != 'Student') {
+        if (req.user.role != 'Student' && isValidObjectId(req.params.id)) {
             let data = await Result.aggregate([
                 {
                     '$match': {
@@ -1518,17 +1652,18 @@ app.get('/result/single/:id', checkAuth, async (req, res) => {
             ])
             res.json({ success: true, data });
         } else {
+            createLog(req.user, "Invalid Id or Studnet trying to access forbiden routes", 'warn');
             res.json({ success: false });
         }
     } catch (err) {
-        console.log(err);
+        createLog(req.user, "In result/single/:id during getting single student result info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
 
 app.get('/result/students/:id', checkAuth, async (req, res) => {
     try {
-        if (req.user.role != 'Student') {
+        if (req.user.role != 'Student' && isValidObjectId(req.params.id)) {
             let data = await Result.aggregate(
                 [
                     {
@@ -1595,21 +1730,25 @@ app.get('/result/students/:id', checkAuth, async (req, res) => {
 
             if (data.length) {
                 res.render('principle/result_students.ejs', { data: data[0] });
+                infoLog(req.user, 'Accessed Result students');
             }
             else {
                 res.render("common/404.ejs")
+                createLog(req.user, "Invalid result id or result with no student", 'warn');
             }
         } else {
+            createLog(req.user, "Invalid Id or Studnet trying to access forbiden routes", 'warn');
             res.render("common/404.ejs")
         }
     } catch (err) {
+        createLog(req.user, "In result/students/:id during getting result student page info Error:" + err, 'error');
         res.render("common/500.ejs")
     }
 })
 
 app.get('/result/students/all/:id', checkAuth, async (req, res) => {
     try {
-        if (req.user.role != 'Student') {
+        if (req.user.role != 'Student' && isValidObjectId(req.params.id)) {
             let data = await Result.aggregate([
                 {
                     '$match': {
@@ -1662,17 +1801,105 @@ app.get('/result/students/all/:id', checkAuth, async (req, res) => {
             ])
             res.json({ success: true, data });
         } else {
+            createLog(req.user, "Invalid Id or Studnet trying to access forbiden routes", 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, "In result/students/all/:id during getting result students info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
 
 app.get('/result/students/single/:sid/:rid', checkAuth, async (req, res) => {
     try {
-        let data = await Result.aggregate(
-            [
+        if (isValidObjectId(req.params.sid) && isValidObjectId(req.params.rid)) {
+            let data = await Result.aggregate(
+                [
+                    {
+                        '$match': {
+                            '_id': new mongoose.Types.ObjectId(req.params.rid)
+                        }
+                    }, {
+                        '$unwind': {
+                            'path': '$result'
+                        }
+                    }, {
+                        '$match': {
+                            'result.userId': new mongoose.Types.ObjectId(req.params.sid)
+                        }
+                    }, {
+                        '$lookup': {
+                            'from': 'users',
+                            'localField': 'result.userId',
+                            'foreignField': '_id',
+                            'as': 'result.userId'
+                        }
+                    }, {
+                        '$unwind': {
+                            'path': '$result.userId'
+                        }
+                    }, {
+                        '$project': {
+                            'title': 1,
+                            'MM': 1,
+                            'createdAt': 1,
+                            'result.userId.username': 1,
+                            'result.userId.profile': 1,
+                            'result.userId._id': 1,
+                            'classId': 1
+                        }
+                    },
+                    {
+                        $lookup: {
+                            'from': 'classes',
+                            'localField': 'classId',
+                            'foreignField': '_id',
+                            'as': 'class'
+                        }
+                    },
+                    {
+                        $project: {
+                            'title': 1,
+                            'MM': 1,
+                            'createdAt': 1,
+                            'result.userId.username': 1,
+                            'result.userId.profile': 1,
+                            'result.userId._id': 1,
+                            'class.inCharge': 1
+                        }
+                    },
+                    {
+                        $unwind: {
+                            'path': '$class',
+                            preserveNullAndEmptyArrays: true,
+                        }
+                    }
+                ]
+            )
+            if (data.length) {
+                data = data[0];
+                data.createdAt = formatTime(data.createdAt); 
+                res.render('common/result.ejs', { data, isPrinciple: (req.user.role === 'Principle') || (data.class.inCharge && data.class.inCharge.toString() === req.user._id.toString()) });
+                infoLog(req.user, "Accessed Result Routes");
+            }
+            else {
+                createLog(req.user, "Invalid result id or result with no student", 'warn');
+                res.render("common/404.ejs")
+            }
+        } else {
+            createLog(req.user, "Invalid Id", 'warn');
+            res.render("common/404.ejs")
+        }
+    } catch (err) {
+        createLog(req.user, "In /result/students/single/:sid/:rid during getting result of single student page info Error:" + err, 'error');
+        res.render("common/500.ejs")
+    }
+})
+
+app.get('/result/single/:rid/:sid', checkAuth, async (req, res) => {
+    try {
+        if (isValidObjectId(req.params.sid) && isValidObjectId(req.params.rid)) {
+            let data = await Result.aggregate([
                 {
                     '$match': {
                         '_id': new mongoose.Types.ObjectId(req.params.rid)
@@ -1686,137 +1913,77 @@ app.get('/result/students/single/:sid/:rid', checkAuth, async (req, res) => {
                         'result.userId': new mongoose.Types.ObjectId(req.params.sid)
                     }
                 }, {
-                    '$lookup': {
-                        'from': 'users',
-                        'localField': 'result.userId',
-                        'foreignField': '_id',
-                        'as': 'result.userId'
-                    }
-                }, {
-                    '$unwind': {
-                        'path': '$result.userId'
-                    }
-                }, {
                     '$project': {
-                        'title': 1,
-                        'MM': 1,
-                        'createdAt': 1,
-                        'result.userId.username': 1,
-                        'result.userId.profile': 1,
-                        'result.userId._id': 1,
-                        'classId': 1
-                    }
-                },
-                {
-                    $lookup: {
-                        'from': 'classes',
-                        'localField': 'classId',
-                        'foreignField': '_id',
-                        'as': 'class'
-                    }
-                },
-                {
-                    $project: {
-                        'title': 1,
-                        'MM': 1,
-                        'createdAt': 1,
-                        'result.userId.username': 1,
-                        'result.userId.profile': 1,
-                        'result.userId._id': 1,
-                        'class.inCharge': 1
-                    }
-                },
-                {
-                    $unwind: {
-                        'path': '$class',
-                        preserveNullAndEmptyArrays: true,
+                        'result.desc': 1
                     }
                 }
-            ]
-        )
-        if (data.length) {
-            data = data[0];
-            data.createdAt = formatTime(data.createdAt);
-            console.log(data);
-            res.render('common/result.ejs', { data, isPrinciple: (req.user.role === 'Principle') || (data.class.inCharge && data.class.inCharge.toString() === req.user._id.toString()) });
-        }
-        else {
-            res.render("common/404.ejs")
-        }
-    } catch (err) {
-        res.render("common/500.ejs")
-    }
-})
-
-app.get('/result/single/:rid/:sid', checkAuth, async (req, res) => {
-    try {
-        let data = await Result.aggregate([
-            {
-                '$match': {
-                    '_id': new mongoose.Types.ObjectId(req.params.rid)
-                }
-            }, {
-                '$unwind': {
-                    'path': '$result'
-                }
-            }, {
-                '$match': {
-                    'result.userId': new mongoose.Types.ObjectId(req.params.sid)
-                }
-            }, {
-                '$project': {
-                    'result.desc': 1
-                }
+            ])
+            if (data.length) {
+                data = JSON.parse(data[0].result.desc);
+                res.json({ success: true, data });
             }
-        ])
-        if (data.length) {
-            data = JSON.parse(data[0].result.desc);
-            res.json({ success: true, data });
+            else {
+                createLog(req.user, "Invalid result id or result with no student", 'warn');
+                res.json({ success: false });
+            }
+        } else {
+            createLog(req.user, "Invalid Id", 'warn');
+            res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, "In /result/single/:rid/:sid during getting result of single student info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
 
 
 
-//student accessing all result of a class
+//student accessing all result in which he/she present in class
 app.get('/result/all/student/:cid', checkAuth, async (req, res) => {
     try {
-        let data = await Result.aggregate([
-            {
-                $match: {
-                    classId: new mongoose.Types.ObjectId(req.params.cid),
-                    'result.userId': new mongoose.Types.ObjectId(req.user._id),
+        if (isValidObjectId(req.params.cid)) {
+            let data = await Result.aggregate([
+                {
+                    $match: {
+                        classId: new mongoose.Types.ObjectId(req.params.cid),
+                        'result.userId': new mongoose.Types.ObjectId(req.user._id),
+                    }
+                },
+                {
+                    $project: {
+                        title: 1,
+                        createdAt: 1,
+                    }
+                },
+                {
+                    $sort: {
+                        createdAt: -1
+                    }
                 }
-            },
-            {
-                $project: {
-                    title: 1,
-                    createdAt: 1,
-                }
-            },
-            {
-                $sort: {
-                    createdAt: -1
-                }
-            }
-        ])
-        res.json({ success: true, data });
+            ])
+            res.json({ success: true, data });
+        } else {
+            createLog(req.user, "Invalid Id", 'warn');
+            res.json({ success: false });
+        }
     } catch (err) {
+        createLog(req.user, "In /result/all/student/:cid during getting all results of student info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
 
 app.post('/result/update/resultName/:id', checkAuth, async (req, res) => {
     try {
-        if (req.user.role != 'Student') {
+        if (req.user.role != 'Student' && isValidObjectId(req.params.id)) {
             await Result.findByIdAndUpdate(req.params.id, { title: req.body.title });
             res.json({ success: true });
+            infoLog(req.user, "Result name Updated");
         } else {
+            createLog(req.user, "Invalid result id or student trying ro change result name", 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, "In /result/update/resultName/:id during updating result name info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
@@ -1824,14 +1991,17 @@ app.post('/result/update/resultName/:id', checkAuth, async (req, res) => {
 
 app.post('/result/updatemarks/:uid/:rid', checkAuth, async (req, res) => {
     try {
-        if (req.user.role != 'Student') {
+        if (req.user.role != 'Student' && isValidObjectId(req.params.uid) && isValidObjectId(req.params.rid)) {
             await Result.updateOne({ "_id": new mongoose.Types.ObjectId(req.params.rid), "result.userId": new mongoose.Types.ObjectId(req.params.uid) },
                 { $set: { "result.$.desc": req.body.result } },)
             res.json({ success: true });
+            infoLog(req.user, 'Marks updated');
         } else {
+            createLog(req.user, "Invalid Id or Studnet trying to update marks", 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, "In /result/updatemarks/:uid/:rid during updating marks of a studnet with id as uid info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
@@ -1839,16 +2009,27 @@ app.post('/result/updatemarks/:uid/:rid', checkAuth, async (req, res) => {
 
 app.get('/result/remove/:id', checkAuth, async (req, res) => {
     try {
-        if (req.user.role != 'Student') {
+        if (req.user.role != 'Student' && isValidObjectId(req.params.id)) {
             await Result.findByIdAndDelete(req.params.id);
             res.json({ success: true });
+            infoLog(req.user, "Result Removed");
         } else {
+            createLog(req.user, "Invalid Id or Studnet trying to remove result", 'warn');
             res.json({ success: false });
         }
     } catch (err) {
+        createLog(req.user, "In /result/remove//:id during removing result info Error:" + err, 'error');
         res.json({ success: false });
     }
 })
 
+
+const noPermissionLog = (user, item) => {
+    createLog(user, 'No Permission to Access ' + item, 'warn');
+}
+
+const infoLog = (user, log) => {
+    createLog(user, log, 'info');
+}
 
 export default app;

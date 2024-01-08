@@ -1,16 +1,19 @@
-.login_container { 
-    margin-right: auto; 
+.login_container {
+    margin-right: auto;
     margin-left: auto;
     max-width: 400px;
     background: #fff;
-    border-radius: 0.25rem; 
+    border-radius: 0.25rem;
 }
-.login{
+
+.login {
     transform: scale(0.85);
 }
-#form-1{
+
+#form-1 {
     position: relative;
 }
+
 #form-1 input {
     width: 86%;
     margin: auto;
@@ -152,4 +155,17 @@ div {
     font-size: 20px;
     color: gray;
     cursor: pointer;
+}
+
+.funCar {
+    width: 80%;
+    margin: auto;
+    transform: translate(0px, 20px);
+    text-align: left;
+}
+
+.car {
+    color: #76aed5;
+    font-size: 15px; 
+    position: relative;
 }

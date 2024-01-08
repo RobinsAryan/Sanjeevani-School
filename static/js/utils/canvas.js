@@ -188,14 +188,14 @@ handleFontTypeChange = (ele) => {
 
 const submit = async () => {
     console.log({ finalPaints });
-    let resData = await myPost(`/cards/finalAdd/${cardData._id}`, { finalPaints });
-    if (resData.success) {
-        location.href = '/cards';
-    }
-    else {
-        alert('something Wrong!!');
-        location.reload();
-    }
+    // let resData = await myPost(`/cards/finalAdd/${cardData._id}`, { finalPaints });
+    // if (resData.success) {
+    //     location.href = '/cards';
+    // }
+    // else {
+    //     alert('something Wrong!!');
+    //     location.reload();
+    // }
 }
 
 

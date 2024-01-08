@@ -1,5 +1,6 @@
 import fs from "fs";
 import jimp from 'jimp';
+import sharp from "sharp";
 
 /**
  * 
@@ -52,9 +53,9 @@ export const compressAndOverwrite = async (filePath) => {//webp not supports
  */
 export const resizeImages = async (filePath, height, width, quality) => {
     try {
-        jimp.read(`./static${filePath}`, (err, lenna) => {
+        jimp.read(`./static${filePath}`, (err, image) => {
             if (err) { console.log(err); return; }
-            lenna
+            image
                 .rotate(0)
                 .resize(width, height)
                 .quality(quality)
@@ -63,6 +64,29 @@ export const resizeImages = async (filePath, height, width, quality) => {
     } catch (err) {
         return null;
     }
+}
+
+
+
+export const interlanceImage = (filePath) => {
+    const imagePath = `./static${filePath}`;
+    sharp(imagePath)
+        .png({ interlace: true })
+        .toBuffer((err, data) => {
+            if (err) {
+                console.error(err);
+            } else {
+                fs.rm(imagePath, () => {
+                    sharp(data).toFile(imagePath, (saveErr, info) => {
+                        if (saveErr) {
+                            console.error(saveErr);
+                        } else {
+                            console.log('Interlaced Image saved successfully:', info);
+                        }
+                    });
+                })
+            }
+        });
 }
 
 
@@ -122,8 +146,12 @@ export const createIdCard = (cardData, studentData) => {
             const stream = canvas.createPNGStream();
             stream.pipe(output);
             return true;
+        }).catch(err => {
+            createLog(req.user, 'In fileOperation-> createidCard during creating id cards:' + err, 'error');
+            return false;
         })
     } catch (err) {
+        createLog(req.user, 'In fileOperation-> createidCard during creating id cards:' + err, 'error');
         return false;
     }
 }

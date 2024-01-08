@@ -16,6 +16,7 @@ import compression from 'compression';
 import cors from 'cors';
 import { Server } from 'socket.io';
 import ioFunction from './controller/RTC/io.js';
+import { createLog, ioLogs } from './controller/logs/logs.js';
 
 
 const app = express();
@@ -31,7 +32,7 @@ const memorystore = MemoryStore(expressSession);
         await mongoose.connect(process.env.MONGO_URL);
         console.log("connected to data base");
     } catch (err) {
-        console.log(err);
+        createLog(null, 'System Error: Database Not connecting....', 'error');
     }
 })();
 
@@ -72,16 +73,16 @@ let io = new Server({
     maxHttpBufferSize: 1e7,
     transports: ['websocket'],
 }).listen(server);
-
 ioFunction(io);
+ioLogs(io);
 
 
 
 
 app.use(routes);
 
-//port setup
 let port = 8080;
 server.listen(port, () => {
     console.log("connected to backend");
+    createLog(null, 'Server Started', 'info');
 })

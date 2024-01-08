@@ -6,6 +6,7 @@ import { userClass } from './userRoutes.js';
 import { createIdCard } from '../utils/fileOperation.js';
 import archiver from 'archiver';
 import fs from 'fs'
+import { createLog } from './logs/logs.js';
 const app = express();
 
 app.get('/', checkAuth, async (req, res) => {
@@ -30,10 +31,12 @@ app.get('/create/:id', checkAuth, checkPrinciple, async (req, res) => {
             delete studentData['role'];
             studentData['dob'] = formatTime(studentData['dob']).split('of ').pop();
             studentData = JSON.stringify(studentData);
+            createLog(req.user, `Access create card route`, 'info');
             res.render('utils/card.ejs', { card, studentData })
         }
     } catch (err) {
-        console.log(err);
+        createLog(req.user, `In cards/create/:id getting card page error: ${err}`, 'error');
+        res.render('common/500.ejs');
     }
 })
 
@@ -45,6 +48,7 @@ app.post('/preAdd', checkAuth, checkPrinciple, async (req, res) => {
         })).save();
         res.json({ success: true, cardId: data._id });
     } catch (err) {
+        createLog(req.user, `In cards/preAdd during adding card error: ${err}`, 'error');
         res.json({ success: false });
     }
 })
@@ -52,9 +56,10 @@ app.post('/preAdd', checkAuth, checkPrinciple, async (req, res) => {
 app.post('/finalAdd/:id', checkAuth, checkPrinciple, async (req, res) => {
     try {
         await Card.findByIdAndUpdate(req.params.id, { desc: JSON.stringify(req.body.finalPaints) })
+        createLog(req.user, `New card added`, 'info');
         res.json({ success: true });
     } catch (err) {
-        console.log(err);
+        createLog(req.user, `In cards/finalAdd/:id during adding card error: ${err}`, 'error');
         res.json({ success: false });
     }
 })
@@ -71,6 +76,7 @@ app.get('/all', checkAuth, async (req, res) => {
         ])
         res.json({ success: true, data });
     } catch (err) {
+        createLog(req.user, `In cards/all during getting all cards error: ${err}`, 'error');
         res.json({ success: false });
     }
 })
@@ -98,7 +104,7 @@ app.get('/print/all/:id', checkAuth, checkPrinciple, async (req, res) => {
         else
             res.json({ success: false });
     } catch (err) {
-        console.log(err);
+        createLog(req.user, `In cards/print/all/:id during printing card error: ${err}`, 'error');
         res.json({ success: false });
     }
 })
@@ -116,6 +122,7 @@ const createZip = () => {
             resolve({ success: true });
         });
         archive.on('error', (err) => {
+            createLog(req.user, `In cards/print during creating zip error: ${err}`, 'error');
             resolve({ success: false });
         });
     })
@@ -124,8 +131,10 @@ const createZip = () => {
 app.get('/remove/:id', checkAuth, checkPrinciple, async (req, res) => {
     try {
         await Card.findByIdAndDelete(req.params.id);
+        createLog(req.user, `Card removed`, 'info');
         res.json({ success: true });
     } catch (err) {
+        createLog(req.user, `In cards/remove/:id during removing card error: ${err}`, 'error');
         res.json({ success: false });
     }
 })

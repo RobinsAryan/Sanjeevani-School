@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/principle/logs.css">
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <title>Logs</title>
+</head>
+
+<body>
+    <div class="main">
+        <div class=fakeMenu>
+            <div class="fakeButtons fakeClose"></div>
+            <div class="fakeButtons fakeMinimize"></div>
+            <div class="fakeButtons fakeZoom"></div>
+        </div>
+        <div class="fakeScreen">
+            <div class="lines" id="lines">
+                <p class="line" style="color: rgb(146, 204, 59);">$ Welcome Principle!!<span< /p>
+            </div>
+            <p class="currentLine" id="cursor">> <span id="cmdInput" spellcheck="false" class="input" contenteditable="true"></span><span onclick="cmdInputFocus()" id="fakeCursor" class="mainCursor">_</span></p>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/principle/logs.js"></script>
+</body>
+
+</html>

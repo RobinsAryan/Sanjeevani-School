@@ -3,7 +3,8 @@ import multer from 'multer';
 import User from '../models/User.js';
 import Class from '../models/Class.js';
 import { checkAuth, checkPrinciple } from '../utils/middleware.js';
-import { compressAndOverwrite, resizeImages } from '../utils/fileOperation.js';
+import { compressAndOverwrite, interlanceImage, resizeImages } from '../utils/fileOperation.js';
+import { createLog } from './logs/logs.js';
 const app = express();
 app.use(express.static('static'));
 const storage = multer.diskStorage({
@@ -11,7 +12,8 @@ const storage = multer.diskStorage({
         cb(null, 'static/uploads');
     },
     filename: function (req, file, cb) {
-        cb(null, Date.now() + "-" + file.originalname);
+        console.log(file);
+        cb(null, Date.now() + "-" + file.originalname.split('.')[0] + '.png');
     },
 });
 const storage2 = multer.diskStorage({
@@ -34,8 +36,10 @@ app.post('/uploadImage', checkAuth, upload.single('image'), async (req, res) => 
             path: filePath
         })
         await compressAndOverwrite(filePath);
+        interlanceImage(filePath);
     }
     catch (err) {
+        createLog(req.user, 'In utils-> /uploadImage during uploading an image error:' + err, 'error');
         res.json({
             success: false
         })
@@ -44,15 +48,15 @@ app.post('/uploadImage', checkAuth, upload.single('image'), async (req, res) => 
 
 
 app.get('/download/:fname', (req, res) => {
-    let fileName = req.params.fname;
-    const excelFilePath = `static/downloads/${fileName}`;
-    let exectFileName = (fileName.split('-').reverse())[0];
-    res.download(excelFilePath, exectFileName, (err) => {
-        if (err) {
-            console.error(err);
-            res.status(500).send('Error downloading the file');
-        }
-    });
+    try {
+        let fileName = req.params.fname;
+        const excelFilePath = `static/downloads/${fileName}`;
+        let exectFileName = (fileName.split('-').reverse())[0];
+        res.download(excelFilePath, exectFileName);
+    } catch (err) {
+        createLog(req.user, 'In utils-> /download/:fname during downloading file error:' + err, 'error');
+        res.render('common/500.ejs');
+    }
 });
 
 app.post('/saveFile', checkAuth, uploadDownloads.single('file'), (req, res) => {
@@ -63,6 +67,7 @@ app.post('/saveFile', checkAuth, uploadDownloads.single('file'), (req, res) => {
         })
     }
     catch (err) {
+        createLog(req.user, 'In utils-> /saveFile during saving a file error:' + err, 'error');
         res.json({
             success: false
         })
@@ -110,6 +115,7 @@ app.get('/birthdays', checkAuth, async (req, res) => {
         ]);
         res.json({ success: true, data });
     } catch (err) {
+        createLog(req.user, 'In utils-> /birthdays during getting birthdays error:' + err, 'error');
         res.json({ success: false });
     }
 })
@@ -159,7 +165,7 @@ app.get('/studentsInfo', checkAuth, checkPrinciple, async (req, res) => {
         });
         res.send({ success: true, ...reqData, perClass: newClassData })
     } catch (err) {
-        console.log(err)
+        createLog(req.user, 'In utils-> /studentsInfo during getting student info for principle home page error:' + err, 'error');
         res.json({ success: false });
     }
 })
@@ -207,6 +213,7 @@ app.get('/search', checkAuth, async (req, res) => {
         ])
         res.json({ success: true, data });
     } catch (err) {
+        createLog(req.user, 'In utils-> /search during search for principle home page error:' + err, 'error');
         res.json({ success: false });
     }
 })
@@ -223,11 +230,12 @@ app.get('/resizeCards', checkAuth, checkPrinciple, async (req, res) => {
         } else {
             newWidth = 500;
             newHeight = Math.ceil(500 * (height / width));
-        } 
+        }
         await resizeImages(url, newHeight, newWidth, 100);
         res.json({ success: true, url: `/compressed${url}` });
     } catch (err) {
-        console.log(err);
+        createLog(req.user, 'In utils-> /resizeCards during resizing cards image error:' + err, 'error');
+        res.json({ success: false });
     }
 })
 

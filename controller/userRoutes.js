@@ -3,11 +3,11 @@ const app = express();
 import User from '../models/User.js';
 import Attandance from '../models/Attendance.js';
 import Gallary from '../models/Gallary.js';
-import bcrypt from 'bcryptjs';
 import { checkAuth, checkPrinciple, formatTime } from '../utils/middleware.js';
 import Class from '../models/Class.js';
 import mongoose from 'mongoose';
 import { deleteFile } from '../utils/fileOperation.js';
+import { createLog } from './logs/logs.js';
 
 export const userClass = async (id) => {
     let data = await Class.aggregate([
@@ -50,6 +50,7 @@ app.get('/profile/:id', checkAuth, async (req, res) => {
     try {
         let user = await User.findById(req.params.id);
         if (user) {
+            createLog(req.user, "Accessed Profile", 'info');
             if (user.role === 'Teacher') {
                 let className = await inChargeofClass(req.params.id);
                 let data = {
@@ -93,11 +94,13 @@ app.get('/profile/:id', checkAuth, async (req, res) => {
             }
         }
         else {
-            res.render('404');
+            createLog(req.user, 'No User to access profile with id' + req.params.id, 'warn');
+            res.render("common/404.ejs");
         }
     }
     catch (err) {
-        res.render('500');
+        createLog(req.user, 'In /profile/:id during getting user profile error:' + err, 'error');
+        res.render("common/500.ejs");
     }
 })
 
@@ -123,7 +126,10 @@ app.get('/profile/remove/:id', checkAuth, checkPrinciple, async (req, res) => {
         if (user.profile) {
             await deleteFile(`./static${user.profile}`);
         }
+        res.json({ success: true });
+        createLog(req.user, 'User possibly Student Removed', 'info');
     } catch (err) {
+        createLog(req.user, 'In /profile/remove/:id during removing user profile error:' + err, 'error');
         res.json({ success: false });
     }
 })
@@ -136,7 +142,9 @@ app.get('/teacher/remove/:id', checkAuth, checkPrinciple, async (req, res) => {
         if (user.profile != '/img/teacher.jpg') {
             await deleteFile(`./static${user.profile}`);
         }
+        createLog(req.user, 'User possibly Teacher Removed', 'info');
     } catch (err) {
+        createLog(req.user, 'In /teacher/remove/:id during removing user profile error:' + err, 'error');
         res.json({ success: false });
     }
 })
@@ -160,10 +168,15 @@ app.get('/attandance/:id', checkAuth, async (req, res) => {
                 studentId: user.rid
             }
             res.render('students/attandance.ejs', { data })
+            createLog(req.user, 'accessed Attandance', 'info');
         }
-        else res.render("404");
+        else {
+            res.render("common/404.ejs");
+            createLog(req.user, "No user or student specific route", 'warn');
+        }
     } catch (err) {
-        res.render("500");
+        res.render("common/500.ejs");
+        createLog(req.user, "In /attandance/:id during getting student attandance page error:" + err, 'error');
     }
 })
 
@@ -172,8 +185,10 @@ app.get('/gallary', checkAuth, async (req, res) => {
     try {
         const data = { ...req.user }
         res.render('common/gallary.ejs', { data });
+        createLog(req.user, 'Accessed Gallary', 'info');
     } catch (err) {
-
+        res.render("common/500.ejs");
+        createLog(req.user, "In /gallary during getting gallary page error:" + err, 'error');
     }
 })
 
@@ -185,8 +200,10 @@ app.post('/gallary/add', checkAuth, checkPrinciple, async (req, res) => {
         })
         newFrame.save();
         res.json({ success: true });
+        createLog(req.user, 'Added to gallary', 'info');
     } catch (err) {
         res.json({ success: false });
+        createLog(req.user, "In /gallary/add during adding in gallary error:" + err, 'error');
     }
 })
 
@@ -208,6 +225,7 @@ app.get('/gallary/all', checkAuth, async (req, res) => {
         ])
         res.json({ success: true, data });
     } catch (err) {
+        createLog(req.user, "In /gallary/all during getting all gallary items error:" + err, 'error');
         res.json({ success: false });
     }
 })
@@ -222,7 +240,9 @@ app.get('/gallary/remove/:id', checkAuth, async (req, res) => {
                 await deleteFile(`./static/compressed${img}`);
             })
         }
+        createLog(req.user, "Gallary item removed", 'info');
     } catch (err) {
+        createLog(req.user, "In /gallary/remove/:id during removing gallary items error:" + err, 'error');
         res.json({ success: false });
     }
 })

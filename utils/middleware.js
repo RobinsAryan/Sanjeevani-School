@@ -3,6 +3,7 @@ import Class from "../models/Class.js";
 import mongoose from "mongoose";
 import { putNotification } from "./webPush.js";
 import User from "../models/User.js";
+import { createLog } from "../controller/logs/logs.js";
 
 
 /**
@@ -39,6 +40,7 @@ export const checkPrinciple = (req, res, next) => {
             res.json({ success: false });
         } else {
             req.flash('error_messages', "Please Login as Principle !");
+            createLog(req.user, 'Invalid Principle Route Accessing', 'warn');
             res.redirect('/');
         }
     }
@@ -157,4 +159,3 @@ export const sendNotificationToSchool = async (title, body) => {
         })
     }
 }
- 

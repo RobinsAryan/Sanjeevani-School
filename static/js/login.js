@@ -1,9 +1,9 @@
 let showOffWord = document.getElementsByClassName('show-off-word')[0];
-let words = ['Education', 'School', 'Assignments', 'Classes']
+let words = ['Education', 'School', 'Assignments', 'Classes', 'Result', '🥺🥺🥺🥺']
 let wordCt = 0;
 setInterval(() => {
     showOffWord.innerHTML = words[wordCt++];
-    if (wordCt >= 4) wordCt = 0;
+    if (wordCt >= words.length) wordCt = 0;
 }, 1000)
 
 
@@ -15,6 +15,9 @@ window.onload = () => {
     setTimeout(() => {
         if (document.getElementsByClassName('page_load_slider')[0].style.right == 0)
             document.getElementsByClassName('page_load_slider')[0].style.right = '100%';
+        setTimeout(() => {
+            moveCar();
+        }, 1000);
     }, 1500);
 }
 
@@ -106,3 +109,23 @@ const forgotPassword = () => {
 //     installPrompt = null;
 //     location.reload();
 // };
+
+
+let car = document.getElementById('car');
+const moveCar = () => {
+    let ct = 0, speed = 1;
+    setInterval(() => {
+        ct += speed;
+        car.style.left = ` ${ct}%`;
+        if (ct == 80 && speed > 0) { car.style.transform = 'rotateZ(15deg)'; speed /= 2; }
+        if (ct == 10 && speed < 0) { car.style.transform = 'rotateY(180deg) rotateZ(15deg)'; speed /= 2; }
+        if (ct == 95 && speed > 0) {
+            car.style.transform = 'rotateY(180deg)';
+            speed = -1;
+        }
+        if (ct == 0 && speed < 0) {
+            car.style.transform = 'rotateY(0deg)';
+            speed = 1;
+        }
+    }, 50);
+}

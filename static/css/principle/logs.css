@@ -1,0 +1,129 @@
+body {
+    background-color: #f9f9f9;
+    padding: 10px;
+}
+
+.main {
+    margin: auto;
+    box-shadow: 0 0 5px 2px gray;
+    border-radius: 5px 5px 0 0;
+}
+
+.fakeButtons {
+    height: 10px;
+    width: 10px;
+    border-radius: 50%;
+    border: 1px solid #000;
+    position: relative;
+    top: 6px;
+    left: 6px;
+    background-color: #ff3b47;
+    border-color: #9d252b;
+    display: inline-block;
+}
+
+.fakeMinimize {
+    left: 11px;
+    background-color: #ffc100;
+    border-color: #9d802c;
+}
+
+.fakeZoom {
+    left: 16px;
+    background-color: #00d742;
+    border-color: #049931;
+}
+
+.fakeMenu {
+    box-sizing: border-box;
+    height: 25px;
+    background-color: #bbb;
+    margin: 0 auto;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+}
+
+.fakeScreen {
+    background-color: #ffffff;
+    box-sizing: border-box;
+    margin: 0 auto;
+    padding: 20px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    max-height: 80vh;
+    overflow: auto;
+}
+
+p {
+    text-align: left;
+    font-size: 1.25em;
+    font-family: monospace;
+    white-space: normal;
+    overflow: hidden;
+    width: 0;
+}
+
+span {
+    color: #000000;
+    font-weight: bold;
+}
+
+
+
+.line {
+    color: #e1a524;
+    overflow: hidden;
+    width: 100%;
+}
+
+.lines .input {
+    color: rgb(60, 198, 233) !important;
+}
+
+.lines .info {
+    color: rgb(35, 86, 215);
+}
+
+.lines .warn {
+    color: rgb(213, 170, 76);
+}
+
+.lines .error {
+    color: rgb(209, 41, 41);
+}
+
+.currentLine {
+    color: #000000;
+    width: 100%;
+}
+
+.currentLine span {
+    outline: none;
+    caret-color: transparent;
+}
+
+.blink {
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 0;
+    }
+
+    40% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    90% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}

@@ -5,6 +5,7 @@ import Room from '../../models/Room.js';
 import { checkAuth } from '../../utils/middleware.js';
 import { userClass } from '../userRoutes.js';
 import mongoose from 'mongoose';
+import { createLog } from '../logs/logs.js';
 
 const app = express();
 dotenv.config();
@@ -56,13 +57,16 @@ app.get('/join/:roomId', checkAuth, async function (req, res) {
                         profile: req.user.profile ? req.user.profile : false
                     });
                 } else {
+                    createLog(req.user, `In Join Room: Student Access Room of other Class`, 'warn');
                     res.render('common/404.ejs');
                 }
             }
         } else {
+            createLog(req.user, `In Join Room: No Room with Id: ${req.params.roomId}`, 'warn');
             res.render('common/404.ejs');
         }
     } catch (err) {
+        createLog(req.user, `In Join Room: Error in /join/:roomId error: ${err}`, 'error');
         res.render('common/500.ejs');
     }
 });
