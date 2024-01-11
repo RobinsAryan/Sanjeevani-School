@@ -599,8 +599,8 @@ let isHostProtected = false; // Username and Password required to initialize roo
 let isPeerAuthEnabled = false; // Username and Password required in the URL params to join room
 
 // survey
-let surveyActive = true; // when leaving the room give a feedback, if false will be redirected to newcall page
-let surveyURL = 'https://www.questionpro.com/t/AUs7VZq00L';
+let surveyActive = false; // when leaving the room give a feedback, if false will be redirected to newcall page
+let surveyURL = 'https://www.thesanjeevanischool.in/';
 
 // Redirect on leave room
 let redirectActive = false;
@@ -1620,6 +1620,7 @@ async function joinToChannel() {
  */
 async function handleAddPeer(config) {
     //console.log("addPeer", JSON.stringify(config));
+    console.log(config);
 
     const { peer_id, should_create_offer, iceServers, peers } = config;
 

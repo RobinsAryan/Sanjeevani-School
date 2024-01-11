@@ -1,0 +1,35 @@
+version: '3'
+services:
+  # Node.js service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: node_app
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongodb
+    environment:
+      MONGO_URI: mongodb://mongodb:27017/school
+    networks:
+      - app_net
+
+  # MongoDB service
+  mongodb:
+    image: mongo
+    container_name: mongo_db
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: yourdbname
+      MONGO_INITDB_ROOT_USERNAME: yourdbuser
+      MONGO_INITDB_ROOT_PASSWORD: yourdbpassword
+    networks:
+      - app_net
+
+networks:
+  app_net:
+    driver: bridge

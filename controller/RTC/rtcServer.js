@@ -38,6 +38,7 @@ if (turnServerEnabled && turnServerUrl && turnServerUsername && turnServerCreden
 
 
 app.get('/join/:roomId', checkAuth, async function (req, res) {
+    console.log(iceServers);
     try {
         let room = await Room.findOne({ roomId: req.params.roomId });
         if (room) {
