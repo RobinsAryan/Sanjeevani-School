@@ -93,6 +93,29 @@ const uploadFile = (file, url) => {
 }
 
 
+let mainToggleUpload;
+const uploadFileChunk = async (file, functions) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let loader = new LoadStream();
+            let info = await loader.upload(file);
+            loader.onprogress = functions[0]
+            mainToggleUpload = (paused) => {
+                if (paused) {
+                    return loader.resume();
+                }
+                else return loader.stop();
+            }
+            loader.onload = () => {
+                resolve(info);
+            }
+        } catch (err) {
+            resolve({ success: false });
+        }
+    })
+}
+
+
 
 
 const showSWrong = (f) => {
@@ -129,6 +152,24 @@ function formatFileSize(bytes) {
     }
 }
 
+
+function uploadTimeFormat(seconds) {
+    if (seconds < 60) {
+        return seconds.toFixed(2) + " s";
+    } else if (seconds < 3600) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = (seconds % 60).toFixed(2);
+        return `${minutes}:${remainingSeconds} m`;
+    } else if (seconds < 86400) {
+        const hours = Math.floor(seconds / 3600);
+        const remainingMinutes = Math.floor((seconds % 3600) / 60);
+        return `${hours}:${remainingMinutes} h`;
+    } else {
+        const days = Math.floor(seconds / 86400);
+        const remainingHours = Math.floor((seconds % 86400) / 3600);
+        return `${days}:${remainingHours} d`;
+    }
+}
 
 
 function getFileTypeByExtension(fileName) {

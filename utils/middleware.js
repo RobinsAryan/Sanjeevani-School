@@ -37,6 +37,7 @@ export const checkPrinciple = (req, res, next) => {
     if (req.user.role === 'Principle') next();
     else {
         if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') > -1)) {
+            createLog(req.user, 'Invalid Principle Route Accessing', 'warn');
             res.json({ success: false });
         } else {
             req.flash('error_messages', "Please Login as Principle !");

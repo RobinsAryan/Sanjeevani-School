@@ -92,6 +92,7 @@ export const interlanceImage = (filePath) => {
 
 
 import { createCanvas, loadImage } from 'canvas'
+import { createLog } from "../controller/logs/logs.js";
 
 /**
  * 

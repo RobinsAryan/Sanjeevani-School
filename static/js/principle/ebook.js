@@ -27,7 +27,7 @@ const addEbook = () => {
 function handleFile(HTMLFileInput) {
     let fileList = HTMLFileInput.files;
     let tempImg = document.getElementById('demoImg');
-    let tempFileName = document.getElementById('tempFileName'); 
+    let tempFileName = document.getElementById('tempFileName');
     if (fileList.length) {
         let file = fileList[0];
         tempFileName.innerHTML = file.name;
@@ -70,8 +70,7 @@ const resetForm = (HTMLFormInput) => {
         handleFile(HTMLFormInput.file);
     }, 200);
 }
-
-
+let toggleUpload;
 const handleSubmit = async (e) => {
     e.preventDefault();
     if (e.target.file.files.length == 0) {
@@ -85,9 +84,42 @@ const handleSubmit = async (e) => {
         url: 'nothing',
     }
     if (e.target.file.files.length) {
-        let resData = await uploadFile(e.target.file.files[0], `/saveFile`);
+        document.getElementById('popup').innerHTML = `
+                <div class="popup-form">
+                    <progress style="width: 60%;" id="progress" max="100" value="0">32%</progress>
+                     <div style="font-size: 11px; color: gray; display: flex; justify-content: space-around;">
+                        <span><span id="time">20</span></span>
+                        <span><span id="speed">400</span>/s</span>
+                    </div>
+                    <div>
+                        <button onclick="toggleUpload()" id="uploadToggleButton" style="background:red" class="normalButton">Pause</button>
+                    </div>
+                </div>
+            `
+        let paused = 0;
+        toggleUpload = () => {
+            let isChanged = mainToggleUpload(paused);
+            if (isChanged) {
+                let btn = document.getElementById('uploadToggleButton');
+                if (paused) {
+                    btn.innerText = 'Pause';
+                    btn.style.background = 'red'
+                    paused = 0;
+                } else {
+                    btn.innerText = 'Resume';
+                    btn.style.background = '#00a600'
+                    paused = 1;
+                }
+            }
+        }
+        let onprogress = (e) => {
+            document.getElementById('progress').value = e.progress;
+            document.getElementById('time').innerText = uploadTimeFormat(e.time);
+            document.getElementById('speed').innerText = formatFileSize(e.speed);
+        }
+        let resData = await uploadFileChunk(e.target.file.files[0], [onprogress]);
         if (resData.success) {
-            data.url = resData.file.filename
+            data.url = resData.info.file;
         }
         else {
             document.getElementById('popup').innerHTML = `

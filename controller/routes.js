@@ -13,6 +13,7 @@ import webRTC from './RTC/liveClass.js'
 import rtcServer from './RTC/rtcServer.js'
 import logRoute, { createLog } from './logs/logs.js'
 import cardRoute from './cards.js';
+import feeRoutes from './Fee/fee.js'
 passportLocal(passport);
 
 
@@ -60,7 +61,7 @@ app.post('/login', (req, res, next) => {
 })
 
 app.get('/loginFail', async (req, res) => {
-    createLog(null, `Login Failed msz: ${res.locals.error}`,'warn');
+    createLog(null, `Login Failed msz: ${res.locals.error}`, 'warn');
     res.json({
         success: false,
         msz: res.locals.error.length ? res.locals.error[0] : 'something wrong',
@@ -68,7 +69,7 @@ app.get('/loginFail', async (req, res) => {
 })
 
 app.get('/loginSuccess', checkAuth, async (req, res) => {
-    createLog(req.user, 'Logged In!!','info'); 
+    createLog(req.user, 'Logged In!!', 'info');
     res.json({
         success: true,
     })
@@ -76,7 +77,7 @@ app.get('/loginSuccess', checkAuth, async (req, res) => {
 
 
 app.get('/logout', (req, res) => {
-    createLog(req.user, 'Logged Out!!','info');
+    createLog(req.user, 'Logged Out!!', 'info');
     req.logout(function (err) {
         req.session.destroy(function (err) {
             res.redirect('/');
@@ -85,12 +86,12 @@ app.get('/logout', (req, res) => {
 });
 
 app.get('/graph', checkPrinciple, (req, res) => {
-    createLog(req.user, 'Accessed Graph','info');
+    createLog(req.user, 'Accessed Graph', 'info');
     res.render('principle/graph.ejs');
 })
 
 app.get('/about', (req, res) => {
-    createLog(req.user, 'Accessed About','info');
+    createLog(req.user, 'Accessed About', 'info');
     res.render('common/about.ejs');
 })
 
@@ -103,6 +104,7 @@ app.use('/RTC', webRTC);
 app.use('/rtcServer', rtcServer);
 app.use('/cards', cardRoute);
 app.use('/logs', logRoute);
+app.use('/fee', feeRoutes);
 app.use(webPush);
 app.get('*', (req, res) => res.render('common/404.ejs'));
 

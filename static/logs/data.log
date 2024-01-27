@@ -3,36 +3,5 @@ All Right Reserved to @2024 Sanjeevani School
 In Any use of these file will be no acceptable
 Thanks & Regards
 Sanjeevani School
-Deepak Suthar(deepaksuthar40128@gmail.com)(Devloper)info: Someone: Server Started {"timestamp":"2024-01-09T17:53:52.616Z"}
-info: Principle: Logged In!! {"timestamp":"2024-01-09T17:54:06.755Z"}
-info: Principle: Accessed Class {"timestamp":"2024-01-09T17:54:08.459Z"}
-info: Principle: Accessed LiveClasses {"timestamp":"2024-01-09T17:54:09.957Z"}
-info: Principle: Accessed All LiveClasses {"timestamp":"2024-01-09T17:54:10.132Z"}
-info: Principle: In Create Room: Created new Live Class info:{
-  roomId: '4172dded-f56d-45ee-92b6-74a4a929a77e',
-  userId: '653b3cd1b409b5afb8ae881d',
-  class: '6561a09f30d5ebd2feb8b45b',
-  title: 'rgtggtergt',
-  _id: new ObjectId("659d884b0b61d5cde95c734a"),
-  createdAt: 2024-01-09T17:54:19.838Z,
-  updatedAt: 2024-01-09T17:54:19.838Z,
-  __v: 0
-} {"timestamp":"2024-01-09T17:54:19.857Z"}
-warn: Someone: Login Failed msz: Password Not Match {"timestamp":"2024-01-09T17:54:58.016Z"}
-warn: Someone: Login Failed msz: Password Not Match {"timestamp":"2024-01-09T17:55:11.396Z"}
-warn: Someone: Login Failed msz: Password Not Match {"timestamp":"2024-01-09T17:55:17.480Z"}
-info: Principle: Logged In!! {"timestamp":"2024-01-09T17:55:38.196Z"}
-info: Principle: Accessed Class {"timestamp":"2024-01-09T17:55:45.082Z"}
-info: Principle: Accessed LiveClasses {"timestamp":"2024-01-09T17:55:46.396Z"}
-info: Principle: Accessed All LiveClasses {"timestamp":"2024-01-09T17:55:46.473Z"}
-info: Someone: Server Started {"timestamp":"2024-01-09T18:01:40.174Z"}
-info: Someone: Server Started {"timestamp":"2024-01-09T18:01:44.878Z"}
-info: Someone: Server Started {"timestamp":"2024-01-09T18:01:49.240Z"}
-info: Principle: Logged In!! {"timestamp":"2024-01-09T18:02:01.209Z"}
-info: Principle: Accessed Class {"timestamp":"2024-01-09T18:02:02.951Z"}
-info: Principle: Accessed LiveClasses {"timestamp":"2024-01-09T18:02:04.563Z"}
-info: Principle: Accessed All LiveClasses {"timestamp":"2024-01-09T18:02:04.716Z"}
-info: Principle: Logged In!! {"timestamp":"2024-01-09T18:03:52.730Z"}
-info: Principle: Accessed Class {"timestamp":"2024-01-09T18:03:59.356Z"}
-info: Principle: Accessed LiveClasses {"timestamp":"2024-01-09T18:04:01.880Z"}
-info: Principle: Accessed All LiveClasses {"timestamp":"2024-01-09T18:04:01.939Z"}
+Deepak Suthar(deepaksuthar40128@gmail.com)(Devloper)
+info: Someone: Server Started {"timestamp":"2024-01-09T17:53:52.616Z"}

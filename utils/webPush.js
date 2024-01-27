@@ -25,7 +25,7 @@ export const putNotification = async (id, title, body) => {
     if (user && user.sub) {
         let subscription = JSON.parse(user.sub);
         webPush.sendNotification(subscription, JSON.stringify({ title, body })).catch((err) => {
-            createLog(req.user, 'In webPush->putNotification during puting  notificaions to users error:' + err, 'error');
+            createLog(null, 'System: In webPush->putNotification during puting  notificaions to users error:' + err, 'error');
         });
     }
 }

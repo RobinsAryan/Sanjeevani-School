@@ -28,6 +28,7 @@
     "express": "^4.18.2",
     "express-session": "^1.17.3",
     "jimp": "^0.22.10",
+    "load-stream": "^1.0.5",
     "memorystore": "^1.6.7",
     "moment": "^2.29.4",
     "mongoose": "^7.6.3",

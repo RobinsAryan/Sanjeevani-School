@@ -2,10 +2,21 @@ import express from 'express';
 import multer from 'multer';
 import User from '../models/User.js';
 import Class from '../models/Class.js';
+import LoadStream from 'load-stream';
 import { checkAuth, checkPrinciple } from '../utils/middleware.js';
 import { compressAndOverwrite, interlanceImage, resizeImages } from '../utils/fileOperation.js';
 import { createLog } from './logs/logs.js';
 const app = express();
+
+let cb = (file) => {
+    return {
+        fileName: (Date.now() + '-' + file.fileName),
+        destination: '/static/downloads'
+    }
+}
+let loader = new LoadStream(cb);
+app.use(loader.load());
+
 app.use(express.static('static'));
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -238,5 +249,7 @@ app.get('/resizeCards', checkAuth, checkPrinciple, async (req, res) => {
         res.json({ success: false });
     }
 })
+
+
 
 export default app;
